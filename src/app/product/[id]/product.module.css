@@ -1,0 +1,254 @@
+.page {
+  background-color: var(--foreground);
+  color: var(--background);
+  min-height: 100vh;
+}
+
+.topBar {
+  background-color: var(--bg-secondary);
+  color: rgba(46, 42, 39, 0.7);
+  padding: 0.6rem 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(46, 42, 39, 0.05);
+}
+
+.topBarCenter span {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 4rem;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.nav {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--foreground);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  transition: color 0.3s ease;
+}
+
+.nav a:hover {
+  color: var(--gold);
+}
+
+.sale {
+  color: var(--gold) !important;
+}
+
+.userIcons {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(46, 42, 39, 0.3);
+  padding-bottom: 0.2rem;
+  margin-right: 1rem;
+}
+
+.search input {
+  background: transparent;
+  border: none;
+  color: var(--foreground);
+  font-family: var(--font-inter);
+  font-size: 0.85rem;
+  outline: none;
+  width: 150px;
+}
+
+.search button {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  cursor: pointer;
+  padding: 0;
+}
+
+.main {
+  padding: 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.container {
+  display: flex;
+  gap: 6rem;
+}
+
+.imageCol {
+  flex: 1;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  background-color: var(--bg-secondary);
+}
+
+.productImage {
+  object-fit: cover;
+}
+
+.detailsCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.breadcrumbs {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.breadcrumbs a {
+  color: var(--background);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.breadcrumbs a:hover {
+  color: var(--gold);
+}
+
+.brand {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-family: var(--font-playfair);
+  font-size: 3rem;
+  color: var(--background);
+  margin-bottom: 1rem;
+}
+
+.price {
+  font-size: 2rem;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-bottom: 3rem;
+}
+
+.sizes h4 {
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  color: var(--background);
+}
+
+.sizeOptions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.sizeOptions button {
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--text-muted);
+  background: transparent;
+  color: var(--background);
+  font-family: var(--font-inter);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sizeOptions button:hover, .sizeOptions button.active {
+  border-color: var(--background);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.btnAddToCart {
+  background-color: var(--background);
+  color: var(--foreground);
+  border: none;
+  padding: 1.2rem;
+  font-family: var(--font-inter);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 3rem;
+}
+
+.btnAddToCart:hover {
+  background-color: var(--gold);
+}
+
+.btnAdded {
+  background-color: #2d6a4f !important;
+  color: #fff !important;
+}
+
+.btnViewCart {
+  display: block;
+  width: 100%;
+  padding: 0.9rem 2rem;
+  background: transparent;
+  color: var(--background);
+  border: 1px solid rgba(255,255,255,0.3);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  font-family: var(--font-inter);
+}
+
+.btnViewCart:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.features {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+}
+
+.features p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+}
+
+.footer {
+  background-color: var(--background);
+  color: var(--foreground);
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.85rem;
+  margin-top: auto;
+}

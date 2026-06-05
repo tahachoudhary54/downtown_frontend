@@ -1,65 +1,92 @@
 import Image from "next/image";
+import ProductGrid from "../components/ProductGrid";
+import HeroSlider from "../components/HeroSlider";
+import EssentialsSlider from "../components/EssentialsSlider";
+import { products } from "../data/products";
+import styles from "./page.module.css";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className={styles.page}>
+
+
+      {/* Hero Section */}
+      <HeroSlider />
+
+      {/* Shop by Category - 5 Columns Editorial */}
+      <EssentialsSlider />
+
+      {/* Autumn Collection Banner */}
+      <section className={styles.autumnBanner}>
+        <div className={styles.autumnContent}>
+          <h2 className={styles.autumnTitle}>Autumn Collection –<br/>Up to 30% OFF</h2>
+          <button className={styles.btnBrown}>SHOP COLLECTION</button>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className={styles.autumnImageWrapper}>
+          <Image src="/autumn_banner.png" alt="Autumn Collection" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
         </div>
-      </main>
+      </section>
+
+      {/* Trending Now */}
+      <section className={styles.sectionContainer}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>TRENDING NOW</h2>
+          <div className={styles.sectionLine}></div>
+        </div>
+        <ProductGrid products={products.slice(0, 5)} />
+      </section>
+      
+      {/* Why Choose Us Section */}
+      <section className={styles.featuresSection}>
+        <h2 className={styles.featuresTitle}>Why Choose Us</h2>
+        <div className={styles.featuresGrid}>
+          
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            </div>
+            <h3>Premium Quality</h3>
+            <p>Meticulously crafted from the finest materials for unparalleled comfort and durability.</p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+            </div>
+            <h3>Free Shipping</h3>
+            <p>Enjoy complimentary shipping and hassle-free returns on all global orders.</p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h3>Secure Payments</h3>
+            <p>Your transactions are protected by industry-leading encryption and security.</p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            </div>
+            <h3>24/7 Support</h3>
+            <p>Our dedicated customer service team is available around the clock to assist you.</p>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className={styles.newsletter}>
+        <h2 className={styles.newsletterTitle}>JOIN THE EXCLUSIVE LIST</h2>
+        <p className={styles.newsletterDesc}>Subscribe to receive updates on new arrivals, special offers and our promotions.</p>
+        <form className={styles.newsletterForm}>
+          <input type="email" placeholder="Enter your email address" />
+          <button type="submit" className={styles.btnPrimary}>SUBSCRIBE</button>
+        </form>
+      </section>
+
+
     </div>
   );
 }

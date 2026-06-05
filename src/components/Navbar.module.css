@@ -1,0 +1,351 @@
+.topBar {
+  background-color: var(--bg-secondary);
+  color: var(--foreground);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 0.8rem;
+  text-align: center;
+}
+.topBar span {
+  font-weight: 700;
+}
+
+.header {
+  width: 100%;
+  padding: 0.5rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.headerHome {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background: transparent;
+}
+
+.headerSolid {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--foreground);
+}
+
+.headerFixedTransparent {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 0.5rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  background: rgba(46, 42, 39, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.nav {
+  display: flex;
+  gap: 2rem;
+}
+.nav a {
+  position: relative;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  transition: opacity 0.3s;
+  padding-bottom: 4px;
+}
+.nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #fff;
+  transition: width 0.3s ease;
+}
+.nav a:hover::after {
+  width: 100%;
+}
+.nav a:hover {
+  opacity: 1;
+}
+
+.userIcons {
+  display: flex;
+  gap: 1.5rem;
+  color: #fff;
+  align-items: center;
+}
+.userIcons svg {
+  cursor: pointer;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.userIcons svg:hover {
+  transform: scale(1.2);
+  opacity: 0.8;
+}
+
+.cartIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: inherit;
+}
+
+.cartBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #c0392b;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.searchInput {
+  position: absolute;
+  right: 100%;
+  margin-right: 1rem;
+  background: var(--foreground);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+  width: 200px;
+  padding: 0.5rem 1rem;
+  opacity: 0;
+  transform: translateX(10px);
+  animation: slideInSearch 0.3s forwards;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@keyframes slideInSearch {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.iconButton {
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 280px;
+  background: var(--foreground);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  animation: fadeInDown 0.2s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.suggestionItem:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.suggestionThumb {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.suggestionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.suggestionName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.suggestionPrice {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.suggestionViewAll {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.78rem;
+  font-style: italic;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.suggestionViewAll:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.userMenuWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 16px);
+  right: 0;
+  width: 250px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+  z-index: 9999;
+  animation: fadeInDown 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.userInfo {
+  padding: 1.2rem;
+  background: #fafafa;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.userDropdownName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.userDropdownEmail {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.userDropdownItem {
+  padding: 0.9rem 1.2rem;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.userDropdownItem:hover {
+  background: #f5f5f5;
+}
+
+.userDropdownItem:last-child {
+  border-top: 1px solid #f0f0f0;
+  color: #d32f2f;
+}
+
+.userDropdownItem:last-child:hover {
+  background: #fff5f5;
+}

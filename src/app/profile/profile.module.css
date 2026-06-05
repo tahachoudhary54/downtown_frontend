@@ -1,0 +1,310 @@
+.page {
+  background: var(--background);
+  min-height: 80vh;
+  padding: 4rem 2rem;
+  font-family: var(--font-inter);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.profileOverview {
+  padding: 2.5rem 2rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #fdfdfd 0%, #ffffff 100%);
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  margin: 0 auto 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #fff;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.avatarWrapper:hover .avatarOverlay {
+  opacity: 1;
+}
+
+.avatarOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  gap: 4px;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatarInput {
+  display: none;
+}
+
+.avatarSvg {
+  width: 44px;
+  height: 44px;
+  color: #ccc;
+}
+
+.userName {
+  font-family: var(--font-playfair);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 0.4rem;
+}
+
+.userBadge {
+  display: inline-block;
+  background: #c8a96e;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.contactInfo {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.contactItem:last-child {
+  margin-bottom: 0;
+}
+
+.contactIcon {
+  color: var(--text-muted);
+}
+
+.navLinks {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 2rem;
+  color: var(--foreground);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.navItem:hover, .navItemActive {
+  background: #fafafa;
+  color: #4f46e5;
+  border-left: 3px solid #4f46e5;
+}
+
+.navItemActive {
+  background: #f5f7ff;
+}
+
+.navItemIcon {
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.navItem:hover .navItemIcon, .navItemActive .navItemIcon {
+  color: #4f46e5;
+}
+
+.actions {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.btnSecondary {
+  width: 100%;
+  padding: 0.8rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background: #fafafa;
+  border-color: #ddd;
+}
+
+.btnLogout {
+  width: 100%;
+  padding: 0.8rem;
+  background: #fff;
+  border: 1px solid #ffebeb;
+  border-radius: 8px;
+  color: #d32f2f;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnLogout:hover {
+  background: #fff5f5;
+  border-color: #ffd6d6;
+}
+
+/* Main Content Styles */
+.mainContent {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border);
+  padding: 2.5rem;
+}
+
+.sectionTitle {
+  font-family: var(--font-playfair);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.orderCard {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderCard:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  border-color: #ddd;
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.orderId {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--foreground);
+}
+
+.orderDate {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.orderStatusWrapper {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.statusBadge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+}
+
+.statusDelivered {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.statusShipped {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.btnViewOrder {
+  background: transparent;
+  border: none;
+  color: var(--foreground);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+}
