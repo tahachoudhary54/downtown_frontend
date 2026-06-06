@@ -16,28 +16,31 @@ export const metadata = {
   description: "Premium Fashion For Every Occasion",
 };
 
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import ClientLayoutWrapper from "../components/ClientLayoutWrapper";
 import { CartProvider } from "../context/CartContext";
 import { AuthProvider } from "../context/AuthContext";
 import { WishlistProvider } from "../context/WishlistContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export default function RootLayout({ children }) {
+  console.log("GOOGLE_CLIENT_ID loaded:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
   return (
     <html
       lang="en"
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <Navbar />
-              <main style={{ flex: 1 }}>{children}</main>
-              <Footer />
-            </WishlistProvider>
-          </CartProvider>
-        </AuthProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "placeholder_id"}>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <ClientLayoutWrapper>
+                  {children}
+                </ClientLayoutWrapper>
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

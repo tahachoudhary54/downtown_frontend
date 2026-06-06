@@ -55,6 +55,16 @@ export async function login(credentials) {
   });
   return res.json();
 }
+
+export async function loginWithGoogle(credential) {
+  const res = await fetch(`${API_URL}/api/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ credential }),
+  });
+  return res.json();
+}
+
 export async function resendOtp(email) {
   const res = await fetch(`${API_URL}/api/auth/resend-otp`, {
     method: "POST",

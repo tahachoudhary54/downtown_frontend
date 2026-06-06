@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
-import { login } from "../../lib/api";
+import { login, loginWithGoogle } from "../../lib/api";
+import { GoogleLogin } from "@react-oauth/google";
 import styles from "../auth.module.css";
 
 export default function LoginPage() {
@@ -25,12 +26,38 @@ export default function LoginPage() {
       const res = await login({ email, password });
       if (res.success) {
         loginState(res.token, res.user);
-        router.push("/");
+        if (res.user.role === 'admin') {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
       } else {
         setError(res.message || "Invalid credentials");
       }
     } catch (err) {
       setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError("");
+    setLoading(true);
+    try {
+      const res = await loginWithGoogle(credentialResponse.credential);
+      if (res.success) {
+        loginState(res.token, res.user);
+        if (res.user.role === 'admin') {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
+      } else {
+        setError(res.message || "Google login failed");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred during Google login.");
     } finally {
       setLoading(false);
     }
@@ -43,6 +70,26 @@ export default function LoginPage() {
         <p className={styles.subtitle}>Sign in to access your account</p>
 
         {error && <div style={{ color: '#c0392b', marginBottom: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>{error}</div>}
+
+        <div className={styles.googleBtnWrapper} style={{ marginBottom: '1.5rem' }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => {
+              setError("Google login failed");
+            }}
+            shape="rectangular"
+            theme="outline"
+            text="continue_with"
+            size="large"
+            width="100%"
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }}></div>
+          <span style={{ padding: '0 1rem', color: '#64748b', fontSize: '0.9rem' }}>OR</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }}></div>
+        </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>

@@ -168,3 +168,15 @@
   /* Ensure consistent focus behavior */
 }
 
+/* Make Google login full width */
+.googleBtnWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.googleBtnWrapper > div {
+  width: 100% !important;
+}
+.googleBtnWrapper iframe {
+  width: 100% !important;
+}

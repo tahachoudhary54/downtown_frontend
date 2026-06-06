@@ -5,13 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./HeroSlider.module.css";
 
-const slides = [
-  "/hero_bg.png",
-  "/hero_bg_v4.png",
-  "/hero_bg_v6.png"
-];
-
-export default function HeroSlider() {
+export default function HeroSlider({ slides, title, subtitle, buttonText, buttonLink }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -43,10 +37,17 @@ export default function HeroSlider() {
       ))}
       
       <div className={styles.heroContent}>
-        <h1 className={styles.heroTitle}>ELEVATE YOUR<br />EVERYDAY</h1>
-        <p className={styles.heroSubtitle}>Discover the new standard of modern luxury menswear. Designed for the discerning individual.</p>
+        <h1 className={styles.heroTitle}>
+          {title.split('\n').map((line, i) => (
+            <span key={i}>
+              {line}
+              <br />
+            </span>
+          ))}
+        </h1>
+        <p className={styles.heroSubtitle}>{subtitle}</p>
         <div className={styles.heroButtons}>
-          <Link href="/shop" className={styles.btnPrimary}>Shop Collection</Link>
+          <Link href={buttonLink} className={styles.btnPrimary}>{buttonText}</Link>
         </div>
       </div>
 

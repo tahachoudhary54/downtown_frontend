@@ -1,0 +1,207 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { NotificationsProvider, useNotifications } from '@/context/NotificationsContext';
+
+function AdminLayoutContent({ children }) {
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef(null);
+
+  const { notifications, unreadCount, totalCount, markAsRead, markAllAsRead } = useNotifications();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user || user.role !== 'admin') {
+        router.replace('/login');
+      }
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user || user.role !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+        <p className="text-[var(--accent)] font-semibold animate-pulse">Loading Admin...</p>
+      </div>
+    );
+  }
+
+  const navLinks = [
+    { href: '/admin', label: 'Dashboard' },
+    { href: '/admin/products', label: 'Products' },
+    { href: '/admin/orders', label: 'Orders' },
+    { href: '/admin/users', label: 'Users' },
+    { href: '/admin/cms', label: 'CMS' },
+    { href: '/admin/notifications', label: 'Notifications' },
+    { href: '/admin/settings', label: 'Settings' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[var(--background)] flex flex-col md:flex-row">
+      {/* Sidebar Navigation */}
+      <aside className="w-full md:w-64 bg-[#111] text-white flex flex-col shadow-xl">
+        <div className="p-6 border-b border-[#222]">
+          <Link href="/admin">
+            <h2 className="text-xl font-bold tracking-widest text-[#c8a96e] uppercase text-center cursor-pointer">
+              Admin Panel
+            </h2>
+          </Link>
+        </div>
+        
+        <nav className="flex-1 p-4 space-y-2">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.href !== '/admin');
+            return (
+              <Link key={link.href} href={link.href}>
+                <span
+                  className={`block px-4 py-3 rounded-lg transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'text-gray-400 hover:bg-[#222] hover:text-white'
+                  }`}
+                >
+                  {link.label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-[#222]">
+          <button
+            onClick={() => {
+              logout();
+              router.push('/login');
+            }}
+            className="w-full text-left px-4 py-3 rounded-lg text-red-400 hover:bg-[#222] hover:text-red-300 transition-colors"
+          >
+            Logout
+          </button>
+          <div className="mt-4 text-center">
+            <Link href="/">
+              <span className="text-xs text-gray-500 hover:text-gray-300 uppercase tracking-widest transition-colors cursor-pointer">
+                Back to Store
+              </span>
+            </Link>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Header */}
+        <header className="bg-white border-b border-[var(--border)] px-8 py-4 flex justify-between items-center shadow-sm">
+          {/* Left Side: Title */}
+          <h1 className="text-xl font-semibold text-[var(--foreground)] capitalize hidden md:block">
+            {pathname === '/admin' ? 'Dashboard' : pathname.split('/').pop()}
+          </h1>
+
+          {/* Right Side / Center: Top Bar Items */}
+          <div className="flex flex-1 justify-end items-center gap-6">
+            
+            {/* Search */}
+            <div className="relative max-w-sm w-full hidden sm:block">
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="w-full bg-[#FAF8F5] border border-[var(--border)] rounded-full px-4 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"
+              />
+              <svg className="w-4 h-4 absolute right-4 top-3 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+
+            {/* Notifications */}
+            <div className="relative" ref={notifRef}>
+              <button 
+                onClick={() => setNotifOpen(!notifOpen)}
+                className="relative p-2 text-[var(--text-muted)] hover:text-[var(--foreground)] transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
+              </button>
+
+              {notifOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[var(--border)] z-50 overflow-hidden">
+                  <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
+                    <h3 className="font-bold text-[var(--foreground)]">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <button onClick={markAllAsRead} className="text-xs text-[var(--accent)] cursor-pointer hover:underline">Mark all as read</button>
+                    )}
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.slice(0, 3).map(notif => (
+                      <div 
+                        key={notif.id} 
+                        onClick={() => markAsRead(notif.id)}
+                        className={`p-4 border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors cursor-pointer ${notif.unread ? 'bg-[#FAF8F5]/50 border-l-4 border-l-[var(--accent)]' : 'border-l-4 border-l-transparent'}`}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className={`text-sm ${notif.unread ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--text-muted)]'}`}>
+                            {notif.title}
+                          </h4>
+                          <span className="text-xs text-gray-400 whitespace-nowrap ml-2">{notif.time}</span>
+                        </div>
+                        <p className="text-xs text-[var(--text-muted)]">{notif.desc}</p>
+                      </div>
+                    ))}
+                    {notifications.length === 0 && (
+                      <div className="p-4 text-center text-sm text-[var(--text-muted)]">No notifications</div>
+                    )}
+                  </div>
+                  <div className="p-3 text-center border-t border-[var(--border)] bg-gray-50">
+                    <Link href="/admin/notifications" onClick={() => setNotifOpen(false)} className="text-sm font-medium text-[var(--accent)] hover:underline block w-full">
+                      View all notifications ({totalCount})
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Admin Profile */}
+            <div className="flex items-center gap-3 border-l border-[var(--border)] pl-6">
+              <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-sm">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
+              </div>
+              <div className="hidden lg:block text-sm">
+                <p className="font-semibold text-[var(--foreground)] leading-tight">{user.name}</p>
+                <p className="text-xs text-[var(--text-muted)]">Admin</p>
+              </div>
+            </div>
+
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-8">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function AdminLayout({ children }) {
+  return (
+    <NotificationsProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </NotificationsProvider>
+  );
+}

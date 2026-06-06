@@ -9,11 +9,11 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // Load user from sessionStorage on mount
   useEffect(() => {
     try {
-      const storedToken = localStorage.getItem("downtown_token");
-      const storedUser = localStorage.getItem("downtown_user");
+      const storedToken = sessionStorage.getItem("downtown_token");
+      const storedUser = sessionStorage.getItem("downtown_user");
 
       if (storedToken && storedUser) {
         const parsedUser = JSON.parse(storedUser);
@@ -29,22 +29,22 @@ export function AuthProvider({ children }) {
   const loginState = (newToken, userData) => {
     setToken(newToken);
     setUser(userData);
-    localStorage.setItem("downtown_token", newToken);
-    localStorage.setItem("downtown_user", JSON.stringify(userData));
+    sessionStorage.setItem("downtown_token", newToken);
+    sessionStorage.setItem("downtown_user", JSON.stringify(userData));
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem("downtown_token");
-    localStorage.removeItem("downtown_user");
+    sessionStorage.removeItem("downtown_token");
+    sessionStorage.removeItem("downtown_user");
   };
 
   // Update user profile (e.g., name, phone)
   const updateProfile = (updates) => {
     setUser((prev) => {
       const updated = { ...prev, ...updates };
-      localStorage.setItem("downtown_user", JSON.stringify(updated));
+      sessionStorage.setItem("downtown_user", JSON.stringify(updated));
       return updated;
     });
   };

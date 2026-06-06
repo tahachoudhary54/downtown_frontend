@@ -112,16 +112,16 @@ export default function Navbar() {
           {/* Logo in Left */}
           <div className={styles.logo}>
             <Link href="/">
-              <Image src="/logo-horizontal-v2.png" alt="MEN'S" width={135} height={34} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
+              <Image src="/logo-horizontal-v2.png" alt="MEN'S" width={145} height={36} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
             </Link>
           </div>
           
           {/* Navigation on Center */}
           <nav className={styles.nav}>
-            <Link href="/">Home</Link>
-            <Link href="/shop">Shop</Link>
-            <Link href="/clothing">Clothing</Link>
-            <Link href="/sale">Sale</Link>
+            <Link href="/" className={pathname === '/' ? styles.active : ''}>Home</Link>
+            <Link href="/shop" className={pathname === '/shop' ? styles.active : ''}>Shop</Link>
+            <Link href="/clothing" className={pathname.startsWith('/clothing') ? styles.active : ''}>Clothing</Link>
+            <Link href="/sale" className={pathname === '/sale' ? styles.active : ''}>Sale</Link>
           </nav>
           
           {/* Icons in Right */}
@@ -207,6 +207,12 @@ export default function Navbar() {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '12px'}}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                       Profile
                     </Link>
+                    {user.role === 'admin' && (
+                      <Link href="/admin" className={styles.userDropdownItem} onClick={() => setUserMenuOpen(false)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '12px'}}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                        Admin Panel
+                      </Link>
+                    )}
                     <button 
                       className={styles.userDropdownItem} 
                       onClick={() => {
