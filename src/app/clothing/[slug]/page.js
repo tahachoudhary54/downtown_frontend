@@ -1,14 +1,31 @@
-import ProductGrid from "../../../components/ProductGrid";
+import LiveProductGrid from "../../../components/LiveProductGrid";
 import { fetchProducts } from "../../../lib/api";
-import { categories } from "../../../data/categories";
+import { categories as defaultCategories } from "../../../data/categories";
 import styles from "../../page.module.css";
 import { notFound } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
+
+async function getSettings() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings`, { cache: 'no-store' });
+    const data = await res.json();
+    if (data.success) return data.data;
+  } catch (err) {
+    console.error("Failed to fetch settings", err);
+  }
+  return null;
+}
 
 export default async function CollectionPage({ params }) {
   const resolvedParams = await params;
   const slug = resolvedParams?.slug;
   
-  const category = categories.find((c) => c.slug === slug);
+  const settings = await getSettings();
+  const dynamicCategories = settings?.categories && Array.isArray(settings.categories) ? settings.categories : defaultCategories;
+  
+  const category = dynamicCategories.find((c) => c.slug === slug) || defaultCategories.find((c) => c.slug === slug);
+  
   if (!category) {
     notFound();
   }
@@ -23,13 +40,11 @@ export default async function CollectionPage({ params }) {
           <div className={styles.sectionLine}></div>
         </div>
 
-        {products.length > 0 ? (
-          <ProductGrid products={products} />
-        ) : (
-          <div style={{ textAlign: "center", padding: "4rem", color: "var(--text-muted)" }}>
-            <p>No products found in this collection.</p>
-          </div>
-        )}
+        <LiveProductGrid 
+          initialProducts={products} 
+          queryParams={{ category: category.name }}
+          emptyMessage="No products found in this collection." 
+        />
       </section>
     </div>
   );

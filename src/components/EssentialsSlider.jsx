@@ -3,22 +3,29 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSettings } from '../hooks/useSettings';
 import styles from '../app/page.module.css';
 
-import { categories } from '../data/categories';
+import { categories as defaultCategories } from '../data/categories';
 
-export default function EssentialsSlider() {
+export default function EssentialsSlider({ initialSettings }) {
+  const { settings } = useSettings(initialSettings);
+  const categories = settings?.categories || [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
   // We duplicate the array to create a seamless looping effect
-  const extendedCategories = [...categories, ...categories, ...categories];
+  const activeCategories = (categories && Array.isArray(categories) ? categories : defaultCategories)
+    .filter(c => c.isActive !== false)
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    
+  const extendedCategories = [...activeCategories, ...activeCategories, ...activeCategories];
 
   const handleNext = () => {
     setCurrentIndex((prev) => {
-      if (prev >= categories.length) {
+      if (prev >= activeCategories.length) {
         return 0;
       }
       return prev + 1;
@@ -28,7 +35,7 @@ export default function EssentialsSlider() {
   const handlePrev = () => {
     setCurrentIndex((prev) => {
       if (prev <= 0) {
-        return categories.length - 1;
+        return activeCategories.length - 1;
       }
       return prev - 1;
     });

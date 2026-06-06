@@ -3,11 +3,32 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import useSWR from 'swr';
 
 export default function AdminDashboard() {
   const { token } = useAuth();
   const [stats, setStats] = useState({ products: 0, users: 0 });
   const [loading, setLoading] = useState(true);
+
+  // SWR for Real-Time Polling of Analytics
+  const fetcher = (url) => fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.json());
+  
+  const { data: analyticsRes } = useSWR(
+    token ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/stats` : null, 
+    fetcher, 
+    { refreshInterval: 3000 } // Poll every 3 seconds for "real-time"
+  );
+  
+  const totalRevenue = analyticsRes?.data?.totalRevenue || 0;
+  const totalOrders = analyticsRes?.data?.totalOrders || 0;
+
+  // SWR for recent orders
+  const { data: ordersRes } = useSWR(
+    token ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/orders` : null,
+    fetcher,
+    { refreshInterval: 5000 }
+  );
+  const recentOrders = (ordersRes?.data || []).slice(0, 5);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -52,9 +73,10 @@ export default function AdminDashboard() {
           <div>
             <div className="flex justify-between items-start">
               <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Total Revenue</h3>
-              <span className="text-green-500 bg-green-50 px-2 py-1 rounded text-xs font-bold">+14%</span>
             </div>
-            <p className="text-3xl font-bold text-[var(--foreground)] mt-3">₹45,231</p>
+            <p className="text-3xl font-bold text-[var(--foreground)] mt-3">
+              ₹{totalRevenue.toLocaleString('en-IN')}
+            </p>
           </div>
           <div className="mt-5 pt-4 border-t border-[var(--border)] text-xs text-[var(--text-muted)]">
             Compared to last month
@@ -66,9 +88,8 @@ export default function AdminDashboard() {
           <div>
             <div className="flex justify-between items-start">
               <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Total Orders</h3>
-              <span className="text-green-500 bg-green-50 px-2 py-1 rounded text-xs font-bold">+8%</span>
             </div>
-            <p className="text-3xl font-bold text-[var(--foreground)] mt-3">128</p>
+            <p className="text-3xl font-bold text-[var(--foreground)] mt-3">{totalOrders}</p>
           </div>
           <div className="mt-5 pt-4 border-t border-[var(--border)]">
             <Link href="/admin/orders" className="text-xs font-semibold text-[var(--accent)] hover:underline uppercase tracking-wide">
@@ -97,7 +118,6 @@ export default function AdminDashboard() {
           <div>
             <div className="flex justify-between items-start">
               <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Registered Users</h3>
-              <span className="text-green-500 bg-green-50 px-2 py-1 rounded text-xs font-bold">+22%</span>
             </div>
             <p className="text-3xl font-bold text-[var(--foreground)] mt-3">{stats.users}</p>
           </div>
@@ -130,21 +150,27 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {[
-                  { id: '#ORD-0921', name: 'John Doe', date: 'Today, 10:24 AM', amount: '₹1,299', status: 'Processing', color: 'bg-yellow-100 text-yellow-800' },
-                  { id: '#ORD-0920', name: 'Sarah Smith', date: 'Yesterday', amount: '₹4,500', status: 'Shipped', color: 'bg-blue-100 text-blue-800' },
-                  { id: '#ORD-0919', name: 'Michael Brown', date: 'Yesterday', amount: '₹899', status: 'Delivered', color: 'bg-green-100 text-green-800' },
-                  { id: '#ORD-0918', name: 'Emma Wilson', date: 'Oct 24, 2023', amount: '₹2,150', status: 'Delivered', color: 'bg-green-100 text-green-800' },
-                ].map((order, i) => (
-                  <tr key={i} className="border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors">
-                    <td className="px-6 py-4 font-medium">{order.id}</td>
-                    <td className="px-6 py-4">{order.name}</td>
-                    <td className="px-6 py-4 text-[var(--text-muted)]">{order.date}</td>
-                    <td className="px-6 py-4 font-medium">{order.amount}</td>
+                {recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-10 text-center text-[var(--text-muted)] text-sm">
+                      No orders yet. Orders placed from your store will appear here.
+                    </td>
+                  </tr>
+                ) : recentOrders.map((order) => (
+                  <tr key={order._id} className="border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs">#{order._id.slice(-6).toUpperCase()}</td>
+                    <td className="px-6 py-4">{order.customer?.firstName} {order.customer?.lastName}</td>
+                    <td className="px-6 py-4 text-[var(--text-muted)] text-xs">
+                      {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </td>
+                    <td className="px-6 py-4 font-medium">₹{order.financials?.total?.toLocaleString('en-IN')}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${order.color}`}>
-                        {order.status}
-                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
+                        order.orderStatus === 'Shipped' ? 'bg-blue-100 text-blue-800' :
+                        order.orderStatus === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>{order.orderStatus}</span>
                     </td>
                   </tr>
                 ))}
@@ -171,14 +197,6 @@ export default function AdminDashboard() {
                 <div className="font-medium">Update Homepage Banner</div>
               </Link>
             </div>
-          </div>
-          
-          <div className="bg-[var(--accent)] text-white p-6 rounded-2xl shadow-sm">
-            <h2 className="text-lg font-bold mb-2">Need Help?</h2>
-            <p className="text-sm text-white/80 mb-4">View the documentation or contact support for assistance with the Admin Panel.</p>
-            <button className="bg-white text-[var(--accent)] px-4 py-2 rounded font-bold text-sm w-full hover:bg-gray-100 transition-colors">
-              Contact Support
-            </button>
           </div>
         </div>
 

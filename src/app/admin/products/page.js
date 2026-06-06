@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function AdminProducts() {
+  const router = useRouter();
   const { token } = useAuth();
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
@@ -12,7 +14,6 @@ export default function AdminProducts() {
   
   // Filters
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
   const [sale, setSale] = useState('all');
   const [page, setPage] = useState(1);
 
@@ -21,7 +22,6 @@ export default function AdminProducts() {
     try {
       let query = `?page=${page}&limit=10`;
       if (search) query += `&search=${search}`;
-      if (category) query += `&category=${category}`;
       if (sale !== 'all') query += `&sale=${sale}`;
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${query}`, {
@@ -41,7 +41,7 @@ export default function AdminProducts() {
 
   useEffect(() => {
     if (token) fetchProducts();
-  }, [token, page, search, category, sale]);
+  }, [token, page, search, sale]);
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
@@ -52,7 +52,8 @@ export default function AdminProducts() {
       });
       const data = await res.json();
       if (data.success) {
-        fetchProducts(); // refresh
+        fetchProducts(); // refresh list
+        router.refresh(); // purge Next.js router cache
       } else {
         alert(data.message);
       }
@@ -67,7 +68,7 @@ export default function AdminProducts() {
         <h2 className="text-2xl font-bold text-[var(--foreground)]">Products</h2>
         <Link 
           href="/admin/products/new"
-          className="bg-[var(--accent)] text-white px-5 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors"
+          className="bg-[#F1ECE5] text-[var(--foreground)] px-5 py-2 rounded-lg font-medium hover:bg-[#E5DED5] transition-colors"
         >
           + Add New Product
         </Link>
@@ -82,16 +83,6 @@ export default function AdminProducts() {
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
-        <select 
-          className="border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
-          value={category}
-          onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-        >
-          <option value="">All Categories</option>
-          <option value="clothing">Clothing</option>
-          <option value="shoes">Shoes</option>
-          <option value="accessories">Accessories</option>
-        </select>
         <select 
           className="border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
           value={sale}
@@ -135,8 +126,8 @@ export default function AdminProducts() {
                     <td className="p-4 font-medium text-[var(--foreground)]">{product.name}</td>
                     <td className="p-4 text-[var(--text-muted)] capitalize">{product.category}</td>
                     <td className="p-4 text-[var(--foreground)] font-medium">
-                      ${product.price}
-                      {product.isOnSale && <span className="ml-2 text-xs text-red-500 line-through">${product.originalPrice}</span>}
+                      ₹{product.price}
+                      {product.isOnSale && <span className="ml-2 text-xs text-red-500 line-through">₹{product.originalPrice}</span>}
                     </td>
                     <td className="p-4">
                       {product.isOnSale && (

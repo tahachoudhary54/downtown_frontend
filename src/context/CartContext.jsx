@@ -51,10 +51,9 @@ export function CartProvider({ children }) {
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.reduce((sum, item) => {
-    const price = parseInt(
-      (item.product.price || "0").replace(/[^0-9]/g, ""), 10
-    );
-    return sum + price * item.quantity;
+    const numericString = (item.product.price || "0").toString().replace(/[^0-9.]/g, "");
+    const price = parseFloat(numericString);
+    return sum + (isNaN(price) ? 0 : price) * item.quantity;
   }, 0);
 
   return (

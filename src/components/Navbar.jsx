@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
+import { useCustomerNotifications } from "../context/CustomerNotificationsContext";
 import IconHeartOutline from "./IconHeartOutline";
 import IconHeartFilled from "./IconHeartFilled";
 import styles from "./Navbar.module.css";
@@ -19,14 +20,17 @@ export default function Navbar() {
   const { totalItems } = useCart();
   const { user, logout } = useAuth();
   const { wishlist } = useWishlist();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useCustomerNotifications();
   const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const searchRef = useRef(null);
   const userMenuRef = useRef(null);
+  const notifRef = useRef(null);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -73,6 +77,9 @@ export default function Navbar() {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setUserMenuOpen(false);
       }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -111,17 +118,17 @@ export default function Navbar() {
         <div className={styles.container}>
           {/* Logo in Left */}
           <div className={styles.logo}>
-            <Link href="/">
+            <a href="/">
               <Image src="/logo-horizontal-v2.png" alt="MEN'S" width={145} height={36} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
-            </Link>
+            </a>
           </div>
           
           {/* Navigation on Center */}
           <nav className={styles.nav}>
-            <Link href="/" className={pathname === '/' ? styles.active : ''}>Home</Link>
-            <Link href="/shop" className={pathname === '/shop' ? styles.active : ''}>Shop</Link>
-            <Link href="/clothing" className={pathname.startsWith('/clothing') ? styles.active : ''}>Clothing</Link>
-            <Link href="/sale" className={pathname === '/sale' ? styles.active : ''}>Sale</Link>
+            <a href="/" className={pathname === '/' ? styles.active : ''}>Home</a>
+            <a href="/shop" className={pathname === '/shop' ? styles.active : ''}>Shop</a>
+            <a href="/clothing" className={pathname.startsWith('/clothing') ? styles.active : ''}>Clothing</a>
+            <a href="/sale" className={pathname === '/sale' ? styles.active : ''}>Sale</a>
           </nav>
           
           {/* Icons in Right */}
@@ -234,6 +241,85 @@ export default function Navbar() {
                 </svg>
               </Link>
             )}
+            {/* Notification Bell — only for logged-in non-admin users */}
+            {user && (
+              <div className={styles.notifWrapper} ref={notifRef}>
+                <button
+                  type="button"
+                  className={styles.iconButton}
+                  onClick={() => setNotifOpen(!notifOpen)}
+                  aria-label="Notifications"
+                  style={{ position: 'relative' }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className={styles.cartBadge} style={{ top: '-6px', right: '-6px', position: 'absolute' }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {notifOpen && (
+                  <div className={styles.notifDropdown}>
+                    <div className={styles.notifHeader}>
+                      <span className={styles.notifTitle}>Notifications</span>
+                      {unreadCount > 0 && (
+                        <button
+                          className={styles.notifMarkAll}
+                          onClick={() => markAllAsRead()}
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    <div className={styles.notifList}>
+                      {notifications.length === 0 ? (
+                        <div className={styles.notifEmpty}>
+                          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3, marginBottom: '0.5rem' }}>
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                          </svg>
+                          <p>No notifications yet.</p>
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <button
+                            key={notif._id}
+                            className={`${styles.notifItem} ${!notif.isRead ? styles.notifItemUnread : ''}`}
+                            onClick={() => {
+                              markAsRead(notif._id);
+                              setNotifOpen(false);
+                              if (notif.orderId) router.push('/profile');
+                            }}
+                          >
+                            <span className={styles.notifIcon}>
+                              {notif.type === 'order_placed' && '🛍️'}
+                              {notif.type === 'order_shipped' && '🚚'}
+                              {notif.type === 'order_delivered' && '✅'}
+                              {notif.type === 'order_cancelled' && '❌'}
+                              {notif.type === 'order_updated' && '📦'}
+                            </span>
+                            <div className={styles.notifContent}>
+                              <p className={styles.notifItemTitle}>{notif.title}</p>
+                              <p className={styles.notifItemMsg}>{notif.message}</p>
+                              <p className={styles.notifTime}>
+                                {new Date(notif.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                            {!notif.isRead && <span className={styles.notifDot} />}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Wishlist button */}
             <button
               className={styles.iconButton}

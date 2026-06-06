@@ -102,7 +102,7 @@ export default function CartPage() {
               </p>
             )}
 
-            <button className={styles.btnCheckout}>PROCEED TO CHECKOUT</button>
+            <Link href="/checkout" className={styles.btnCheckout} style={{ display: 'block', textAlign: 'center' }}>PROCEED TO CHECKOUT</Link>
             <Link href="/shop" className={styles.btnContinue}>CONTINUE SHOPPING</Link>
           </div>
         </div>

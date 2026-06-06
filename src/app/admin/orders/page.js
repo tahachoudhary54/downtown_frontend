@@ -1,20 +1,213 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import useSWR from 'swr';
+
+const STATUS_COLORS = {
+  Processing: 'bg-yellow-100 text-yellow-800',
+  Shipped: 'bg-blue-100 text-blue-800',
+  Delivered: 'bg-green-100 text-green-800',
+  Cancelled: 'bg-red-100 text-red-800',
+};
+
 export default function AdminOrders() {
+  const { token } = useAuth();
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const fetcher = (url) =>
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json());
+
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+  const { data, mutate, isLoading } = useSWR(
+    token ? `${apiBase}/api/orders` : null,
+    fetcher,
+    { refreshInterval: 5000 }
+  );
+
+  const orders = data?.data || [];
+
+  const filtered = orders.filter((order) => {
+    const matchesSearch =
+      order.customer?.firstName?.toLowerCase().includes(search.toLowerCase()) ||
+      order.customer?.lastName?.toLowerCase().includes(search.toLowerCase()) ||
+      order.customer?.email?.toLowerCase().includes(search.toLowerCase()) ||
+      order._id?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || order.orderStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    setUpdatingId(orderId);
+    try {
+      await fetch(`${apiBase}/api/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderStatus: newStatus }),
+      });
+      mutate(); // Re-fetch
+    } catch (err) {
+      console.error('Failed to update status', err);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+    
+    setUpdatingId(orderId);
+    try {
+      await fetch(`${apiBase}/api/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      mutate();
+    } catch (err) {
+      console.error('Failed to delete order', err);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const totalRevenue = orders.reduce((sum, o) => sum + (o.financials?.total || 0), 0);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-[var(--foreground)]">Orders</h2>
+        <div className="flex gap-4 text-sm">
+          <span className="bg-white border border-[var(--border)] px-4 py-2 rounded-lg font-medium">
+            Total Orders: <strong>{orders.length}</strong>
+          </span>
+          <span className="bg-white border border-[var(--border)] px-4 py-2 rounded-lg font-medium">
+            Total Revenue: <strong>₹{totalRevenue.toLocaleString('en-IN')}</strong>
+          </span>
+        </div>
       </div>
 
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-[var(--border)] text-center">
-        <div className="mb-4 text-[var(--text-muted)]">
-          <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-          </svg>
-          <p className="text-lg font-medium">Orders Management</p>
-          <p className="text-sm mt-2">This page is currently under construction. Order tracking and management features will be available here soon.</p>
-        </div>
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          placeholder="Search by name, email or order ID..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 border border-[var(--border)] rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[var(--accent)] bg-white"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border border-[var(--border)] rounded-lg px-4 py-2 text-sm focus:outline-none bg-white"
+        >
+          <option value="all">All Statuses</option>
+          <option value="Processing">Processing</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
+        {isLoading ? (
+          <div className="p-12 text-center text-[var(--text-muted)] animate-pulse">Loading orders...</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="text-[var(--text-muted)] mb-2">
+              <svg className="w-12 h-12 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <p className="font-medium text-[var(--foreground)]">No orders found</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">Orders will appear here once customers place them.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-[var(--bg)] border-b border-[var(--border)]">
+                <tr>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Order ID</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Customer</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Items</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Payment</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Date</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {filtered.map((order) => (
+                  <tr key={order._id} className="hover:bg-[var(--bg)] transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs text-[var(--text-muted)]">
+                      #{order._id.slice(-6).toUpperCase()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-[var(--foreground)]">{order.customer?.firstName} {order.customer?.lastName}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{order.customer?.email}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{order.customer?.phone}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        {order.items?.map((item, i) => (
+                          <p key={i} className="text-xs text-[var(--text-muted)]">
+                            {item.name} × {item.quantity} <span className="opacity-60">(Size: {item.size})</span>
+                          </p>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 font-semibold text-[var(--foreground)]">
+                      ₹{order.financials?.total?.toLocaleString('en-IN')}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-xs font-medium uppercase bg-[var(--bg)] px-2 py-1 rounded">
+                        {order.paymentMethod}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-[var(--text-muted)]">
+                      {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <select
+                          value={order.orderStatus}
+                          onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                          disabled={updatingId === order._id}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-md border-0 ring-1 ring-inset ring-black/5 focus:ring-2 focus:ring-[var(--accent)] outline-none cursor-pointer shadow-sm transition-all ${STATUS_COLORS[order.orderStatus] || 'bg-gray-100'} disabled:opacity-50`}
+                        >
+                          <option value="Processing" className="bg-white text-gray-900 py-1">Processing</option>
+                          <option value="Shipped" className="bg-white text-gray-900 py-1">Shipped</option>
+                          <option value="Delivered" className="bg-white text-gray-900 py-1">Delivered</option>
+                          <option value="Cancelled" className="bg-white text-gray-900 py-1">Cancelled</option>
+                        </select>
+                        <button
+                          onClick={() => handleDeleteOrder(order._id)}
+                          disabled={updatingId === order._id}
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                          title="Delete Order"
+                        >
+                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

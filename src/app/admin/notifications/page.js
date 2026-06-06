@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useNotifications } from '@/context/NotificationsContext';
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const { notifications, markAsRead, markAllAsRead, deleteNotifications } = useNotifications();
   const [selectedIds, setSelectedIds] = useState([]);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, idsToDelete: [] });
@@ -100,7 +102,16 @@ export default function NotificationsPage() {
         ) : (
           <div className="divide-y divide-[var(--border)]">
             {notifications.map((notif) => (
-              <div key={notif.id} className={`p-6 flex gap-4 transition-colors ${notif.unread ? 'bg-[#FAF8F5]' : 'hover:bg-gray-50'}`}>
+              <div 
+                key={notif.id} 
+                onClick={(e) => {
+                  // Only navigate if we're not clicking a button or checkbox
+                  if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                    if (notif.type === 'order') router.push('/admin/orders');
+                  }
+                }}
+                className={`p-6 flex gap-4 transition-colors cursor-pointer ${notif.unread ? 'bg-[#FAF8F5]' : 'hover:bg-gray-50'}`}
+              >
                 <div className="flex items-start mt-1">
                   <input 
                     type="checkbox" 

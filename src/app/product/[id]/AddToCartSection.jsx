@@ -6,7 +6,8 @@ import Link from "next/link";
 import styles from "./product.module.css";
 
 export default function AddToCartSection({ product }) {
-  const [selectedSize, setSelectedSize] = useState("M");
+  const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["S", "M", "L", "XL"];
+  const [selectedSize, setSelectedSize] = useState(availableSizes[0] || "");
   const [added, setAdded] = useState(false);
   const { addToCart } = useCart();
 
@@ -17,20 +18,22 @@ export default function AddToCartSection({ product }) {
 
   return (
     <>
-      <div className={styles.sizes}>
-        <h4>SELECT SIZE</h4>
-        <div className={styles.sizeOptions}>
-          {["S", "M", "L", "XL"].map((size) => (
-            <button
-              key={size}
-              className={selectedSize === size ? styles.active : ""}
-              onClick={() => setSelectedSize(size)}
-            >
-              {size}
-            </button>
-          ))}
+      {availableSizes.length > 0 && (
+        <div className={styles.sizes}>
+          <h4>SELECT SIZE</h4>
+          <div className={styles.sizeOptions}>
+            {availableSizes.map((size) => (
+              <button
+                key={size}
+                className={selectedSize === size ? styles.active : ""}
+                onClick={() => setSelectedSize(size)}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <button
         className={`${styles.btnAddToCart} ${added ? styles.btnAdded : ""}`}

@@ -1,9 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
-import { categories } from "../../data/categories";
+import { categories as defaultCategories } from "../../data/categories";
 import styles from "../page.module.css";
 
-export default function ClothingPage() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+async function getSettings() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings`, { cache: 'no-store' });
+    const data = await res.json();
+    if (data.success) return data.data;
+  } catch (err) {
+    console.error("Failed to fetch settings", err);
+  }
+  return null;
+}
+
+export default async function ClothingPage() {
+  const settings = await getSettings();
+  const activeCategories = (settings?.categories && Array.isArray(settings.categories) ? settings.categories : defaultCategories)
+    .filter(c => c.isActive !== false)
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   return (
     <div className={styles.page}>
       <section className={styles.sectionContainer}>
@@ -18,7 +36,7 @@ export default function ClothingPage() {
           gap: '2rem',
           marginTop: '2rem'
         }}>
-          {categories.map((cat, index) => (
+          {activeCategories.map((cat, index) => (
             <Link key={`${cat.id}-${index}`} href={`/clothing/${cat.slug}`} className={styles.editorialCard} style={{ minHeight: '400px', display: 'block', textDecoration: 'none' }}>
               <div className={styles.editorialImageWrapper} style={{ height: '320px' }}>
                 <Image src={cat.img} alt={cat.name} fill className={styles.editorialImage} style={{ objectFit: 'cover' }} />

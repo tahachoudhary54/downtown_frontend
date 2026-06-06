@@ -1,17 +1,55 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const NotificationsContext = createContext();
 
+const DEFAULT_NOTIFICATIONS = [];
+
 export function NotificationsProvider({ children }) {
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'New Order Received', desc: 'Order #ORD-0921 has been placed successfully. Please review and prepare for shipping.', time: '5 minutes ago', unread: true, type: 'order' },
-    { id: 2, title: 'Low Stock Alert', desc: 'Product "Classic Wool Coat" is running low on stock (2 left). Consider restocking soon to avoid missed sales.', time: '1 hour ago', unread: true, type: 'alert' },
-    { id: 3, title: 'New User Registration', desc: 'Sarah Smith (sarah.smith@example.com) just created a new customer account.', time: '3 hours ago', unread: false, type: 'user' },
-    { id: 4, title: 'Order Delivered', desc: 'Order #ORD-0890 has been successfully delivered to the customer.', time: '1 day ago', unread: false, type: 'order' },
-    { id: 5, title: 'System Update', desc: 'The Downtown Boutique backend system was updated to v1.2.4 successfully.', time: '2 days ago', unread: false, type: 'system' },
-  ]);
+  const [notifications, setNotifications] = useState(() => {
+    // Load from localStorage on first render (client-side only)
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('downtown_notifications');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return DEFAULT_NOTIFICATIONS;
+  });
+
+  // Persist to localStorage whenever notifications change
+  useEffect(() => {
+    try {
+      localStorage.setItem('downtown_notifications', JSON.stringify(notifications));
+    } catch {}
+  }, [notifications]);
+
+  // Sync across tabs: when the checkout tab adds a notification and saves to localStorage,
+  // the admin tab receives the 'storage' event and picks it up in real time.
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'downtown_notifications' && e.newValue) {
+        try {
+          setNotifications(JSON.parse(e.newValue));
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const addNotification = ({ title, desc, type = 'order' }) => {
+    const newNotif = {
+      id: Date.now(),
+      title,
+      desc,
+      time: 'Just now',
+      unread: true,
+      type,
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
 
   const markAsRead = (ids) => {
     const idsArray = Array.isArray(ids) ? ids : [ids];
@@ -35,6 +73,7 @@ export function NotificationsProvider({ children }) {
       notifications,
       unreadCount,
       totalCount,
+      addNotification,
       markAsRead,
       markAllAsRead,
       deleteNotifications

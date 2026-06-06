@@ -1,6 +1,6 @@
 .page {
-  background-color: var(--foreground);
-  color: var(--background);
+  background-color: var(--background);
+  color: var(--foreground);
   min-height: 100vh;
 }
 
@@ -123,7 +123,7 @@
 }
 
 .breadcrumbs a {
-  color: var(--background);
+  color: var(--foreground);
   text-decoration: none;
   transition: color 0.3s ease;
 }
@@ -142,7 +142,7 @@
 .title {
   font-family: var(--font-playfair);
   font-size: 3rem;
-  color: var(--background);
+  color: var(--foreground);
   margin-bottom: 1rem;
 }
 
@@ -164,7 +164,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   margin-bottom: 1rem;
-  color: var(--background);
+  color: var(--foreground);
 }
 
 .sizeOptions {
@@ -178,7 +178,7 @@
   height: 50px;
   border: 1px solid var(--text-muted);
   background: transparent;
-  color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-inter);
   font-size: 1rem;
   cursor: pointer;
@@ -186,14 +186,14 @@
 }
 
 .sizeOptions button:hover, .sizeOptions button.active {
-  border-color: var(--background);
-  background: var(--background);
-  color: var(--foreground);
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
 }
 
 .btnAddToCart {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--foreground);
+  color: var(--background);
   border: none;
   padding: 1.2rem;
   font-family: var(--font-inter);
@@ -219,8 +219,8 @@
   width: 100%;
   padding: 0.9rem 2rem;
   background: transparent;
-  color: var(--background);
-  border: 1px solid rgba(255,255,255,0.3);
+  color: var(--foreground);
+  border: 1px solid rgba(0,0,0,0.3);
   font-size: 0.9rem;
   letter-spacing: 0.08em;
   cursor: pointer;
@@ -230,7 +230,7 @@
 }
 
 .btnViewCart:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.05);
 }
 
 .features {

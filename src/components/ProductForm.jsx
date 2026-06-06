@@ -17,6 +17,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     isOnSale: false,
     originalPrice: '',
     inStock: true,
+    sizes: [],
   });
   
   const [loading, setLoading] = useState(false);
@@ -43,17 +44,20 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
 
     setUploading(true);
     const data = new FormData();
-    data.append('file', file);
+    data.append('image', file);
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        },
         body: data
       });
       const result = await res.json();
       if (result.success) {
-        setFormData(prev => ({ ...prev, img: result.url }));
+        setFormData(prev => ({ ...prev, img: result.imageUrl || result.url || '' }));
       } else {
         alert(result.message || 'Image upload failed');
       }
@@ -88,6 +92,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
 
       const data = await res.json();
       if (data.success) {
+        router.refresh(); // purge next.js cache
         router.push('/admin/products');
       } else {
         alert(data.message);
@@ -158,7 +163,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
           <label className="block text-sm font-medium text-[var(--text-muted)]">Image URL *</label>
           <div className="flex gap-2">
             <input 
-              type="text" required name="img" value={formData.img} onChange={handleChange} placeholder="https://..."
+              type="text" required name="img" value={formData.img || ''} onChange={handleChange} placeholder="https://..."
               className="flex-1 border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
             />
             <input 
@@ -180,7 +185,31 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-6 pt-2">
+        <div className="space-y-2 pt-2">
+          <label className="block text-sm font-medium text-[var(--text-muted)]">Available Sizes</label>
+          <div className="flex flex-wrap gap-4">
+            {['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
+              <label key={size} className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={formData.sizes?.includes(size) || false}
+                  onChange={(e) => {
+                    const currentSizes = formData.sizes || [];
+                    if (e.target.checked) {
+                      setFormData({...formData, sizes: [...currentSizes, size]});
+                    } else {
+                      setFormData({...formData, sizes: currentSizes.filter(s => s !== size)});
+                    }
+                  }}
+                  className="w-4 h-4 accent-[var(--accent)]"
+                />
+                <span className="text-sm font-medium text-[var(--foreground)]">{size}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-6 pt-4 border-t border-[var(--border)]">
           <label className="flex items-center gap-2 cursor-pointer">
             <input 
               type="checkbox" name="isOnSale" checked={formData.isOnSale} onChange={handleChange}

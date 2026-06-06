@@ -1,4 +1,4 @@
-import ProductGrid from "../../components/ProductGrid";
+import LiveProductGrid from "../../components/LiveProductGrid";
 import { fetchProducts } from "../../lib/api";
 import styles from "../page.module.css";
 import { staticSeo } from "../seoConfig";
@@ -39,13 +39,11 @@ export default async function ShopPage({ searchParams }) {
           <div className={styles.sectionLine}></div>
         </div>
 
-        {products.length > 0 ? (
-          <ProductGrid products={products} />
-        ) : (
-          <div style={{ textAlign: "center", padding: "4rem", color: "var(--text-muted)" }}>
-            <p>No products found matching your search.</p>
-          </div>
-        )}
+        <LiveProductGrid 
+          initialProducts={products} 
+          queryParams={query ? { search: query } : {}}
+          emptyMessage="No products found matching your search." 
+        />
       </section>
     </div>
   );

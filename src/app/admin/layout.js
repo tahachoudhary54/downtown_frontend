@@ -14,6 +14,8 @@ function AdminLayoutContent({ children }) {
   const notifRef = useRef(null);
 
   const { notifications, unreadCount, totalCount, markAsRead, markAllAsRead } = useNotifications();
+  const [toast, setToast] = useState(null);
+  const prevCountRef = useRef(notifications.length);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -24,6 +26,19 @@ function AdminLayoutContent({ children }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Show a toast popup whenever a new notification arrives (cross-tab sync)
+  useEffect(() => {
+    if (notifications.length > prevCountRef.current) {
+      const newest = notifications[0]; // newest is always first
+      if (newest?.unread) {
+        setToast(newest);
+        const timer = setTimeout(() => setToast(null), 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+    prevCountRef.current = notifications.length;
+  }, [notifications]);
 
   useEffect(() => {
     if (!loading) {
@@ -46,12 +61,14 @@ function AdminLayoutContent({ children }) {
     { href: '/admin/products', label: 'Products' },
     { href: '/admin/orders', label: 'Orders' },
     { href: '/admin/users', label: 'Users' },
+    { href: '/admin/tickets', label: 'Support Tickets' },
     { href: '/admin/cms', label: 'CMS' },
     { href: '/admin/notifications', label: 'Notifications' },
     { href: '/admin/settings', label: 'Settings' },
   ];
 
   return (
+    <>
     <div className="min-h-screen bg-[var(--background)] flex flex-col md:flex-row">
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-[#111] text-white flex flex-col shadow-xl">
@@ -148,7 +165,11 @@ function AdminLayoutContent({ children }) {
                     {notifications.slice(0, 3).map(notif => (
                       <div 
                         key={notif.id} 
-                        onClick={() => markAsRead(notif.id)}
+                        onClick={() => {
+                          markAsRead(notif.id);
+                          setNotifOpen(false);
+                          if (notif.type === 'order') router.push('/admin/orders');
+                        }}
                         className={`p-4 border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors cursor-pointer ${notif.unread ? 'bg-[#FAF8F5]/50 border-l-4 border-l-[var(--accent)]' : 'border-l-4 border-l-transparent'}`}
                       >
                         <div className="flex justify-between items-start mb-1">
@@ -195,6 +216,55 @@ function AdminLayoutContent({ children }) {
         </div>
       </main>
     </div>
+
+      {/* New Order Toast Popup */}
+      {toast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '80px',
+            right: '24px',
+            zIndex: 9999,
+            width: '340px',
+            background: '#1a1a1a',
+            color: 'white',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+            display: 'flex',
+            gap: '14px',
+            alignItems: 'flex-start',
+            animation: 'slideInToast 0.35s ease',
+          }}
+        >
+          <div style={{
+            width: '36px', height: '36px', minWidth: '36px',
+            background: 'var(--accent)', borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 01-8 0"/>
+            </svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '4px' }}>{toast.title}</p>
+            <p style={{ fontSize: '0.78rem', color: '#ccc', lineHeight: 1.4 }}>{toast.desc}</p>
+          </div>
+          <button
+            onClick={() => setToast(null)}
+            style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '18px', lineHeight: 1, marginTop: '-2px' }}
+          >&times;</button>
+        </div>
+      )}
+      <style>{`
+        @keyframes slideInToast {
+          from { opacity: 0; transform: translateY(-20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </>
   );
 }
 

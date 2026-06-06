@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import styles from './profile.module.css';
+import useSWR from 'swr';
 import { useWishlist } from '../../context/WishlistContext';
 
 // SVG Icons
@@ -15,11 +16,14 @@ const IconHeart = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="no
 const IconMapPin = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
 const IconGift = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>;
 const IconSettings = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
+const IconSupport = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
 
 export default function ProfilePage() {
-  const { user, loading, logout, updateProfile } = useAuth();
+  const { user, loading, logout, updateProfile, token } = useAuth();
   const router = useRouter();
+  const { wishlist, toggleWishlist } = useWishlist();
   const [activeTab, setActiveTab] = useState('orders');
+  const [selectedOrderForTicket, setSelectedOrderForTicket] = useState('');
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [avatarUrl, setAvatarUrl] = useState(() => {
@@ -28,6 +32,26 @@ export default function ProfilePage() {
     }
     return null;
   });
+
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const fetcher = (url) => fetch(url, {
+    headers: { Authorization: `Bearer ${token}` }
+  }).then(r => r.json());
+
+  const { data: ordersData } = useSWR(
+    user && token && (activeTab === 'orders' || activeTab === 'support') ? `${apiBase}/api/orders/myorders` : null,
+    fetcher
+  );
+  
+  const myOrders = ordersData?.data || [];
+
+  const { data: ticketsData, mutate: mutateTickets } = useSWR(
+    user && token && activeTab === 'support' ? `${apiBase}/api/tickets/my-tickets` : null,
+    fetcher,
+    { refreshInterval: 5000 }
+  );
+
+  const myTickets = ticketsData?.data || [];
 
   useEffect(() => {
     if (!loading && !user) {
@@ -59,31 +83,41 @@ export default function ProfilePage() {
           <>
             <h2 className={styles.sectionTitle}>Recent Orders</h2>
             <div className={styles.ordersList}>
-              <div className={styles.orderCard}>
-                <div className={styles.orderInfo}>
-                  <span className={styles.orderId}>Order #DB1001</span>
-                  <span className={styles.orderDate}>Placed on Oct 24, 2026</span>
+              {myOrders.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>
+                  <IconPackage />
+                  <p style={{ marginTop: '1rem' }}>You haven't placed any orders yet.</p>
+                  <button onClick={() => router.push('/shop')} style={{ marginTop: '1rem', padding: '0.8rem 1.5rem', background: '#111', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Start Shopping</button>
                 </div>
-                <div className={styles.orderStatusWrapper}>
-                  <span className={`${styles.statusBadge} ${styles.statusDelivered}`}>Delivered</span>
-                  <button className={styles.btnViewOrder}>View Details</button>
-                </div>
-              </div>
-              <div className={styles.orderCard}>
-                <div className={styles.orderInfo}>
-                  <span className={styles.orderId}>Order #DB1002</span>
-                  <span className={styles.orderDate}>Placed on Nov 02, 2026</span>
-                </div>
-                <div className={styles.orderStatusWrapper}>
-                  <span className={`${styles.statusBadge} ${styles.statusShipped}`}>Shipped</span>
-                  <button className={styles.btnViewOrder}>Track Order</button>
-                </div>
-              </div>
+              ) : (
+                myOrders.map(order => {
+                  const orderIdDisplay = order._id.slice(-6).toUpperCase();
+                  const dateOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+                  const formattedDate = new Date(order.createdAt).toLocaleDateString('en-US', dateOptions);
+                  
+                  return (
+                    <div key={order._id} className={styles.orderCard}>
+                      <div className={styles.orderInfo}>
+                        <span className={styles.orderId}>Order #{orderIdDisplay}</span>
+                        <span className={styles.orderDate}>Placed on {formattedDate}</span>
+                      </div>
+                      <div className={styles.orderStatusWrapper}>
+                        <span className={`${styles.statusBadge} ${order.orderStatus === 'Delivered' ? styles.statusDelivered : styles.statusShipped}`}>
+                          {order.orderStatus}
+                        </span>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                          <button onClick={() => router.push(`/profile/orders/${order._id}`)} className={styles.btnViewOrder}>View Details</button>
+                          <button onClick={() => { setActiveTab('support'); setSelectedOrderForTicket(order._id); }} className={styles.btnSecondary} style={{ fontSize: '0.8rem', padding: '0.4rem' }}>Report Issue</button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </>
         );
         case 'wishlist': {
-          const { wishlist, toggleWishlist } = useWishlist();
           return (
             <>
               <h2 className={styles.sectionTitle}>My Wishlist</h2>
@@ -178,6 +212,49 @@ export default function ProfilePage() {
             </form>
           </>
         );
+      case 'support':
+        return (
+          <>
+            <h2 className={styles.sectionTitle}>Customer Support</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <p style={{ color: 'var(--text-muted)' }}>Need help with an order? Create a support ticket.</p>
+              <button onClick={() => router.push('/profile/tickets/new' + (selectedOrderForTicket ? `?order=${selectedOrderForTicket}` : ''))} style={{ padding: '0.6rem 1rem', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Create New Ticket</button>
+            </div>
+
+            <div className={styles.ordersList}>
+              {myTickets.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>
+                  <IconSupport />
+                  <p style={{ marginTop: '1rem' }}>You don't have any open support tickets.</p>
+                </div>
+              ) : (
+                myTickets.map(ticket => {
+                  const ticketIdDisplay = ticket._id.slice(-6).toUpperCase();
+                  const dateOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+                  const formattedDate = new Date(ticket.createdAt).toLocaleDateString('en-US', dateOptions);
+                  
+                  return (
+                    <div key={ticket._id} className={styles.orderCard} style={{ cursor: 'pointer' }} onClick={() => router.push(`/profile/tickets/${ticket._id}`)}>
+                      <div className={styles.orderInfo}>
+                        <span className={styles.orderId}>{ticket.subject}</span>
+                        <span className={styles.orderDate}>Ticket #{ticketIdDisplay} &bull; Created on {formattedDate}</span>
+                        <span className={styles.orderDate}>Category: {ticket.category}</span>
+                      </div>
+                      <div className={styles.orderStatusWrapper}>
+                        <span className={`${styles.statusBadge}`} style={{ 
+                          backgroundColor: ticket.status === 'Resolved' || ticket.status === 'Closed' ? '#e6f4ea' : ticket.status === 'In Progress' ? '#e8f0fe' : '#fce8e6',
+                          color: ticket.status === 'Resolved' || ticket.status === 'Closed' ? '#1e8e3e' : ticket.status === 'In Progress' ? '#1a73e8' : '#d93025'
+                         }}>
+                          {ticket.status}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </>
+        );
       default:
         return null;
     }
@@ -237,6 +314,9 @@ export default function ProfilePage() {
             </div>
             <div className={`${styles.navItem} ${activeTab === 'rewards' ? styles.navItemActive : ''}`} onClick={() => setActiveTab('rewards')}>
               <span className={styles.navItemIcon}><IconGift /></span> Rewards
+            </div>
+            <div className={`${styles.navItem} ${activeTab === 'support' ? styles.navItemActive : ''}`} onClick={() => setActiveTab('support')}>
+              <span className={styles.navItemIcon}><IconSupport /></span> Support
             </div>
             <div className={`${styles.navItem} ${activeTab === 'settings' ? styles.navItemActive : ''}`} onClick={() => setActiveTab('settings')}>
               <span className={styles.navItemIcon}><IconSettings /></span> Settings

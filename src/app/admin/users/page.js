@@ -52,6 +52,26 @@ export default function AdminUsers() {
     }
   };
 
+  const handleDelete = async (id, name) => {
+    if (!confirm(`Are you sure you want to delete user "${name}"? This action cannot be undone.`)) return;
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchUsers();
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete user');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -98,12 +118,19 @@ export default function AdminUsers() {
                         <span className="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-1 rounded uppercase tracking-wider">User</span>
                       )}
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="p-4 text-right flex items-center justify-end gap-3">
                       <button 
                         onClick={() => handleRoleToggle(user._id, user.role)} 
-                        className="text-[var(--accent)] hover:text-opacity-80 font-medium"
+                        className="text-[var(--accent)] hover:text-opacity-80 font-medium whitespace-nowrap"
                       >
                         Make {user.role === 'admin' ? 'User' : 'Admin'}
+                      </button>
+                      <span className="text-gray-300">|</span>
+                      <button 
+                        onClick={() => handleDelete(user._id, user.name)} 
+                        className="text-red-500 hover:text-red-600 font-medium whitespace-nowrap"
+                      >
+                        Delete
                       </button>
                     </td>
                   </tr>

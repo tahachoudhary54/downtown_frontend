@@ -452,11 +452,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2.4rem 2rem;
-  background: #FAF8F5;
+  padding: 3rem 2.5rem;
+  background: #FDFCFB;
   border: none;
-  border-radius: 4px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  border-radius: 0px;
   transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
   height: 100%;
   opacity: 0;
@@ -480,36 +479,34 @@
 .featureCard:nth-child(4) { animation-delay: 550ms; }
 
 .featureCard:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  background: #F7F5F2;
 }
 .featureIcon {
-  width: 75px;
-  height: 75px;
+  width: 70px;
+  height: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1.5rem;
-  color: #C9A86A;
-  background-color: rgba(201, 168, 106, 0.1);
+  margin-bottom: 2rem;
+  color: #B8935A;
+  background-color: #F5EFEB;
   border-radius: 50%;
   transition: all 0.5s ease;
 }
 .featureCard:hover .featureIcon {
-  background-color: #C9A86A;
-  color: #fff;
   transform: scale(1.05);
 }
 .featureCard h3 {
   font-family: var(--font-playfair);
-  font-size: 24px;
-  margin-bottom: 1.2rem;
-  color: var(--foreground);
+  font-size: 18px;
+  margin-bottom: 1.5rem;
+  color: #1a1a1a;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.2em;
   font-weight: 500;
   position: relative;
-  padding-bottom: 1rem;
+  padding-bottom: 1.5rem;
+  line-height: 1.5;
 }
 .featureCard h3::after {
   content: '';
@@ -517,14 +514,14 @@
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 40px;
-  height: 2px;
+  width: 30px;
+  height: 1px;
   background-color: #C9A86A;
 }
 .featureCard p {
   font-size: 0.85rem;
-  line-height: 1.7;
-  color: #555555;
+  line-height: 1.8;
+  color: #666666;
   font-family: var(--font-inter);
   margin: 0;
 }
