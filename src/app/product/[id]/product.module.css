@@ -252,3 +252,21 @@
   font-size: 0.85rem;
   margin-top: auto;
 }
+
+/* Real-time Stock Indicator */
+.stockIndicator {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: block;
+}
+.stockInStock { color: #16a34a; }
+.stockLow { color: #d97706; }
+.stockCritical { color: #dc2626; animation: pulseStock 1.5s infinite; }
+.stockOut { color: #991b1b; }
+.btnAddToCartDisabled {
+  background-color: #e5e7eb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+  pointer-events: none;
+}

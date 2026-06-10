@@ -56,12 +56,33 @@ export default function AdminSettings() {
     }));
   };
 
-  const handleCategoryChange = (index, field, value) => {
+  const handleCategoryChange = async (index, field, value) => {
+    let newSettings;
     setSettings(prev => {
       const newCats = [...(prev.categories || [])];
       newCats[index] = { ...newCats[index], [field]: value };
-      return { ...prev, categories: newCats };
+      newSettings = { ...prev, categories: newCats };
+      return newSettings;
     });
+
+    if (field === 'isActive') {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/settings`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify({ categories: newSettings.categories })
+        });
+        const data = await res.json();
+        if (data.success) {
+          router.refresh();
+        }
+      } catch (err) {
+        console.error("Failed to auto-save category status", err);
+      }
+    }
   };
 
   const handleAddCategory = () => {
@@ -333,43 +354,111 @@ export default function AdminSettings() {
           </button>
         </div>
 
-        <div className="space-y-4">
-          <button onClick={handleAddCategory} className="w-full py-4 border-2 border-dashed border-[var(--border)] rounded-lg text-[var(--text-muted)] font-medium hover:bg-[#FAF8F5] transition-colors mb-4">
-            + Add New Category
+        <div className="space-y-6">
+          <button 
+            onClick={handleAddCategory} 
+            className="w-full py-5 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 font-bold tracking-wide hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[#FAF8F5] transition-all duration-300 flex items-center justify-center gap-2 mb-2"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add New Category
           </button>
-          {(settings.categories || []).map((cat, index) => (
-            <div key={index} className="border border-[var(--border)] p-4 rounded-lg flex items-start gap-4 relative">
-              <div className="flex flex-col gap-2">
-                <button onClick={() => handleMoveCategory(index, 'up')} disabled={index === 0} className="p-1 bg-gray-100 rounded disabled:opacity-30">&uarr;</button>
-                <button onClick={() => handleMoveCategory(index, 'down')} disabled={index === (settings.categories || []).length - 1} className="p-1 bg-gray-100 rounded disabled:opacity-30">&darr;</button>
-              </div>
-              <div className="w-32 h-32 bg-gray-100 rounded overflow-hidden relative flex-shrink-0">
-                {cat.img ? <img src={cat.img} alt="Category" className="w-full h-full object-cover" /> : <span className="text-xs text-gray-400 absolute inset-0 flex items-center justify-center">No Image</span>}
-              </div>
-              <div className="flex-grow grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-xs font-medium text-[var(--text-muted)]">Name</label>
-                  <input type="text" value={cat.name || ''} onChange={(e) => handleCategoryChange(index, 'name', e.target.value)} className="w-full border border-[var(--border)] rounded px-3 py-1.5 focus:outline-none focus:border-[var(--accent)] text-sm" />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-xs font-medium text-[var(--text-muted)]">Slug</label>
-                  <input type="text" value={cat.slug || ''} onChange={(e) => handleCategoryChange(index, 'slug', e.target.value)} className="w-full border border-[var(--border)] rounded px-3 py-1.5 focus:outline-none focus:border-[var(--accent)] text-sm" />
-                </div>
-                <div className="space-y-2">
-                  <button onClick={() => triggerUpload({ type: 'category', index })} disabled={uploading} className="text-sm bg-[#F1ECE5] px-3 py-1.5 rounded font-medium hover:bg-[#E5DED5] transition-colors w-full mt-6">
-                    Upload Image
+          
+          <div className="grid gap-6">
+            {(settings.categories || []).map((cat, index) => (
+              <div key={index} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center gap-6 relative group">
+                
+                {/* Reorder Controls */}
+                <div className="flex md:flex-col gap-2 items-center justify-center order-last md:order-first w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100">
+                  <button 
+                    onClick={() => handleMoveCategory(index, 'up')} 
+                    disabled={index === 0} 
+                    className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                  </button>
+                  <button 
+                    onClick={() => handleMoveCategory(index, 'down')} 
+                    disabled={index === (settings.categories || []).length - 1} 
+                    className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                   </button>
                 </div>
-                <div className="space-y-2 flex items-end justify-between col-span-2">
-                  <label className="flex items-center gap-2 cursor-pointer mb-2">
-                    <input type="checkbox" checked={cat.isActive !== false} onChange={(e) => handleCategoryChange(index, 'isActive', e.target.checked)} className="w-4 h-4 accent-[var(--accent)]" />
-                    <span className="font-medium text-sm text-[var(--foreground)]">Active</span>
-                  </label>
-                  <button onClick={() => handleRemoveCategory(index)} className="text-red-500 text-sm hover:underline font-medium mb-2">Remove</button>
+
+                {/* Image Section */}
+                <div className="relative w-32 h-32 rounded-xl border border-gray-200 overflow-hidden shrink-0 bg-gray-50 flex items-center justify-center mx-auto md:mx-0 shadow-inner group-hover:border-[var(--accent)] transition-colors">
+                  {cat.img ? (
+                    <img src={cat.img} alt={cat.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs text-gray-400 font-medium">No Image</span>
+                  )}
+                  
+                  {/* Hover Upload Overlay */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <button 
+                      onClick={() => triggerUpload({ type: 'category', index })} 
+                      disabled={uploading} 
+                      className="bg-white/90 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-white transition-colors"
+                    >
+                      Change
+                    </button>
+                  </div>
                 </div>
+
+                {/* Form Fields */}
+                <div className="flex-grow w-full space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">Category Name</label>
+                      <input 
+                        type="text" 
+                        value={cat.name || ''} 
+                        onChange={(e) => handleCategoryChange(index, 'name', e.target.value)} 
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] text-sm font-medium transition-all" 
+                        placeholder="e.g. SUMMER WEAR"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">URL Slug</label>
+                      <input 
+                        type="text" 
+                        value={cat.slug || ''} 
+                        onChange={(e) => handleCategoryChange(index, 'slug', e.target.value)} 
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] text-sm font-medium transition-all"
+                        placeholder="e.g. summer-wear"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <button 
+                      type="button"
+                      onClick={() => handleCategoryChange(index, 'isActive', cat.isActive === false ? true : false)}
+                      className="flex items-center gap-3 cursor-pointer group/toggle focus:outline-none"
+                    >
+                      <div className="relative flex items-center">
+                        <div className={`w-10 h-6 rounded-full transition-colors duration-200 ease-in-out flex items-center px-0.5 ${cat.isActive !== false ? 'bg-[var(--accent)]' : 'bg-gray-200'}`}>
+                          <div className={`bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out ${cat.isActive !== false ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                        </div>
+                      </div>
+                      <span className="font-bold text-sm text-gray-700 group-hover/toggle:text-[var(--accent)] transition-colors">
+                        {cat.isActive !== false ? 'Active Status' : 'Hidden Status'}
+                      </span>
+                    </button>
+
+                    <button 
+                      onClick={() => handleRemoveCategory(index)} 
+                      className="flex items-center gap-1.5 text-red-600 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors font-bold text-xs uppercase tracking-wider"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

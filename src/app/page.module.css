@@ -1055,3 +1055,62 @@
     transform: translateY(0);
   }
 }
+/* Real-time Stock Indicator */
+.stockIndicator {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 4px;
+  transition: color 0.3s ease;
+}
+.stockInStock { color: #16a34a; }
+.stockLow { color: #d97706; }
+.stockCritical { color: #dc2626; animation: pulseStock 1.5s infinite; }
+.stockOut { color: #991b1b; }
+@keyframes pulseStock {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+.btnCardAddDisabled {
+  background-color: #e5e7eb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.outOfStockOverlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+.outOfStockBadge {
+  background: #dc2626;
+  color: white;
+  padding: 8px 16px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  transform: rotate(-10deg);
+}
+
+.stockOverlay {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 5;
+}
+
+.stockIndicatorImage {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  display: inline-block;
+  backdrop-filter: blur(4px);
+}

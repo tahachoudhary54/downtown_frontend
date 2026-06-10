@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 
 const NotificationsContext = createContext();
 
@@ -37,6 +38,27 @@ export function NotificationsProvider({ children }) {
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Listen for real-time WebSocket notifications from the server
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const socket = io(apiUrl);
+
+    socket.on('admin_notification', (data) => {
+      setNotifications((prev) => [{
+        id: Date.now(),
+        title: data.title,
+        desc: data.desc,
+        time: 'Just now',
+        unread: true,
+        type: data.type || 'alert'
+      }, ...prev]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const addNotification = ({ title, desc, type = 'order' }) => {

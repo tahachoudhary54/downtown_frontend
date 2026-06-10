@@ -100,7 +100,7 @@ export default function AdminStock() {
         fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ totalStock: 0, inventory: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 } })
+          body: JSON.stringify({ stock: 0, inventory: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 } })
         })
       ));
       await fetchProducts();
@@ -155,17 +155,17 @@ export default function AdminStock() {
   const saveInventory = async () => {
     if (!editProduct) return;
     // Calculate total stock
-    const totalStock = Object.values(editInventory).reduce((sum, val) => sum + val, 0);
+    const stock = Object.values(editInventory).reduce((sum, val) => sum + val, 0);
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${editProduct._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ inventory: editInventory, totalStock })
+        body: JSON.stringify({ inventory: editInventory, stock })
       });
       const data = await res.json();
       if (data.success) {
-        setProducts(prev => prev.map(p => p._id === editProduct._id ? { ...p, inventory: editInventory, totalStock } : p));
+        setProducts(prev => prev.map(p => p._id === editProduct._id ? { ...p, inventory: editInventory, stock } : p));
         closeEditModal();
       } else {
         alert(data.message);
@@ -185,7 +185,7 @@ export default function AdminStock() {
   };
 
   const filteredProducts = products.filter(p => {
-    const total = p.totalStock || 0;
+    const total = p.stock || 0;
     if (stockFilter === 'all') return true;
     if (stockFilter === 'instock') return total > 10;
     if (stockFilter === 'lowstock') return total > 0 && total <= 10;
@@ -195,9 +195,9 @@ export default function AdminStock() {
 
   // Calculate Summaries
   const totalProducts = products.length;
-  const inStockCount = products.filter(p => (p.totalStock || 0) > 10).length;
-  const lowStockCount = products.filter(p => (p.totalStock || 0) > 0 && (p.totalStock || 0) <= 10).length;
-  const outOfStockCount = products.filter(p => (p.totalStock || 0) === 0).length;
+  const inStockCount = products.filter(p => (p.stock || 0) > 10).length;
+  const lowStockCount = products.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 10).length;
+  const outOfStockCount = products.filter(p => (p.stock || 0) === 0).length;
 
   return (
     <div className="space-y-6">
@@ -302,7 +302,7 @@ export default function AdminStock() {
                 </tr>
               ) : (
                 filteredProducts.map((product) => {
-                  const total = product.totalStock || 0;
+                  const total = product.stock || 0;
                   const status = getStockStatus(total);
                   
                   return (

@@ -22,6 +22,7 @@ import { AuthProvider } from "../context/AuthContext";
 import { WishlistProvider } from "../context/WishlistContext";
 import { NotificationsProvider } from "../context/NotificationsContext";
 import { CustomerNotificationsProvider } from "../context/CustomerNotificationsContext";
+import { RealtimeStockProvider } from "../context/RealtimeStockContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export default function RootLayout({ children }) {
@@ -36,13 +37,15 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <CustomerNotificationsProvider>
               <NotificationsProvider>
-                <CartProvider>
-                  <WishlistProvider>
-                    <ClientLayoutWrapper>
-                      {children}
-                    </ClientLayoutWrapper>
-                  </WishlistProvider>
-                </CartProvider>
+                <RealtimeStockProvider>
+                  <CartProvider>
+                    <WishlistProvider>
+                      <ClientLayoutWrapper>
+                        {children}
+                      </ClientLayoutWrapper>
+                    </WishlistProvider>
+                  </CartProvider>
+                </RealtimeStockProvider>
               </NotificationsProvider>
             </CustomerNotificationsProvider>
           </AuthProvider>
