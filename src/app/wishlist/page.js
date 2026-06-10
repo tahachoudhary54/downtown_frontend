@@ -1,11 +1,25 @@
 "use client";
+import { useEffect } from 'react';
 import { useWishlist } from "../../context/WishlistContext";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
 import IconHeartOutline from "../../components/IconHeartOutline";
 import IconHeartFilled from "../../components/IconHeartFilled";
 import styles from "../page.module.css"; // using global styles
 
 export default function WishlistPage() {
   const { wishlist, toggleWishlist } = useWishlist();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      sessionStorage.setItem('redirectAfterAuth', '/wishlist');
+      router.push('/login');
+    }
+  }, [loading, user, router]);
+
+  if (loading || !user) return null;
 
   return (
     <div className={styles.page} style={{ paddingTop: '120px', background: '#FAFAFA' }}>

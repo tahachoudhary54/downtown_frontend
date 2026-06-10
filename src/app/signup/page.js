@@ -4,30 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import { useNotifications } from "../../context/NotificationsContext";
 import { signup, verifyOtp, resendOtp, loginWithGoogle } from "../../lib/api";
 import { GoogleLogin } from "@react-oauth/google";
 
 import styles from "../auth.module.css";
 
-export async function generateMetadata() {
-  const meta = staticSeo["/signup"];
-  return {
-    title: meta.title,
-    description: meta.description,
-    keywords: meta.keywords,
-    openGraph: {
-      title: meta.title,
-      description: meta.description,
-      images: [{ url: meta.ogImage }],
-    },
-    twitter: {
-      card: meta.twitterCard,
-      title: meta.title,
-      description: meta.description,
-      images: [{ url: meta.ogImage }],
-    },
-  };
-}
+
+
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -47,6 +31,7 @@ export default function SignupPage() {
   
   const router = useRouter();
   const { loginState } = useAuth();
+  const { addNotification } = useNotifications();
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
@@ -82,7 +67,19 @@ export default function SignupPage() {
       const res = await loginWithGoogle(credentialResponse.credential);
       if (res.success) {
         loginState(res.token, res.user);
-        if (res.user.role === 'admin') {
+        // Notify admin about new Google signup (skip admin users)
+        if (res.user.role !== 'admin') {
+          addNotification({
+            title: 'New User Registered',
+            desc: `${res.user.name} (${res.user.email}) just created an account via Google.`,
+            type: 'user',
+          });
+        }
+        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectAfterAuth');
+          router.push(redirectUrl);
+        } else if (res.user.role === 'admin') {
           router.push("/admin");
         } else {
           router.push("/");
@@ -127,7 +124,19 @@ export default function SignupPage() {
       const res = await verifyOtp({ email, otp });
       if (res.success) {
         loginState(res.token, res.user);
-        router.push("/"); // redirect to home after successful login
+        // Notify admin about new verified signup
+        addNotification({
+          title: 'New User Registered',
+          desc: `${res.user.name} (${res.user.email}) just created and verified their account.`,
+          type: 'user',
+        });
+        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectAfterAuth');
+          router.push(redirectUrl);
+        } else {
+          router.push("/"); // redirect to home after successful login
+        }
       } else {
         setError(res.message || "Invalid OTP");
       }

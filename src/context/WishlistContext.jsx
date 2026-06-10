@@ -2,7 +2,11 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from 'react';
 
-const WishlistContext = createContext();
+const WishlistContext = createContext({
+  wishlist: [],
+  isWishlisted: () => false,
+  toggleWishlist: () => {},
+});
 
 export const WishlistProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);

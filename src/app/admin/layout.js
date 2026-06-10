@@ -59,6 +59,7 @@ function AdminLayoutContent({ children }) {
   const navLinks = [
     { href: '/admin', label: 'Dashboard' },
     { href: '/admin/products', label: 'Products' },
+    { href: '/admin/stock', label: 'Stock Management' },
     { href: '/admin/orders', label: 'Orders' },
     { href: '/admin/users', label: 'Users' },
     { href: '/admin/tickets', label: 'Support Tickets' },
@@ -169,6 +170,7 @@ function AdminLayoutContent({ children }) {
                           markAsRead(notif.id);
                           setNotifOpen(false);
                           if (notif.type === 'order') router.push('/admin/orders');
+                          if (notif.type === 'user') router.push('/admin/users');
                         }}
                         className={`p-4 border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors cursor-pointer ${notif.unread ? 'bg-[#FAF8F5]/50 border-l-4 border-l-[var(--accent)]' : 'border-l-4 border-l-transparent'}`}
                       >
@@ -239,14 +241,21 @@ function AdminLayoutContent({ children }) {
         >
           <div style={{
             width: '36px', height: '36px', minWidth: '36px',
-            background: 'var(--accent)', borderRadius: '50%',
+            background: toast.type === 'user' ? '#16a34a' : 'var(--accent)', borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <path d="M16 10a4 4 0 01-8 0"/>
-            </svg>
+            {toast.type === 'user' ? (
+              <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            ) : (
+              <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 01-8 0"/>
+              </svg>
+            )}
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '4px' }}>{toast.title}</p>

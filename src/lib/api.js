@@ -1,13 +1,25 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export async function fetchProducts(params = {}) {
-  const query = new URLSearchParams(params).toString();
-  const res = await fetch(`${API_URL}/api/products${query ? `?${query}` : ""}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Failed to fetch products");
-  const data = await res.json();
-  return data.data;
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/api/products${query ? `?${query}` : ""}`, {
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.data;
+    }
+  } catch (e) {
+    // ignore fetch errors
+  }
+  // Fallback to static product list
+  try {
+    const { products } = require('../data/products');
+    return products || [];
+  } catch (_) {
+    return [];
+  }
 }
 
 export async function fetchProductById(id) {

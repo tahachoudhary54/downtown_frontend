@@ -10,14 +10,14 @@ import { categories as defaultCategories } from '../data/categories';
 
 export default function EssentialsSlider({ initialSettings }) {
   const { settings } = useSettings(initialSettings);
-  const categories = settings?.categories || [];
+  const categories = settings?.categories;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
   // We duplicate the array to create a seamless looping effect
-  const activeCategories = (categories && Array.isArray(categories) ? categories : defaultCategories)
+  const activeCategories = (categories && Array.isArray(categories) && categories.length > 0 ? categories : defaultCategories)
     .filter(c => c.isActive !== false)
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
     

@@ -105,9 +105,9 @@ export default function NotificationsPage() {
               <div 
                 key={notif.id} 
                 onClick={(e) => {
-                  // Only navigate if we're not clicking a button or checkbox
                   if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
                     if (notif.type === 'order') router.push('/admin/orders');
+                    if (notif.type === 'user') router.push('/admin/users');
                   }
                 }}
                 className={`p-6 flex gap-4 transition-colors cursor-pointer ${notif.unread ? 'bg-[#FAF8F5]' : 'hover:bg-gray-50'}`}

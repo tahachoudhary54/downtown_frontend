@@ -1,3 +1,4 @@
+import styles from "../page.module.css";
 import { staticSeo } from "../seoConfig";
 
 export async function generateMetadata() {

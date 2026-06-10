@@ -27,9 +27,9 @@ export default function Footer() {
         <div>
           <h4>Shop</h4>
           <ul>
-            <li><Link href="/shop">Men's Collection</Link></li>
+            <li><Link href="/clothing">Men's Collection</Link></li>
             <li><Link href="/shop">New Arrivals</Link></li>
-            <li><Link href="/shop">Best Sellers</Link></li>
+            <li><Link href="/sale">Best Sellers</Link></li>
           </ul>
         </div>
         <div>
@@ -44,10 +44,10 @@ export default function Footer() {
         <div>
           <h4>Customer Service</h4>
           <ul>
-            <li><Link href="/contact">Shipping & Returns</Link></li>
-            <li><Link href="/contact">Track Order</Link></li>
-            <li><Link href="/contact">Size Guide</Link></li>
-            <li><Link href="/contact">FAQ</Link></li>
+            <li><Link href="/shipping">Shipping & Returns</Link></li>
+            <li><Link href="/profile">Track Order</Link></li>
+            <li><Link href="/size-guide">Size Guide</Link></li>
+            <li><Link href="/faq">FAQ</Link></li>
           </ul>
         </div>
       </footer>

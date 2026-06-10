@@ -1,24 +1,51 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
+  const { user } = useAuth();
+  const [cartKey, setCartKey] = useState(null);
+  const [loadedKey, setLoadedKey] = useState(null);
 
-  // Load cart from localStorage on mount
+  // Initialize cart key based on user or guest
   useEffect(() => {
+    if (user && user.id) {
+      setCartKey(`downtown_cart_${user.id}`);
+    } else {
+      let guestId = localStorage.getItem("downtown_guest_id");
+      if (!guestId) {
+        guestId = "guest_" + Math.random().toString(36).substring(2, 11) + Date.now();
+        localStorage.setItem("downtown_guest_id", guestId);
+      }
+      setCartKey(`downtown_cart_${guestId}`);
+    }
+  }, [user]);
+
+  // Load cart when cartKey changes
+  useEffect(() => {
+    if (!cartKey) return;
     try {
-      const saved = localStorage.getItem("downtown_cart");
-      if (saved) setCart(JSON.parse(saved));
-    } catch {}
-  }, []);
+      const saved = localStorage.getItem(cartKey);
+      if (saved) {
+        setCart(JSON.parse(saved));
+      } else {
+        setCart([]); // Clear cart if new key has no saved data
+      }
+    } catch {
+      setCart([]);
+    }
+    setLoadedKey(cartKey);
+  }, [cartKey]);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage whenever it changes, BUT only if it belongs to current key
   useEffect(() => {
-    localStorage.setItem("downtown_cart", JSON.stringify(cart));
-  }, [cart]);
+    if (!cartKey || loadedKey !== cartKey) return;
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+  }, [cart, cartKey, loadedKey]);
 
   const addToCart = (product, size = "M", quantity = 1) => {
     setCart((prev) => {

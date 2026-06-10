@@ -55,6 +55,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!loading && !user) {
+      sessionStorage.setItem('redirectAfterAuth', '/profile');
       router.push('/login');
     } else if (user) {
       setName(user.name || '');

@@ -26,7 +26,11 @@ export default function LoginPage() {
       const res = await login({ email, password });
       if (res.success) {
         loginState(res.token, res.user);
-        if (res.user.role === 'admin') {
+        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectAfterAuth');
+          router.push(redirectUrl);
+        } else if (res.user.role === 'admin') {
           router.push("/admin");
         } else {
           router.push("/");
@@ -48,7 +52,11 @@ export default function LoginPage() {
       const res = await loginWithGoogle(credentialResponse.credential);
       if (res.success) {
         loginState(res.token, res.user);
-        if (res.user.role === 'admin') {
+        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectAfterAuth');
+          router.push(redirectUrl);
+        } else if (res.user.role === 'admin') {
           router.push("/admin");
         } else {
           router.push("/");

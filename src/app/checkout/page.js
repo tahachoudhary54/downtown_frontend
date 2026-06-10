@@ -13,7 +13,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cart, totalPrice, clearCart } = useCart();
   const { addNotification } = useNotifications();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [mounted, setMounted] = useState(false);
   
   // Checkout State
@@ -39,7 +39,14 @@ export default function CheckoutPage() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  useEffect(() => {
+    if (!loading && !user) {
+      sessionStorage.setItem('redirectAfterAuth', '/checkout');
+      router.push('/login');
+    }
+  }, [loading, user, router]);
+
+  if (!mounted || loading || (!user && !isSuccess)) return null;
 
   // If cart is empty and not on success screen, redirect back
   if (cart.length === 0 && !isSuccess) {
