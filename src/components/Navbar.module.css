@@ -599,11 +599,11 @@
     height: 18px;
   }
   .userIcons {
-    gap: 0.1rem;
+    gap: 1rem;
   }
   .hamburgerBtn {
     padding: 0.2rem;
-    margin-left: 0.25rem;
+    margin-left: 0.5rem;
   }
   .hideOnMobile {
     display: none !important;
