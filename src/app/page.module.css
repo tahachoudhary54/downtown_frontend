@@ -239,55 +239,32 @@
   --slider-gap: 3rem;
 }
 
-.navArrow {
-  position: absolute;
-  top: calc(50% - 20px);
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  background-color: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  color: #1a1a1a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  opacity: 0;
-}
 
-.sliderWrapper:hover .navArrow {
-  opacity: 1;
-}
-
-.navArrow:hover {
-  background-color: #1a1a1a;
-  color: #fff;
-  transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-.navArrowLeft {
-  left: -22px;
-}
-
-.navArrowRight {
-  right: -22px;
-}
 
 .sliderViewport {
   width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 2rem;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+.sliderViewport:active {
+  cursor: grabbing;
+}
+
+.sliderViewport::-webkit-scrollbar {
+  display: none;
 }
 
 .sliderTrack {
   display: flex;
   gap: var(--slider-gap);
-  /* Transform and transition are handled inline via JS */
+  padding-right: var(--slider-gap);
 }
 
 .editorialCard {
@@ -296,6 +273,7 @@
   flex-direction: column;
   cursor: pointer;
   background: transparent;
+  scroll-snap-align: start;
 }
 
 .editorialImageWrapper {
@@ -308,11 +286,11 @@
 
 .editorialImage {
   object-fit: cover;
-  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .editorialCard:hover .editorialImage {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .editorialContent {
@@ -323,12 +301,15 @@
 
 .editorialTitle {
   font-family: var(--font-playfair);
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  color: #1a1a1a;
-  margin: 0 0 1.5rem 0;
+  letter-spacing: 0.08em;
+  color: #1F1A17;
+  margin: 0 0 1rem 0;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .editorialCtaWrapper {
@@ -370,23 +351,26 @@
   width: 100%;
 }
 
+.sliderProgressContainer {
+  width: 100%;
+  height: 2px;
+  background-color: rgba(31, 26, 23, 0.1);
+  margin-top: 0.5rem;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sliderProgressBar {
+  height: 100%;
+  background-color: #1F1A17;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
 @media (max-width: 1024px) {
   .sliderWrapper {
     --slider-items: 2;
     --slider-gap: 1.5rem;
-  }
-
-  .navArrow {
-    width: 38px;
-    height: 38px;
-  }
-
-  .navArrowLeft {
-    left: 0;
-  }
-
-  .navArrowRight {
-    right: 0;
   }
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSettings } from '../hooks/useSettings';
@@ -11,69 +11,128 @@ import { categories as defaultCategories } from '../data/categories';
 export default function EssentialsSlider({ initialSettings }) {
   const { settings } = useSettings(initialSettings);
   const categories = settings?.categories;
-  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const sliderRef = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
-  // We duplicate the array to create a seamless looping effect
   const activeCategories = (categories && Array.isArray(categories) && categories.length > 0 ? categories : defaultCategories)
     .filter(c => c.isActive !== false)
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
     
+  // Duplicate categories to create a longer scroll experience
   const extendedCategories = [...activeCategories, ...activeCategories, ...activeCategories];
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => {
-      if (prev >= activeCategories.length) {
-        return 0;
-      }
-      return prev + 1;
-    });
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => {
-      if (prev <= 0) {
-        return activeCategories.length - 1;
-      }
-      return prev - 1;
-    });
-  };
-
   useEffect(() => {
-    if (isHovered) return;
+    const smoothScrollTo = (element, target, duration) => {
+      const start = element.scrollLeft;
+      const change = target - start;
+      const startTime = performance.now();
 
-    const interval = setInterval(() => {
-      handleNext();
-    }, 3000);
+      element.style.scrollBehavior = 'auto';
+      element.style.scrollSnapType = 'none';
 
+      // smooth cubic-bezier style easing (easeInOutCubic)
+      const easeInOutCubic = (t, b, c, d) => {
+        t /= d / 2;
+        if (t < 1) return c / 2 * t * t * t + b;
+        t -= 2;
+        return c / 2 * (t * t * t + 2) + b;
+      };
+
+      const animateScroll = (currentTime) => {
+        const elapsedTime = currentTime - startTime;
+        if (elapsedTime < duration) {
+          element.scrollLeft = easeInOutCubic(elapsedTime, start, change, duration);
+          requestAnimationFrame(animateScroll);
+        } else {
+          element.scrollLeft = target;
+          element.style.scrollSnapType = 'x mandatory';
+          element.style.scrollBehavior = 'smooth';
+        }
+      };
+
+      requestAnimationFrame(animateScroll);
+    };
+
+    let interval;
+    if (!isDragging && !isHovered) {
+      interval = setInterval(() => {
+        if (sliderRef.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
+          const track = sliderRef.current.children[0];
+          
+          if (track && track.children.length > 0) {
+            const cardWidth = track.children[0].getBoundingClientRect().width;
+            const gap = parseFloat(getComputedStyle(track).gap) || 0;
+            const scrollAmount = cardWidth + gap;
+
+            if (scrollLeft + clientWidth >= scrollWidth - 10) {
+              sliderRef.current.style.scrollBehavior = 'auto';
+              sliderRef.current.style.scrollSnapType = 'none';
+              sliderRef.current.scrollLeft = 0;
+              requestAnimationFrame(() => {
+                if (sliderRef.current) {
+                  sliderRef.current.style.scrollBehavior = 'smooth';
+                  sliderRef.current.style.scrollSnapType = 'x mandatory';
+                }
+              });
+            } else {
+              const currentSnapIndex = Math.round(scrollLeft / scrollAmount);
+              const nextTarget = (currentSnapIndex + 1) * scrollAmount;
+              smoothScrollTo(sliderRef.current, nextTarget, 800);
+            }
+          }
+        }
+      }, 3500);
+    }
     return () => clearInterval(interval);
-  }, [isHovered]);
+  }, [isDragging, isHovered]);
 
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-    setIsHovered(true); // Pause on touch
+  const handleScroll = () => {
+    if (!sliderRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
+    const maxScroll = scrollWidth - clientWidth;
+    if (maxScroll <= 0) {
+      setScrollProgress(0);
+    } else {
+      const progress = (scrollLeft / maxScroll) * 100;
+      setScrollProgress(progress);
+    }
   };
 
-  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+  const handleMouseDown = (e) => {
+    if (!sliderRef.current) return;
+    setIsDragging(true);
+    // disable scroll snap while dragging for smoother feel
+    sliderRef.current.style.scrollSnapType = 'none';
+    setStartX(e.pageX - sliderRef.current.offsetLeft);
+    setScrollLeft(sliderRef.current.scrollLeft);
+  };
 
-  const onTouchEnd = () => {
-    setIsHovered(false); // Resume after touch
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    
-    if (isLeftSwipe) {
-      handleNext();
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    if (sliderRef.current) {
+      sliderRef.current.style.scrollSnapType = 'x mandatory';
     }
-    if (isRightSwipe) {
-      handlePrev();
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (sliderRef.current) {
+      sliderRef.current.style.scrollSnapType = 'x mandatory';
     }
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !sliderRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll-fast multiplier
+    sliderRef.current.scrollLeft = scrollLeft - walk;
   };
 
   return (
@@ -87,39 +146,27 @@ export default function EssentialsSlider({ initialSettings }) {
         <p className={styles.sectionSubtitle}>Everyday Luxury</p>
       </div>
 
-      <div
-        className={styles.sliderWrapper}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        <button 
-          className={`${styles.navArrow} ${styles.navArrowLeft}`} 
-          onClick={handlePrev}
-          aria-label="Previous slide"
+      <div className={styles.sliderWrapper}>
+        <div
+          className={styles.sliderViewport}
+          ref={sliderRef}
+          onScroll={handleScroll}
+          onMouseDown={handleMouseDown}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={(e) => { handleMouseLeave(); setIsHovered(false); }}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
-
-        <div className={styles.sliderViewport}>
-          <div
-            className={styles.sliderTrack}
-            style={{
-              transform: `translateX(calc(-${currentIndex} * (100% / var(--slider-items)) - ${currentIndex} * (var(--slider-gap) / var(--slider-items))))`,
-              transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)'
-            }}
-          >
+          <div className={styles.sliderTrack}>
             {extendedCategories.map((cat, index) => (
               <div key={`${cat.id}-${index}`} className={styles.editorialCard}>
                 <div className={styles.editorialImageWrapper}>
-                  <Image src={cat.img} alt={cat.name} fill className={styles.editorialImage} />
+                  <Image src={cat.img} alt={cat.name} fill className={styles.editorialImage} draggable={false} />
                 </div>
                 <div className={styles.editorialContent}>
                   <h3 className={styles.editorialTitle}>{cat.name}</h3>
                   <div className={styles.editorialCtaWrapper}>
-                    <Link href={`/clothing/${cat.slug}`} className={styles.editorialLink}>
+                    <Link href={`/clothing/${cat.slug}`} className={styles.editorialLink} draggable={false}>
                       Explore Collection &rarr;
                     </Link>
                   </div>
@@ -129,13 +176,13 @@ export default function EssentialsSlider({ initialSettings }) {
           </div>
         </div>
 
-        <button 
-          className={`${styles.navArrow} ${styles.navArrowRight}`} 
-          onClick={handleNext}
-          aria-label="Next slide"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </button>
+        {/* Custom Progress Bar */}
+        <div className={styles.sliderProgressContainer}>
+          <div 
+            className={styles.sliderProgressBar} 
+            style={{ width: `${scrollProgress}%` }}
+          />
+        </div>
       </div>
     </section>
   );
