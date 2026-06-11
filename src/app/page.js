@@ -11,6 +11,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
+export const metadata = {
+  title: "Downtown Boutique | Premium Fashion",
+  description: "Discover the new standard of modern luxury menswear. Explore our exclusive collections today.",
+};
+
 async function getSettings() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings?_t=${Date.now()}`, { cache: 'no-store' });

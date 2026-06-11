@@ -3,17 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function AdminProducts() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { token } = useAuth();
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   
   // Filters
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('search') || '');
   const [sale, setSale] = useState('all');
   const [page, setPage] = useState(1);
 

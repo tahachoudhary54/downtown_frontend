@@ -12,6 +12,7 @@ function AdminLayoutContent({ children }) {
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState('');
   const notifRef = useRef(null);
 
   const getPageTitle = (path) => {
@@ -162,10 +163,32 @@ function AdminLayoutContent({ children }) {
             <div className="relative max-w-[140px] sm:max-w-sm w-full">
               <input 
                 type="text" 
-                placeholder="Search..." 
+                placeholder="Search products..." 
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (globalSearch.trim()) {
+                      router.push(`/admin/products?search=${encodeURIComponent(globalSearch.trim())}`);
+                    } else {
+                      router.push('/admin/products');
+                    }
+                  }
+                }}
                 className="w-full bg-[#FAF8F5] border border-[var(--border)] rounded-full px-4 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"
               />
-              <svg className="w-4 h-4 absolute right-4 top-3 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <button 
+                onClick={() => {
+                  if (globalSearch.trim()) {
+                    router.push(`/admin/products?search=${encodeURIComponent(globalSearch.trim())}`);
+                  } else {
+                    router.push('/admin/products');
+                  }
+                }}
+                className="absolute right-4 top-3 text-[var(--text-muted)] hover:text-[var(--accent)]"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </button>
             </div>
 
             {/* Notifications */}

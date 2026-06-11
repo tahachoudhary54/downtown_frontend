@@ -12,8 +12,34 @@ const playfair = Playfair_Display({
 });
 
 export const metadata = {
-  title: "Downtown Boutique",
-  description: "Premium Fashion For Every Occasion",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  title: {
+    template: '%s | Downtown Boutique',
+    default: 'Downtown Boutique | Premium Fashion For Every Occasion',
+  },
+  description: "Discover the new standard of modern luxury menswear. Curated premium fashion, accessories, and essentials.",
+  keywords: ["fashion", "menswear", "boutique", "luxury", "clothing", "downtown boutique"],
+  openGraph: {
+    title: 'Downtown Boutique | Premium Fashion',
+    description: 'Discover the new standard of modern luxury menswear.',
+    url: '/',
+    siteName: 'Downtown Boutique',
+    images: [
+      {
+        url: '/hero_bg.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Downtown Boutique | Premium Fashion',
+    description: 'Discover the new standard of modern luxury menswear.',
+    images: ['/hero_bg.png'],
+  },
 };
 
 import ClientLayoutWrapper from "../components/ClientLayoutWrapper";

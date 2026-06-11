@@ -3,26 +3,38 @@ import Link from "next/link";
 import { fetchProductById } from "../../../lib/api";
 import AddToCartSection from "./AddToCartSection";
 import styles from "./product.module.css";
-import { getProductSeo } from "../../seoConfig";
 import { getSalePricing } from "../../../utils/price";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
-  const meta = await getProductSeo(params);
+  const resolvedParams = await params;
+  const product = await fetchProductById(resolvedParams.id);
+  
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "The requested product does not exist.",
+    };
+  }
+
+  const title = product.name;
+  const description = product.description;
+  const image = product.img || "/hero_bg.png";
+
   return {
-    title: meta.title,
-    description: meta.description,
-    keywords: meta.keywords,
+    title: title,
+    description: description,
+    keywords: [product.category, "fashion", "menswear", "downtown boutique"],
     openGraph: {
-      title: meta.title,
-      description: meta.description,
-      images: [{ url: meta.ogImage }],
+      title: title,
+      description: description,
+      images: [{ url: image }],
     },
     twitter: {
-      card: meta.twitterCard || "summary",
-      title: meta.title,
-      description: meta.description,
-      images: [{ url: meta.ogImage }],
+      card: "summary_large_image",
+      title: title,
+      description: description,
+      images: [image],
     },
   };
 }
