@@ -26,6 +26,7 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const searchRef = useRef(null);
@@ -124,11 +125,12 @@ export default function Navbar() {
           </div>
           
           {/* Navigation on Center */}
-          <nav className={styles.nav}>
-            <a href="/" className={pathname === '/' ? styles.active : ''}>Home</a>
-            <a href="/shop" className={pathname === '/shop' ? styles.active : ''}>Shop</a>
-            <a href="/clothing" className={pathname.startsWith('/clothing') ? styles.active : ''}>Clothing</a>
-            <a href="/sale" className={pathname === '/sale' ? styles.active : ''}>Sale</a>
+          <nav className={`${styles.nav} ${navOpen ? styles.navOpen : ''}`}>
+            <a href="/" className={pathname === '/' ? styles.active : ''} onClick={() => setNavOpen(false)}>Home</a>
+            <a href="/shop" className={pathname === '/shop' ? styles.active : ''} onClick={() => setNavOpen(false)}>Shop</a>
+            <a href="/clothing" className={pathname.startsWith('/clothing') ? styles.active : ''} onClick={() => setNavOpen(false)}>Clothing</a>
+            <a href="/sale" className={pathname === '/sale' ? styles.active : ''} onClick={() => setNavOpen(false)}>Sale</a>
+            <a href="/wishlist" className={`${pathname === '/wishlist' ? styles.active : ''} ${styles.mobileOnlyLink}`} onClick={() => setNavOpen(false)}>Wishlist</a>
           </nav>
           
           {/* Icons in Right */}
@@ -165,9 +167,9 @@ export default function Navbar() {
               {/* Suggestions Dropdown */}
               {searchOpen && suggestions.length > 0 && (
                 <div className={styles.suggestions}>
-                  {suggestions.map((product) => (
+                  {suggestions.map((product, index) => (
                     <button
-                      key={product.id}
+                      key={product.id || product._id || `suggestion-${index}`}
                       className={styles.suggestionItem}
                       onClick={() => handleSuggestionClick(product)}
                     >
@@ -210,10 +212,7 @@ export default function Navbar() {
                       <span className={styles.userDropdownName}>{user.name || 'User'}</span>
                       <span className={styles.userDropdownEmail} title={user.email}>{user.email}</span>
                     </div>
-                    <Link href="/profile" className={styles.userDropdownItem} onClick={() => setUserMenuOpen(false)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '12px'}}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                      Profile
-                    </Link>
+
                     {user.role === 'admin' && (
                       <Link href="/admin" className={styles.userDropdownItem} onClick={() => setUserMenuOpen(false)}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '12px'}}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
@@ -293,7 +292,7 @@ export default function Navbar() {
                             onClick={() => {
                               markAsRead(notif._id);
                               setNotifOpen(false);
-                              if (notif.orderId) router.push('/profile');
+                              if (notif.orderId) { /* Do nothing since profile is removed */ }
                             }}
                           >
                             <span className={styles.notifIcon}>
@@ -322,7 +321,7 @@ export default function Navbar() {
 
             {/* Wishlist button */}
             <button
-              className={styles.iconButton}
+              className={`${styles.iconButton} ${styles.hideOnMobile}`}
               onClick={() => router.push('/wishlist')}
               aria-label="Wishlist"
               style={{ position: 'relative' }}
@@ -339,6 +338,19 @@ export default function Navbar() {
               )}
             </Link>
           </div>
+          
+          {/* Hamburger Menu for Mobile */}
+          <button 
+            className={styles.hamburgerBtn}
+            onClick={() => setNavOpen(!navOpen)}
+            aria-label="Toggle navigation"
+          >
+            {navOpen ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            )}
+          </button>
         </div>
       </header>
     </>

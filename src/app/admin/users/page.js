@@ -78,10 +78,10 @@ export default function AdminUsers() {
         <h2 className="text-2xl font-bold text-[var(--foreground)]">Users</h2>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#F9F7F4] text-[var(--text-muted)] border-b border-[var(--border)]">
+      <div className="md:bg-white md:rounded-xl md:shadow-sm md:border md:border-[var(--border)] overflow-hidden">
+        <div>
+          <table className="w-full text-left text-sm block md:table">
+            <thead className="bg-[#F9F7F4] text-[var(--text-muted)] border-b border-[var(--border)] hidden md:table-header-group">
               <tr>
                 <th className="p-4 font-semibold">Name</th>
                 <th className="p-4 font-semibold">Email</th>
@@ -90,42 +90,50 @@ export default function AdminUsers() {
                 <th className="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="block md:table-row-group">
               {loading ? (
-                <tr>
-                  <td colSpan="5" className="p-8 text-center text-gray-500 animate-pulse">Loading users...</td>
+                <tr className="block md:table-row bg-white rounded-xl shadow-sm border border-[var(--border)] mb-4 md:mb-0 md:rounded-none md:shadow-none md:border-0 md:border-b">
+                  <td colSpan="5" className="block md:table-cell p-8 text-center text-gray-500 animate-pulse">Loading users...</td>
                 </tr>
               ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="p-8 text-center text-gray-500">No users found.</td>
+                <tr className="block md:table-row bg-white rounded-xl shadow-sm border border-[var(--border)] mb-4 md:mb-0 md:rounded-none md:shadow-none md:border-0 md:border-b">
+                  <td colSpan="5" className="block md:table-cell p-8 text-center text-gray-500">No users found.</td>
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user._id} className="border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors">
-                    <td className="p-4 font-medium text-[var(--foreground)]">{user.name}</td>
-                    <td className="p-4 text-[var(--text-muted)]">{user.email}</td>
-                    <td className="p-4">
+                  <tr key={user._id} className="bg-white rounded-xl shadow-sm border border-[var(--border)] mb-4 md:mb-0 md:rounded-none md:shadow-none md:border-0 md:border-b md:border-[var(--border)] hover:bg-[#FAF8F5] transition-colors block md:table-row p-4 md:p-0">
+                    <td className="block md:table-cell md:p-4 font-medium text-[var(--foreground)] mb-2 md:mb-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase mr-2">Name:</span>
+                      {user.name}
+                    </td>
+                    <td className="block md:table-cell md:p-4 text-[var(--text-muted)] mb-2 md:mb-0 break-all sm:break-normal">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase mr-2">Email:</span>
+                      {user.email}
+                    </td>
+                    <td className="block md:table-cell md:p-4 mb-2 md:mb-0 flex items-center">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase mr-2">Status:</span>
                       {user.isVerified ? (
                         <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded">Verified</span>
                       ) : (
                         <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-1 rounded">Pending</span>
                       )}
                     </td>
-                    <td className="p-4">
+                    <td className="block md:table-cell md:p-4 mb-3 md:mb-0 flex items-center">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase mr-2">Role:</span>
                       {user.role === 'admin' ? (
                         <span className="bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-1 rounded uppercase tracking-wider">Admin</span>
                       ) : (
                         <span className="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-1 rounded uppercase tracking-wider">User</span>
                       )}
                     </td>
-                    <td className="p-4 text-right flex items-center justify-end gap-3">
+                    <td className="flex md:table-cell md:p-4 items-center justify-start md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-0 border-gray-100">
                       <button 
                         onClick={() => handleRoleToggle(user._id, user.role)} 
                         className="text-[var(--accent)] hover:text-opacity-80 font-medium whitespace-nowrap"
                       >
                         Make {user.role === 'admin' ? 'User' : 'Admin'}
                       </button>
-                      <span className="text-gray-300">|</span>
+                      <span className="text-gray-300 mx-2">|</span>
                       <button 
                         onClick={() => handleDelete(user._id, user.name)} 
                         className="text-red-500 hover:text-red-600 font-medium whitespace-nowrap"

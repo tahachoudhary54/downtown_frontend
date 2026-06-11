@@ -64,11 +64,11 @@ export default function AdminProducts() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-[var(--foreground)]">Products</h2>
         <Link 
           href="/admin/products/new"
-          className="bg-[#F1ECE5] text-[var(--foreground)] px-5 py-2 rounded-lg font-medium hover:bg-[#E5DED5] transition-colors"
+          className="bg-[#F1ECE5] text-[var(--foreground)] px-5 py-2 rounded-lg font-medium hover:bg-[#E5DED5] transition-colors whitespace-nowrap self-start sm:self-auto"
         >
           + Add New Product
         </Link>
@@ -100,12 +100,12 @@ export default function AdminProducts() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[#F9F7F4] text-[var(--text-muted)] border-b border-[var(--border)]">
               <tr>
-                <th className="p-4 font-semibold">Image</th>
-                <th className="p-4 font-semibold">Name</th>
-                <th className="p-4 font-semibold">Category</th>
-                <th className="p-4 font-semibold">Price</th>
-                <th className="p-4 font-semibold">Status</th>
-                <th className="p-4 font-semibold text-right">Actions</th>
+                <th className="p-4 font-semibold whitespace-nowrap">Image</th>
+                <th className="p-4 font-semibold whitespace-nowrap">Name</th>
+                <th className="p-4 font-semibold whitespace-nowrap">Category</th>
+                <th className="p-4 font-semibold whitespace-nowrap">Price</th>
+                <th className="p-4 font-semibold whitespace-nowrap">Status</th>
+                <th className="p-4 font-semibold text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -121,15 +121,15 @@ export default function AdminProducts() {
                 products.map((product) => (
                   <tr key={product._id} className="border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors">
                     <td className="p-4">
-                      <img src={product.img} alt={product.name} className="w-12 h-12 object-cover rounded border border-[var(--border)]" />
+                      <img src={product.img} alt={product.name} className="w-12 h-12 min-w-[48px] object-cover rounded border border-[var(--border)]" />
                     </td>
-                    <td className="p-4 font-medium text-[var(--foreground)]">{product.name}</td>
-                    <td className="p-4 text-[var(--text-muted)] capitalize">{product.category}</td>
-                    <td className="p-4 text-[var(--foreground)] font-medium">
+                    <td className="p-4 font-medium text-[var(--foreground)] whitespace-nowrap">{product.name}</td>
+                    <td className="p-4 text-[var(--text-muted)] capitalize whitespace-nowrap">{product.category}</td>
+                    <td className="p-4 text-[var(--foreground)] font-medium whitespace-nowrap">
                       ₹{product.price}
                       {product.isOnSale && <span className="ml-2 text-xs text-red-500 line-through">₹{product.originalPrice}</span>}
                     </td>
-                    <td className="p-4">
+                    <td className="p-4 whitespace-nowrap">
                       {product.isOnSale && (
                         <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded">Sale</span>
                       )}
@@ -137,7 +137,7 @@ export default function AdminProducts() {
                         <span className="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-1 rounded ml-2">Out of Stock</span>
                       )}
                     </td>
-                    <td className="p-4 text-right space-x-3">
+                    <td className="p-4 text-right space-x-3 whitespace-nowrap">
                       <Link href={`/admin/products/edit/${product._id}`} className="text-blue-600 hover:text-blue-800 font-medium">
                         Edit
                       </Link>
@@ -154,7 +154,7 @@ export default function AdminProducts() {
         
         {/* Pagination Controls */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="p-4 border-t border-[var(--border)] flex justify-between items-center">
+          <div className="p-4 border-t border-[var(--border)] flex flex-col sm:flex-row justify-between items-center gap-4">
             <span className="text-sm text-[var(--text-muted)]">
               Showing page {pagination.page} of {pagination.totalPages}
             </span>

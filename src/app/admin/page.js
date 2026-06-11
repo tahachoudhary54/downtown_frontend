@@ -138,9 +138,9 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-bold text-[var(--foreground)]">Recent Orders</h2>
             <Link href="/admin/orders" className="text-sm font-medium text-[var(--accent)] hover:underline">View All</Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
+          <div>
+            <table className="w-full text-left border-collapse block md:table">
+              <thead className="hidden md:table-header-group">
                 <tr className="bg-[#FAF8F5] text-xs uppercase tracking-wider text-[var(--text-muted)]">
                   <th className="px-6 py-4 font-semibold">Order ID</th>
                   <th className="px-6 py-4 font-semibold">Customer</th>
@@ -149,22 +149,33 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4 font-semibold">Status</th>
                 </tr>
               </thead>
-              <tbody className="text-sm">
+              <tbody className="block md:table-row-group text-sm divide-y-0 md:divide-y md:divide-[var(--border)]">
                 {recentOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-[var(--text-muted)] text-sm">
+                  <tr className="block md:table-row">
+                    <td colSpan={5} className="block md:table-cell px-6 py-10 text-center text-[var(--text-muted)] text-sm">
                       No orders yet. Orders placed from your store will appear here.
                     </td>
                   </tr>
                 ) : recentOrders.map((order) => (
-                  <tr key={order._id} className="border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs">#{order._id.slice(-6).toUpperCase()}</td>
-                    <td className="px-6 py-4">{order.customer?.firstName} {order.customer?.lastName}</td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-xs">
+                  <tr key={order._id} className="border border-[var(--border)] m-4 md:m-0 rounded-xl md:rounded-none md:border-0 hover:bg-[#FAF8F5] transition-colors block md:table-row bg-white overflow-hidden shadow-sm md:shadow-none">
+                    <td className="block md:table-cell px-6 py-3 md:py-4 font-mono text-xs border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Order ID:</span>
+                      #{order._id.slice(-6).toUpperCase()}
+                    </td>
+                    <td className="block md:table-cell px-6 py-3 md:py-4 border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Customer:</span>
+                      {order.customer?.firstName} {order.customer?.lastName}
+                    </td>
+                    <td className="block md:table-cell px-6 py-3 md:py-4 text-[var(--text-muted)] text-xs border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Date:</span>
                       {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4 font-medium">₹{order.financials?.total?.toLocaleString('en-IN')}</td>
-                    <td className="px-6 py-4">
+                    <td className="block md:table-cell px-6 py-3 md:py-4 font-medium border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Amount:</span>
+                      ₹{order.financials?.total?.toLocaleString('en-IN')}
+                    </td>
+                    <td className="flex md:table-cell px-6 py-4 md:py-4 items-center">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Status:</span>
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                         order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
                         order.orderStatus === 'Shipped' ? 'bg-blue-100 text-blue-800' :

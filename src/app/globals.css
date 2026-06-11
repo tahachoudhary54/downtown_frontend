@@ -12,11 +12,13 @@
   --radius: 20px;
 }
 
-body {
+html, body {
   background: var(--background);
   color: var(--foreground);
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 * {
@@ -27,3 +29,54 @@ a {
   text-decoration: none;
   color: inherit;
 }
+
+/* Premium Sale Pricing Utilities */
+.premiumPriceContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.premiumOriginalPrice {
+  font-family: var(--font-inter, sans-serif);
+  font-size: 0.95rem;
+  color: #7a7a7a;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.premiumSalePrice {
+  font-family: var(--font-inter, sans-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  background: #1A1A1A;
+  padding: 8px 16px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.premiumPriceContainer:hover .premiumSalePrice {
+  background: #C9A86A;
+  color: #1A1A1A;
+}
+
+.premiumSaleBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #C9A86A;
+  color: #1a1a1a;
+  border: none;
+  font-family: var(--font-inter, sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+

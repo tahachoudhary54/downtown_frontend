@@ -487,3 +487,132 @@
   margin-top: 6px;
   animation: popIn 0.3s ease;
 }
+
+
+/* -- Mobile Responsiveness -- */
+.hamburgerBtn {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  .header {
+    padding: 0.5rem 2rem;
+  }
+  .hamburgerBtn {
+    display: flex;
+    z-index: 1002;
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    margin-left: 10px;
+  }
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--foreground);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+    z-index: 1001;
+    transform: translateY(-100%);
+    transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+    opacity: 0;
+    visibility: hidden;
+  }
+  .nav.navOpen {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+  .nav a {
+    font-size: 1.5rem;
+  }
+  .searchInput {
+    width: 150px;
+    right: 0;
+    top: 100%;
+    margin-top: 10px;
+    margin-right: 0;
+  }
+  .suggestions {
+    right: -50px;
+    width: 250px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: 0.5rem 1rem;
+  }
+  .userIcons {
+    gap: 1rem;
+  }
+  .notifDropdown, .userDropdown, .searchInput {
+    position: fixed;
+    top: 80px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: calc(100vw - 20px);
+    z-index: 10000;
+  }
+  .suggestions {
+    position: fixed;
+    top: 130px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: calc(100vw - 20px);
+    z-index: 10000;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .topBar {
+    padding: 0.4rem;
+    font-size: 0.65rem;
+  }
+  .header {
+    padding: 0.3rem 1rem;
+  }
+  .logo img {
+    height: 30px !important;
+    width: auto !important;
+  }
+  .iconButton, .nav a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem;
+  }
+  .userIcons svg {
+    width: 18px;
+    height: 18px;
+  }
+  .userIcons {
+    gap: 0.1rem;
+  }
+  .hamburgerBtn {
+    padding: 0.2rem;
+    margin-left: 0.25rem;
+  }
+  .hideOnMobile {
+    display: none !important;
+  }
+  .mobileOnlyLink {
+    display: flex !important;
+  }
+}
+
+.mobileOnlyLink {
+  display: none;
+}

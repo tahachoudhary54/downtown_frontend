@@ -30,15 +30,10 @@ export default async function ClothingPage() {
           <div className={styles.sectionLine}></div>
         </div>
         
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '2rem',
-          marginTop: '2rem'
-        }}>
+        <div className={styles.clothingGrid}>
           {activeCategories.map((cat, index) => (
-            <Link key={`${cat.id}-${index}`} href={`/clothing/${cat.slug}`} className={styles.editorialCard} style={{ minHeight: '400px', display: 'block', textDecoration: 'none' }}>
-              <div className={styles.editorialImageWrapper} style={{ height: '320px' }}>
+            <Link key={`${cat.id}-${index}`} href={`/clothing/${cat.slug}`} className={styles.editorialCard} style={{ textDecoration: 'none' }}>
+              <div className={styles.editorialImageWrapper}>
                 <Image src={cat.img} alt={cat.name} fill className={styles.editorialImage} style={{ objectFit: 'cover' }} />
               </div>
               <div className={styles.editorialContent} style={{ padding: '1rem 0' }}>

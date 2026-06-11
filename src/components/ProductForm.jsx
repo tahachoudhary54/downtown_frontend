@@ -109,33 +109,19 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
       <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6">{isEdit ? 'Edit Product' : 'Add New Product'}</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[var(--text-muted)]">Product Name *</label>
-            <input 
-              type="text" required name="name" value={formData.name} onChange={handleChange}
-              className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[var(--text-muted)]">Category *</label>
-            <select 
-              name="category" value={formData.category} onChange={handleChange} required
-              className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
-            >
-              <option value="clothing">Clothing</option>
-              <option value="shoes">Shoes</option>
-              <option value="accessories">Accessories</option>
-            </select>
-          </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-[var(--text-muted)]">Product Name *</label>
+          <input 
+            type="text" required name="name" value={formData.name || ''} onChange={handleChange}
+            className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-[var(--text-muted)]">Price (e.g. 59.99) *</label>
             <input 
-              type="text" required name="price" value={formData.price} onChange={handleChange}
+              type="text" required name="price" value={formData.price || ''} onChange={handleChange}
               className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
             />
           </div>
@@ -144,7 +130,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
             <div className="space-y-2">
               <label className="block text-sm font-medium text-[var(--text-muted)]">Original Price</label>
               <input 
-                type="text" name="originalPrice" value={formData.originalPrice} onChange={handleChange}
+                type="text" name="originalPrice" value={formData.originalPrice || ''} onChange={handleChange}
                 className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
@@ -154,7 +140,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium text-[var(--text-muted)]">Description</label>
           <textarea 
-            name="description" value={formData.description} onChange={handleChange} rows="4"
+            name="description" value={formData.description || ''} onChange={handleChange} rows="4"
             className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
           ></textarea>
         </div>
@@ -188,7 +174,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
         <div className="space-y-2 pt-2">
           <label className="block text-sm font-medium text-[var(--text-muted)]">Available Sizes</label>
           <div className="flex flex-wrap gap-4">
-            {['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
+            {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
               <label key={size} className="flex items-center gap-2 cursor-pointer">
                 <input 
                   type="checkbox" 

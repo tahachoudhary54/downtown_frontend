@@ -9,20 +9,17 @@ import { useLiveStock } from "../../../context/RealtimeStockContext";
 
 export default function AddToCartSection({ product }) {
   const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["S", "M", "L", "XL"];
-  const [selectedSize, setSelectedSize] = useState(availableSizes[0] || "");
+  const firstAvailableSize = availableSizes.find(size => !(product.inventory && product.inventory[size] === 0)) || availableSizes[0];
+  const [selectedSize, setSelectedSize] = useState(firstAvailableSize || "");
   const [added, setAdded] = useState(false);
   const { addToCart } = useCart();
   const liveStock = useLiveStock(product._id || product.id, product.stock !== undefined ? product.stock : (product.totalStock || 0));
 
   let stockStatus = { text: '', className: '' };
   if (liveStock === 0) {
-    stockStatus = { text: 'Out of Stock', className: styles.stockOut };
-  } else if (liveStock >= 20) {
-    stockStatus = { text: 'In Stock', className: styles.stockInStock };
-  } else if (liveStock >= 6) {
-    stockStatus = { text: `Availability: Only ${liveStock} left in stock`, className: styles.stockLow };
-  } else {
-    stockStatus = { text: `🔥 Availability: Hurry! Only ${liveStock} left`, className: styles.stockCritical };
+    stockStatus = { text: 'OUT OF STOCK', className: styles.stockOut };
+  } else if (liveStock > 0 && liveStock <= 20) {
+    stockStatus = { text: `ONLY ${liveStock} LEFT`, className: styles.stockLow };
   }
 
   const handleAddToCart = () => {
@@ -44,8 +41,9 @@ export default function AddToCartSection({ product }) {
             {availableSizes.map((size) => (
               <button
                 key={size}
-                className={selectedSize === size ? styles.active : ""}
+                className={`${selectedSize === size ? styles.active : ""} ${product.inventory && product.inventory[size] === 0 ? styles.sizeDisabled : ""}`}
                 onClick={() => setSelectedSize(size)}
+                disabled={product.inventory && product.inventory[size] === 0}
               >
                 {size}
               </button>

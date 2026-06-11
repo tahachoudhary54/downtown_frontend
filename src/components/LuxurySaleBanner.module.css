@@ -1,0 +1,240 @@
+.heroSection {
+  display: flex;
+  width: 100%;
+  min-height: calc(100vh - 80px); /* Assuming header is around 80px */
+  background-color: #F5F0E8;
+  overflow: hidden;
+}
+
+.leftCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 6rem;
+  color: #2A211C;
+  position: relative;
+}
+
+.rightCol {
+  flex: 1;
+  position: relative;
+}
+
+.heroImage {
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Typography & Content */
+.newSeasonLabel {
+  font-family: var(--font-inter);
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.goldLine {
+  width: 40px;
+  height: 1px;
+  background-color: #A8834A;
+}
+
+.headline {
+  font-family: var(--font-playfair);
+  font-size: 5rem;
+  line-height: 0.95;
+  font-weight: 400;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.subheading {
+  font-family: var(--font-inter);
+  font-size: 0.95rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #A8834A;
+  margin-bottom: 1rem;
+}
+
+.description {
+  font-family: var(--font-inter);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(42, 33, 28, 0.8);
+  max-width: 400px;
+  margin-bottom: 3rem;
+}
+
+.offerWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: var(--font-inter);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  margin-bottom: 2.5rem;
+}
+
+.offerHighlight {
+  font-size: 2.5rem;
+  color: #A8834A;
+  font-weight: 600;
+  font-family: var(--font-inter);
+  line-height: 1;
+}
+
+/* CTA Button */
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  padding: 0 36px;
+  background-color: #2A211C;
+  color: #FFFFFF;
+  font-family: var(--font-inter);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0);
+  align-self: flex-start;
+}
+
+.ctaButton:hover {
+  background-color: #3f322a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(42, 33, 28, 0.25);
+}
+
+.ctaArrow {
+  margin-left: 12px;
+  transition: transform 0.3s ease;
+}
+
+.ctaButton:hover .ctaArrow {
+  transform: translateX(4px);
+}
+
+/* Bottom Branding */
+.bottomBranding {
+  position: absolute;
+  bottom: 2rem;
+  left: 6rem;
+  right: 6rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.crestIcon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #2A211C;
+  border-radius: 50%;
+  font-family: var(--font-playfair);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2A211C;
+  padding-bottom: 2px;
+}
+
+.estText {
+  font-family: var(--font-inter);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  color: #2A211C;
+}
+
+.brandDivider {
+  flex: 1;
+  height: 1px;
+  background-color: rgba(42, 33, 28, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .headline {
+    font-size: 4rem;
+  }
+  .leftCol {
+    padding: 4rem 4rem;
+  }
+  .bottomBranding {
+    left: 4rem;
+    right: 4rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .heroSection {
+    flex-direction: column-reverse;
+  }
+  .rightCol {
+    min-height: 500px;
+    flex: none;
+  }
+  .leftCol {
+    padding: 4rem 2.5rem 8rem 2.5rem;
+    align-items: center;
+    text-align: center;
+  }
+  .newSeasonLabel {
+    align-items: center;
+  }
+  .headline {
+    font-size: 3.5rem;
+  }
+  .description {
+    margin: 0 auto 3rem auto;
+  }
+  .ctaButton {
+    align-self: center;
+  }
+  .bottomBranding {
+    left: 2.5rem;
+    right: 2.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .rightCol {
+    min-height: 400px;
+  }
+  .leftCol {
+    padding: 3rem 1.5rem 7rem 1.5rem;
+  }
+  .headline {
+    font-size: 2.8rem;
+  }
+  .subheading {
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+  }
+  .offerHighlight {
+    font-size: 2rem;
+  }
+  .bottomBranding {
+    left: 1.5rem;
+    right: 1.5rem;
+  }
+}

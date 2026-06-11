@@ -231,21 +231,38 @@ export default function CheckoutPage() {
             <h2 className={styles.sectionTitle}>Order Summary</h2>
             
             <div className={styles.summaryItems}>
-              {cart.map((item, index) => (
-                <div key={index} className={styles.summaryItem}>
-                  <div className={styles.itemImage}>
-                    <div className={styles.itemBadge}>{item.quantity}</div>
-                    <Image src={item.product.img || '/placeholder.png'} alt={item.product.name} fill />
+              {cart.map((item, index) => {
+                const priceVal = parseFloat((item.product.price || "0").toString().replace(/[^0-9.]/g, "")) || 0;
+                const origVal = parseFloat((item.product.originalPrice || "0").toString().replace(/[^0-9.]/g, "")) || 0;
+                const isSaleValid = item.product.isOnSale && !isNaN(origVal) && !isNaN(priceVal) && origVal > priceVal;
+
+                return (
+                  <div key={index} className={styles.summaryItem}>
+                    <div className={styles.itemImage}>
+                      <div className={styles.itemBadge}>{item.quantity}</div>
+                      <Image src={item.product.img || '/placeholder.png'} alt={item.product.name} fill />
+                    </div>
+                    <div className={styles.itemInfo}>
+                      <h4 className={styles.itemName}>{item.product.name}</h4>
+                      <p className={styles.itemMeta}>Size: {item.size}</p>
+                    </div>
+                    <div className={styles.itemPrice}>
+                      {isSaleValid ? (
+                        <div className="premiumPriceContainer" style={{ justifyContent: 'flex-end', gap: '0.5rem' }}>
+                          <span className="premiumOriginalPrice" style={{ fontSize: '0.8em' }}>
+                            ₹{(origVal * item.quantity).toLocaleString('en-IN')}
+                          </span>
+                          <span className="premiumSalePrice" style={{ fontSize: '1em' }}>
+                            ₹{(priceVal * item.quantity).toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                      ) : (
+                        `₹${(priceVal * item.quantity).toLocaleString('en-IN')}`
+                      )}
+                    </div>
                   </div>
-                  <div className={styles.itemInfo}>
-                    <h4 className={styles.itemName}>{item.product.name}</h4>
-                    <p className={styles.itemMeta}>Size: {item.size}</p>
-                  </div>
-                  <div className={styles.itemPrice}>
-                    ₹{((parseFloat((item.product.price || "0").toString().replace(/[^0-9.]/g, "")) || 0) * item.quantity).toLocaleString('en-IN')}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className={styles.summaryDivider} />

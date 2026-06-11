@@ -3,7 +3,7 @@ import Link from "next/link";
 import ProductGrid from "../components/ProductGrid";
 import HeroSlider from "../components/HeroSlider";
 import EssentialsSlider from "../components/EssentialsSlider";
-import LiveSeasonalBanner from "../components/LiveSeasonalBanner";
+import LuxurySaleBanner from "../components/LuxurySaleBanner";
 import { fetchProducts } from "../lib/api";
 import styles from "./page.module.css";
 
@@ -43,10 +43,10 @@ export default async function Home() {
 
   const seasonalSettings = settings?.seasonalBanner || {
     enabled: true,
-    title: "Autumn Collection –\nUp to 30% OFF",
+    title: "Autumn Collection –\nUp to 50% OFF",
     image: "/autumn_banner.png",
-    buttonText: "SHOP COLLECTION",
-    buttonLink: "/shop"
+    buttonText: "SHOP SALE",
+    buttonLink: "/sale"
   };
 
   return (
@@ -59,8 +59,8 @@ export default async function Home() {
       {/* Shop by Category - 5 Columns Editorial */}
       <EssentialsSlider initialSettings={settings} />
 
-      {/* Autumn Collection Banner */}
-      <LiveSeasonalBanner initialSettings={settings} />
+      {/* Luxury Sale Banner */}
+      <LuxurySaleBanner initialSettings={settings} />
 
       {/* Trending Now */}
       <section className={styles.sectionContainer}>
@@ -68,7 +68,7 @@ export default async function Home() {
           <h2 className={styles.sectionTitle}>TRENDING NOW</h2>
           <div className={styles.sectionLine}></div>
         </div>
-        <ProductGrid products={products.slice(0, 8)} />
+        <ProductGrid products={products.filter(p => p.inStock && !p.isOnSale).slice(0, 8)} />
       </section>
       
       {/* Why Choose Us Section */}

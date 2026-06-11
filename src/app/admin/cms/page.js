@@ -15,6 +15,8 @@ export default function AdminSettings() {
   
   const fileInputRef = useRef(null);
   const [currentUploadTarget, setCurrentUploadTarget] = useState(null); // { type: 'hero', index: 0 } or { type: 'seasonal' }
+  const [catPage, setCatPage] = useState(1);
+  const catLimit = 5;
 
   // Debounced Auto-save for Seasonal Banner
   useEffect(() => {
@@ -252,10 +254,10 @@ export default function AdminSettings() {
 
       {/* Seasonal Sale Banner CMS */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-[var(--border)]">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-6">
           <h3 className="text-xl font-bold text-[var(--foreground)]">Seasonal Sale Banner</h3>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer bg-[#F9F7F4] px-4 py-2 rounded-lg border border-[var(--border)]">
+          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+            <label className="flex flex-1 md:flex-none justify-center items-center gap-2 cursor-pointer bg-[#F9F7F4] px-4 py-2 rounded-lg border border-[var(--border)]">
               <input 
                 type="checkbox" 
                 checked={settings.seasonalBanner.enabled} 
@@ -267,7 +269,7 @@ export default function AdminSettings() {
             <button 
               onClick={() => handleSave('seasonal')}
               disabled={saving || uploading}
-              className="bg-[var(--accent)] text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors disabled:opacity-50"
+              className="bg-[var(--accent)] text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors disabled:opacity-50 flex-1 md:flex-none whitespace-nowrap text-center"
             >
               {saving ? 'Saving...' : 'Save Banner Changes'}
             </button>
@@ -284,7 +286,7 @@ export default function AdminSettings() {
               ></textarea>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-[var(--text-muted)]">Button Text</label>
                 <input 
@@ -342,13 +344,13 @@ export default function AdminSettings() {
       </div>
 
       {/* Categories CMS */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-[var(--border)] mt-8">
-        <div className="flex justify-between items-center mb-6">
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-[var(--border)] mt-8">
+        <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-6">
           <h3 className="text-xl font-bold text-[var(--foreground)]">Essential Collection Categories</h3>
           <button 
             onClick={() => handleSave('categories')}
             disabled={saving || uploading}
-            className="bg-[var(--accent)] text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors disabled:opacity-50"
+            className="bg-[var(--accent)] text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors disabled:opacity-50 w-full md:w-auto"
           >
             {saving ? 'Saving...' : 'Save Categories'}
           </button>
@@ -364,26 +366,34 @@ export default function AdminSettings() {
           </button>
           
           <div className="grid gap-6">
-            {(settings.categories || []).map((cat, index) => (
-              <div key={index} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center gap-6 relative group">
-                
-                {/* Reorder Controls */}
-                <div className="flex md:flex-col gap-2 items-center justify-center order-last md:order-first w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100">
-                  <button 
-                    onClick={() => handleMoveCategory(index, 'up')} 
-                    disabled={index === 0} 
-                    className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                  </button>
-                  <button 
-                    onClick={() => handleMoveCategory(index, 'down')} 
-                    disabled={index === (settings.categories || []).length - 1} 
-                    className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                  </button>
-                </div>
+            {(() => {
+              const totalCatPages = Math.ceil((settings.categories || []).length / catLimit) || 1;
+              const paginatedCategories = (settings.categories || []).slice((catPage - 1) * catLimit, catPage * catLimit);
+
+              return (
+                <>
+                  {paginatedCategories.map((cat, index) => {
+                    const globalIndex = (catPage - 1) * catLimit + index;
+                    return (
+                      <div key={globalIndex} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 relative group overflow-hidden w-full">
+                        
+                        {/* Reorder Controls */}
+                        <div className="flex md:flex-col gap-2 items-center justify-center order-last md:order-first w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100">
+                          <button 
+                            onClick={() => handleMoveCategory(globalIndex, 'up')} 
+                            disabled={globalIndex === 0} 
+                            className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                          </button>
+                          <button 
+                            onClick={() => handleMoveCategory(globalIndex, 'down')} 
+                            disabled={globalIndex === (settings.categories || []).length - 1} 
+                            className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                          </button>
+                        </div>
 
                 {/* Image Section */}
                 <div className="relative w-32 h-32 rounded-xl border border-gray-200 overflow-hidden shrink-0 bg-gray-50 flex items-center justify-center mx-auto md:mx-0 shadow-inner group-hover:border-[var(--accent)] transition-colors">
@@ -396,7 +406,7 @@ export default function AdminSettings() {
                   {/* Hover Upload Overlay */}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <button 
-                      onClick={() => triggerUpload({ type: 'category', index })} 
+                      onClick={() => triggerUpload({ type: 'category', index: globalIndex })} 
                       disabled={uploading} 
                       className="bg-white/90 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-white transition-colors"
                     >
@@ -413,7 +423,7 @@ export default function AdminSettings() {
                       <input 
                         type="text" 
                         value={cat.name || ''} 
-                        onChange={(e) => handleCategoryChange(index, 'name', e.target.value)} 
+                        onChange={(e) => handleCategoryChange(globalIndex, 'name', e.target.value)} 
                         className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] text-sm font-medium transition-all" 
                         placeholder="e.g. SUMMER WEAR"
                       />
@@ -423,17 +433,17 @@ export default function AdminSettings() {
                       <input 
                         type="text" 
                         value={cat.slug || ''} 
-                        onChange={(e) => handleCategoryChange(index, 'slug', e.target.value)} 
+                        onChange={(e) => handleCategoryChange(globalIndex, 'slug', e.target.value)} 
                         className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] text-sm font-medium transition-all"
                         placeholder="e.g. summer-wear"
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2">
+                  <div className="flex flex-wrap items-center justify-between pt-2 gap-4">
                     <button 
                       type="button"
-                      onClick={() => handleCategoryChange(index, 'isActive', cat.isActive === false ? true : false)}
+                      onClick={() => handleCategoryChange(globalIndex, 'isActive', cat.isActive === false ? true : false)}
                       className="flex items-center gap-3 cursor-pointer group/toggle focus:outline-none"
                     >
                       <div className="relative flex items-center">
@@ -447,7 +457,7 @@ export default function AdminSettings() {
                     </button>
 
                     <button 
-                      onClick={() => handleRemoveCategory(index)} 
+                      onClick={() => handleRemoveCategory(globalIndex)} 
                       className="flex items-center gap-1.5 text-red-600 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors font-bold text-xs uppercase tracking-wider"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
@@ -457,7 +467,34 @@ export default function AdminSettings() {
                 </div>
 
               </div>
-            ))}
+                    );
+                  })}
+                  {totalCatPages > 1 && (
+                    <div className="p-4 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-50 rounded-xl">
+                      <span className="text-sm text-[var(--text-muted)]">
+                        Showing page {catPage} of {totalCatPages}
+                      </span>
+                      <div className="space-x-2">
+                        <button 
+                          disabled={catPage === 1} 
+                          onClick={() => setCatPage(p => p - 1)}
+                          className="px-3 py-1 bg-white border border-[var(--border)] rounded text-sm disabled:opacity-50 hover:bg-[#F9F7F4] shadow-sm transition-colors"
+                        >
+                          Previous
+                        </button>
+                        <button 
+                          disabled={catPage === totalCatPages} 
+                          onClick={() => setCatPage(p => p + 1)}
+                          className="px-3 py-1 bg-white border border-[var(--border)] rounded text-sm disabled:opacity-50 hover:bg-[#F9F7F4] shadow-sm transition-colors"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>

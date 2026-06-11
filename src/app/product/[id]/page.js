@@ -4,6 +4,7 @@ import { fetchProductById } from "../../../lib/api";
 import AddToCartSection from "./AddToCartSection";
 import styles from "./product.module.css";
 import { getProductSeo } from "../../seoConfig";
+import { getSalePricing } from "../../../utils/price";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
@@ -34,6 +35,8 @@ export default async function ProductPage({ params }) {
     notFound();
   }
 
+  const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing(product);
+
   return (
     <div className={styles.page}>
 
@@ -49,7 +52,14 @@ export default async function ProductPage({ params }) {
           <div className={styles.detailsCol}>
             <p className={styles.brand}>DOWNTOWN EXCLUSIVE</p>
             <h1 className={styles.title}>{product.name}</h1>
-            <p className={styles.price}>{product.price}</p>
+            {isSaleValid ? (
+              <div className="premiumPriceContainer" style={{ marginBottom: '2rem' }}>
+                <span className="premiumOriginalPrice" style={{ fontSize: '1.2rem' }}>{originalPriceStr}</span>
+                <span className={styles.price} style={{ marginBottom: 0 }}>{salePriceStr}</span>
+              </div>
+            ) : (
+              <p className={styles.price}>{product.price}</p>
+            )}
             
             <p className={styles.description}>
               {product.description}

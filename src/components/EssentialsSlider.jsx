@@ -107,8 +107,8 @@ export default function EssentialsSlider({ initialSettings }) {
           <div
             className={styles.sliderTrack}
             style={{
-              transform: `translateX(calc(-${currentIndex * 25}% - ${currentIndex * 0.75}rem))`,
-              transition: 'transform 2s cubic-bezier(0.25, 1, 0.5, 1)'
+              transform: `translateX(calc(-${currentIndex} * (100% / var(--slider-items)) - ${currentIndex} * (var(--slider-gap) / var(--slider-items))))`,
+              transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)'
             }}
           >
             {extendedCategories.map((cat, index) => (

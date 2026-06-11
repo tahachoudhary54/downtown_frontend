@@ -33,3 +33,7 @@ export function useLiveStock(productId, initialStock) {
   const stocks = useContext(RealtimeStockContext);
   return stocks && stocks[productId] !== undefined ? stocks[productId] : initialStock;
 }
+
+export function useAllLiveStocks() {
+  return useContext(RealtimeStockContext) || {};
+}

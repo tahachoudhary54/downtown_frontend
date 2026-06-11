@@ -3,234 +3,140 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+const POLICY_FIELDS = [
+  { key: 'aboutUs', label: 'About Us' },
+  { key: 'contactUs', label: 'Contact Us' },
+  { key: 'termsAndConditions', label: 'Terms & Conditions' },
+  { key: 'privacyPolicy', label: 'Privacy Policy' },
+  { key: 'shippingAndReturns', label: 'Shipping & Returns' },
+  { key: 'sizeGuide', label: 'Size Guide' },
+  { key: 'faq', label: 'FAQ' }
+];
+
 export default function AdminSettings() {
   const { token } = useAuth();
+  const [policies, setPolicies] = useState({
+    aboutUs: '',
+    contactUs: '',
+    termsAndConditions: '',
+    privacyPolicy: '',
+    shippingAndReturns: '',
+    sizeGuide: '',
+    faq: ''
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState({
-    storeName: '',
-    contactEmail: '',
-    phoneNumber: '',
-    currency: 'USD',
-    flatShippingRate: 15.00,
-    socialLinks: {
-      instagram: '',
-      facebook: '',
-      twitter: ''
-    }
-  });
-  const [whatsapp, setWhatsapp] = useState({
-    enabled: false,
-    adminNumber: ''
-  });
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [activeTab, setActiveTab] = useState('aboutUs');
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/settings`);
-        const data = await res.json();
-        if (data.success) {
-          if (data.data.store) setSettings(data.data.store);
-          if (data.data.whatsapp) {
-            setWhatsapp({
-              enabled: data.data.whatsapp.enabled || false,
-              adminNumber: data.data.whatsapp.adminNumber || ''
-            });
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch settings", err);
-      } finally {
-        setLoading(false);
+    fetchPolicies();
+  }, [token]);
+
+  const fetchPolicies = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/policies`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setPolicies(data.data);
       }
-    };
-    fetchSettings();
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    
-    if (name.startsWith('whatsapp_')) {
-      const field = name.split('_')[1];
-      setWhatsapp(prev => ({
-        ...prev,
-        [field]: type === 'checkbox' ? checked : value
-      }));
-      return;
-    }
-
-    if (name.startsWith('social_')) {
-      const platform = name.split('_')[1];
-      setSettings(prev => ({
-        ...prev,
-        socialLinks: {
-          ...prev.socialLinks,
-          [platform]: value
-        }
-      }));
-    } else {
-      setSettings(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }));
+    } catch (err) {
+      console.error('Error fetching policies:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
+  const handleSave = async () => {
     setSaving(true);
+    setMessage({ type: '', text: '' });
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/settings`, {
+      const res = await fetch(`${API_URL}/api/policies`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ store: settings, whatsapp })
+        body: JSON.stringify(policies)
       });
       const data = await res.json();
       if (data.success) {
-        alert('Settings saved successfully!');
+        setMessage({ type: 'success', text: 'Policies saved successfully!' });
       } else {
-        alert(data.message || 'Failed to save settings');
+        setMessage({ type: 'error', text: data.message || 'Failed to save policies.' });
       }
     } catch (err) {
-      console.error(err);
-      alert('Error saving settings');
+      setMessage({ type: 'error', text: 'Server error while saving.' });
     } finally {
       setSaving(false);
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     }
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-[var(--text-muted)]">Loading settings...</div>;
+    return <div className="p-8 text-[var(--accent)]">Loading settings...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-[var(--foreground)]">Store Settings</h2>
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-[var(--border)]">
+        <div>
+          <h2 className="text-2xl font-bold text-[var(--foreground)]">Website Policies</h2>
+          <p className="text-[var(--text-muted)] text-sm mt-1">Manage all public policy pages</p>
+        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-[var(--accent)] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-opacity-90 transition-all disabled:opacity-50"
+        >
+          {saving ? 'Saving...' : 'Save All Changes'}
+        </button>
       </div>
 
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-[var(--border)]">
-        <form onSubmit={handleSave} className="space-y-8">
-          
-          {/* General Information */}
-          <div>
-            <h3 className="text-lg font-bold border-b border-[var(--border)] pb-2 mb-4">General Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-[var(--text-muted)]">Store Name</label>
-                <input 
-                  type="text" name="storeName" value={settings.storeName} onChange={handleChange} required
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-[var(--text-muted)]">Contact Email</label>
-                <input 
-                  type="email" name="contactEmail" value={settings.contactEmail} onChange={handleChange} required
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-[var(--text-muted)]">Phone Number</label>
-                <input 
-                  type="text" name="phoneNumber" value={settings.phoneNumber} onChange={handleChange}
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-                />
-              </div>
-            </div>
-          </div>
+      {message.text && (
+        <div className={`p-4 rounded-lg font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+          {message.text}
+        </div>
+      )}
 
-          {/* Configuration */}
-          <div>
-            <h3 className="text-lg font-bold border-b border-[var(--border)] pb-2 mb-4">Configuration</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-[var(--text-muted)]">Currency</label>
-                <select 
-                  name="currency" value={settings.currency} onChange={handleChange}
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
-                >
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                  <option value="INR">INR (₹)</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-[var(--text-muted)]">Flat Shipping Rate</label>
-                <input 
-                  type="number" step="0.01" name="flatShippingRate" value={settings.flatShippingRate} onChange={handleChange} required
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Social Links */}
-          <div>
-            <h3 className="text-lg font-bold border-b border-[var(--border)] pb-2 mb-4">Social Media Links</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-[var(--text-muted)]">Instagram URL</label>
-                <input 
-                  type="url" name="social_instagram" value={settings.socialLinks?.instagram || ''} onChange={handleChange}
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* WhatsApp Notifications */}
-          <div>
-            <h3 className="text-lg font-bold border-b border-[var(--border)] pb-2 mb-4">WhatsApp Notifications</h3>
-            <div className="bg-[#FAF8F5] p-6 rounded-lg border border-[var(--border)]">
-              <div className="flex items-center gap-3 mb-6">
-                <input 
-                  type="checkbox" 
-                  id="whatsapp_enabled"
-                  name="whatsapp_enabled" 
-                  checked={whatsapp.enabled} 
-                  onChange={handleChange}
-                  className="w-5 h-5 text-[var(--accent)] border-[var(--border)] rounded focus:ring-[var(--accent)]"
-                />
-                <label htmlFor="whatsapp_enabled" className="text-sm font-bold text-[var(--foreground)] cursor-pointer">
-                  Enable WhatsApp Notifications
-                </label>
-              </div>
-
-              {whatsapp.enabled && (
-                <div className="space-y-4 max-w-md animate-fade-in">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-[var(--text-muted)]">Admin WhatsApp Number</label>
-                    <input 
-                      type="text" 
-                      name="whatsapp_adminNumber" 
-                      value={whatsapp.adminNumber} 
-                      onChange={handleChange} 
-                      placeholder="+919876543210"
-                      className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
-                    />
-                    <p className="text-xs text-[var(--text-muted)] mt-1">Include country code (e.g. +91 for India)</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-[var(--border)] flex justify-end">
-            <button 
-              type="submit" 
-              disabled={saving}
-              className="bg-[var(--accent)] text-white px-6 py-2 rounded-lg font-bold hover:bg-opacity-90 transition-colors disabled:opacity-50"
+      <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] flex flex-col md:flex-row overflow-hidden min-h-[600px]">
+        {/* Tabs sidebar */}
+        <div className="w-full md:w-64 bg-gray-50 border-b md:border-b-0 md:border-r border-[var(--border)] flex md:flex-col overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {POLICY_FIELDS.map(field => (
+            <button
+              key={field.key}
+              onClick={() => setActiveTab(field.key)}
+              className={`whitespace-nowrap p-4 text-center md:text-left text-sm font-medium transition-colors border-r md:border-r-0 md:border-b border-[var(--border)] md:last:border-b-0
+                ${activeTab === field.key ? 'bg-white text-[var(--accent)] border-b-4 border-b-[var(--accent)] md:border-b-0 md:border-l-4 md:border-l-[var(--accent)]' : 'text-[var(--text-muted)] hover:bg-gray-100 border-b-4 border-b-transparent md:border-b-0 md:border-l-4 md:border-l-transparent'}
+              `}
             >
-              {saving ? 'Saving...' : 'Save Settings'}
+              {field.label}
             </button>
+          ))}
+        </div>
+        
+        {/* Editor Area */}
+        <div className="flex-1 p-6 flex flex-col">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-[var(--foreground)]">
+              Editing: {POLICY_FIELDS.find(f => f.key === activeTab)?.label}
+            </h3>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              Supports plain text and paragraphs. Line breaks will be preserved on the frontend.
+            </p>
           </div>
-
-        </form>
+          <textarea
+            value={policies[activeTab] || ''}
+            onChange={(e) => setPolicies({ ...policies, [activeTab]: e.target.value })}
+            className="flex-1 w-full p-4 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] resize-none"
+            placeholder={`Enter ${POLICY_FIELDS.find(f => f.key === activeTab)?.label} content here...`}
+            style={{ minHeight: '400px' }}
+          />
+        </div>
       </div>
     </div>
   );

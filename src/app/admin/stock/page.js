@@ -23,13 +23,13 @@ export default function AdminStock() {
 
   // Edit Modal State
   const [editProduct, setEditProduct] = useState(null);
-  const [editInventory, setEditInventory] = useState({ S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
+  const [editInventory, setEditInventory] = useState({ S: 0, M: 0, L: 0, XL: 0, XXL: 0, '3XL': 0 });
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      // Use a larger limit for stock management to allow effective bulk operations
-      let query = `?page=${page}&limit=50`;
+      // Use a limit of 10 to match the products page pagination
+      let query = `?page=${page}&limit=10`;
       if (search) query += `&search=${search}`;
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${query}`, {
@@ -100,7 +100,7 @@ export default function AdminStock() {
         fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ stock: 0, inventory: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 } })
+          body: JSON.stringify({ stock: 0, inventory: { S: 0, M: 0, L: 0, XL: 0, XXL: 0, '3XL': 0 } })
         })
       ));
       await fetchProducts();
@@ -140,6 +140,7 @@ export default function AdminStock() {
       L: currentInventory.L || 0,
       XL: currentInventory.XL || 0,
       XXL: currentInventory.XXL || 0,
+      '3XL': currentInventory['3XL'] || 0,
     });
   };
 
@@ -369,7 +370,7 @@ export default function AdminStock() {
         
         {/* Pagination Controls */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="p-4 border-t border-[var(--border)] flex justify-between items-center bg-gray-50">
+          <div className="p-4 border-t border-[var(--border)] flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50">
             <span className="text-sm text-[var(--text-muted)]">
               Showing page {pagination.page} of {pagination.totalPages}
             </span>
@@ -407,7 +408,7 @@ export default function AdminStock() {
             
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                {['S', 'M', 'L', 'XL', 'XXL'].map(size => (
+                {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
                   <div key={size} className="flex flex-col">
                     <label className="text-xs font-bold text-gray-500 mb-1">Size {size}</label>
                     <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">

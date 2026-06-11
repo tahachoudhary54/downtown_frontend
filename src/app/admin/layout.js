@@ -11,7 +11,16 @@ function AdminLayoutContent({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const notifRef = useRef(null);
+
+  const getPageTitle = (path) => {
+    if (path === '/admin' || path === '/admin/') return 'Dashboard';
+    const parts = path.split('/').filter(Boolean);
+    if (parts.includes('edit')) return `Edit ${parts[1].slice(0, -1)}`;
+    if (parts.includes('new')) return `Add ${parts[1].slice(0, -1)}`;
+    return parts[1] || 'Dashboard';
+  };
 
   const { notifications, unreadCount, totalCount, markAsRead, markAllAsRead } = useNotifications();
   const [toast, setToast] = useState(null);
@@ -70,9 +79,17 @@ function AdminLayoutContent({ children }) {
 
   return (
     <>
-    <div className="min-h-screen bg-[var(--background)] flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[var(--background)] flex relative overflow-hidden">
+      {/* Sidebar Overlay for Mobile */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-[#111] text-white flex flex-col shadow-xl">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#111] text-white flex flex-col shadow-xl transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out`}>
         <div className="p-6 border-b border-[#222]">
           <Link href="/admin">
             <h2 className="text-xl font-bold tracking-widest text-[#c8a96e] uppercase text-center cursor-pointer">
@@ -81,12 +98,13 @@ function AdminLayoutContent({ children }) {
           </Link>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
           {navLinks.map((link) => {
             const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.href !== '/admin');
             return (
               <Link key={link.href} href={link.href}>
                 <span
+                  onClick={() => setSidebarOpen(false)}
                   className={`block px-4 py-3 rounded-lg transition-colors cursor-pointer ${
                     isActive
                       ? 'bg-[var(--accent)] text-white'
@@ -123,17 +141,25 @@ function AdminLayoutContent({ children }) {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="bg-white border-b border-[var(--border)] px-8 py-4 flex justify-between items-center shadow-sm">
-          {/* Left Side: Title */}
-          <h1 className="text-xl font-semibold text-[var(--foreground)] capitalize hidden md:block">
-            {pathname === '/admin' ? 'Dashboard' : pathname.split('/').pop()}
-          </h1>
+        <header className="bg-white border-b border-[var(--border)] px-4 md:px-8 py-4 flex justify-between items-center shadow-sm">
+          {/* Left Side: Title & Mobile Hamburger */}
+          <div className="flex items-center gap-4">
+            <button 
+              className="md:hidden p-2 -ml-2 text-[var(--foreground)]"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <h1 className="text-xl font-semibold text-[var(--foreground)] capitalize hidden sm:block">
+              {getPageTitle(pathname)}
+            </h1>
+          </div>
 
           {/* Right Side / Center: Top Bar Items */}
-          <div className="flex flex-1 justify-end items-center gap-6">
+          <div className="flex flex-1 justify-end items-center gap-3 sm:gap-6">
             
             {/* Search */}
-            <div className="relative max-w-sm w-full hidden sm:block">
+            <div className="relative max-w-[140px] sm:max-w-sm w-full">
               <input 
                 type="text" 
                 placeholder="Search..." 
@@ -155,7 +181,7 @@ function AdminLayoutContent({ children }) {
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[var(--border)] z-50 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[var(--border)] z-50 overflow-hidden -mr-16 sm:mr-0">
                   <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
                     <h3 className="font-bold text-[var(--foreground)]">Notifications</h3>
                     {unreadCount > 0 && (
@@ -197,7 +223,7 @@ function AdminLayoutContent({ children }) {
             </div>
 
             {/* Admin Profile */}
-            <div className="flex items-center gap-3 border-l border-[var(--border)] pl-6">
+            <div className="flex items-center gap-3 border-l border-[var(--border)] pl-3 sm:pl-6">
               <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-sm">
                 {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
               </div>

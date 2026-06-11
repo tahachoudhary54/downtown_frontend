@@ -48,7 +48,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
         <h2 className="text-2xl font-bold text-[var(--foreground)]">Notifications Center</h2>
         <button 
           onClick={markAllAsRead}
@@ -61,7 +61,7 @@ export default function NotificationsPage() {
       <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
         {/* Bulk Actions Header */}
         {notifications.length > 0 && (
-          <div className="p-4 border-b border-[var(--border)] bg-gray-50 flex items-center justify-between">
+          <div className="p-4 border-b border-[var(--border)] bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <input 
                 type="checkbox" 
@@ -78,13 +78,13 @@ export default function NotificationsPage() {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={handleMarkSelectedAsRead}
-                  className="text-xs font-semibold text-[var(--foreground)] bg-white px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-gray-50 transition-colors shadow-sm"
+                  className="text-xs font-semibold text-[var(--foreground)] bg-white px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-gray-50 transition-colors shadow-sm whitespace-nowrap"
                 >
                   Mark as Read
                 </button>
                 <button 
                   onClick={() => confirmDelete(selectedIds)}
-                  className="text-xs font-semibold text-red-600 bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-100 transition-colors shadow-sm"
+                  className="text-xs font-semibold text-red-600 bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-100 transition-colors shadow-sm whitespace-nowrap"
                 >
                   Delete Selected
                 </button>
@@ -126,12 +126,12 @@ export default function NotificationsPage() {
                   </div>
                 </div>
                 
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <h3 className={`text-base ${notif.unread ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--text-muted)]'}`}>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-4">
+                    <h3 className={`text-base break-words ${notif.unread ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--text-muted)]'}`}>
                       {notif.title}
                     </h3>
-                    <span className="text-xs text-gray-500 whitespace-nowrap ml-4">{notif.time}</span>
+                    <span className="text-xs text-gray-500 whitespace-nowrap">{notif.time}</span>
                   </div>
                   <p className="mt-1 text-sm text-[var(--text-muted)]">{notif.desc}</p>
                   

@@ -7,6 +7,54 @@ import IconHeartOutline from "../../components/IconHeartOutline";
 import IconHeartFilled from "../../components/IconHeartFilled";
 import styles from "../page.module.css"; // using global styles
 
+import { useLiveStock } from "../../context/RealtimeStockContext";
+import { getSalePricing } from "../../utils/price";
+
+function WishlistItem({ item, toggleWishlist }) {
+  const liveStock = useLiveStock(item._id || item.id, item.stock !== undefined ? item.stock : (item.totalStock || 0));
+  const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing(item);
+
+  return (
+    <div className={styles.wishlistCard} style={{ flex: '0 0 235px', maxWidth: '235px' }}>
+      <div className={styles.wishlistImageWrapper}>
+        <img 
+          src={item.img} 
+          alt={item.name} 
+          className={`${styles.productImage} ${liveStock === 0 ? styles.premiumOutOfStockImage : ''}`} 
+        />
+        {liveStock === 0 && (
+          <div className={styles.premiumOutOfStockBadge}>Out of Stock</div>
+        )}
+        {isSaleValid && liveStock > 0 && (
+          <div className="premiumSaleBadge">SALE</div>
+        )}
+        <div className={styles.wishlistOverlay}>
+          <span className={styles.viewDetailsText}>VIEW DETAILS &rarr;</span>
+        </div>
+        <button
+          className={`${styles.btnHeart} ${styles.btnHeartActive}`}
+          onClick={() => toggleWishlist(item)}
+        >
+          <IconHeartFilled />
+        </button>
+      </div>
+      <div className={styles.wishlistInfo}>
+        <h4 className={styles.wishlistName}>{item.name}</h4>
+        <p className={styles.wishlistSubtitle}>Luxury Essentials Collection</p>
+        <div className={styles.premiumSeparator}></div>
+        {isSaleValid ? (
+          <div className="premiumPriceContainer">
+            <span className="premiumOriginalPrice">{originalPriceStr}</span>
+            <span className="premiumSalePrice">{salePriceStr}</span>
+          </div>
+        ) : (
+          <p className={styles.wishlistPrice}>{item.price}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function WishlistPage() {
   const { wishlist, toggleWishlist } = useWishlist();
   const { user, loading } = useAuth();
@@ -47,26 +95,7 @@ export default function WishlistPage() {
         ) : (
           <div className={styles.wishlistGrid}>
             {wishlist.map((item) => (
-              <div key={item._id || item.id} className={styles.wishlistCard} style={{ flex: '0 0 235px', maxWidth: '235px' }}>
-                <div className={styles.wishlistImageWrapper}>
-                  <img src={item.img} alt={item.name} className={styles.productImage} />
-                  <div className={styles.wishlistOverlay}>
-                    <span className={styles.viewDetailsText}>VIEW DETAILS &rarr;</span>
-                  </div>
-                  <button
-                    className={`${styles.btnHeart} ${styles.btnHeartActive}`}
-                    onClick={() => toggleWishlist(item)}
-                  >
-                    <IconHeartFilled />
-                  </button>
-                </div>
-                <div className={styles.wishlistInfo}>
-                  <h4 className={styles.wishlistName}>{item.name}</h4>
-                  <p className={styles.wishlistSubtitle}>Luxury Essentials Collection</p>
-                  <div className={styles.premiumSeparator}></div>
-                  <p className={styles.wishlistPrice}>{item.price}</p>
-                </div>
-              </div>
+              <WishlistItem key={item._id || item.id} item={item} toggleWishlist={toggleWishlist} />
             ))}
           </div>
         )}

@@ -49,6 +49,15 @@
   gap: 20px;
 }
 
+@media (max-width: 600px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+  .page {
+    padding: 100px 15px 60px;
+  }
+}
+
 .fullWidth {
   grid-column: 1 / -1;
 }

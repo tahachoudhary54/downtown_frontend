@@ -316,4 +316,11 @@
     width: 100%;
     justify-content: space-between;
   }
+
+  .page {
+    padding: 1.5rem 0;
+  }
+  .container {
+    padding: 0 1rem;
+  }
 }

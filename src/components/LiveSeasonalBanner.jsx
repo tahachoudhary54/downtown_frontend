@@ -10,10 +10,10 @@ export default function LiveSeasonalBanner({ initialSettings }) {
   
   const seasonalSettings = settings?.seasonalBanner || {
     enabled: true,
-    title: "Autumn Collection –\nUp to 30% OFF",
+    title: "Autumn Collection –\nUp to 50% OFF",
     image: "/autumn_banner.png",
-    buttonText: "SHOP COLLECTION",
-    buttonLink: "/shop"
+    buttonText: "SHOP SALE",
+    buttonLink: "/sale"
   };
 
   if (!seasonalSettings.enabled) return null;

@@ -130,9 +130,9 @@ export default function AdminOrders() {
             <p className="text-sm text-[var(--text-muted)] mt-1">Orders will appear here once customers place them.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-[var(--bg)] border-b border-[var(--border)]">
+          <div>
+            <table className="w-full text-sm block md:table">
+              <thead className="hidden md:table-header-group bg-[var(--bg)] border-b border-[var(--border)]">
                 <tr>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Order ID</th>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Customer</th>
@@ -143,19 +143,22 @@ export default function AdminOrders() {
                   <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="block md:table-row-group divide-y-0 md:divide-y md:divide-[var(--border)]">
                 {filtered.map((order) => (
-                  <tr key={order._id} className="hover:bg-[var(--bg)] transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs text-[var(--text-muted)]">
+                  <tr key={order._id} className="border border-[var(--border)] m-4 md:m-0 rounded-xl md:rounded-none md:border-0 hover:bg-[var(--bg)] transition-colors block md:table-row bg-white overflow-hidden shadow-sm md:shadow-none">
+                    <td className="block md:table-cell px-6 py-3 md:py-4 font-mono text-xs text-[var(--text-muted)] border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Order ID</span>
                       #{order._id.slice(-6).toUpperCase()}
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-[var(--foreground)]">{order.customer?.firstName} {order.customer?.lastName}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{order.customer?.email}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{order.customer?.phone}</p>
+                    <td className="block md:table-cell px-6 py-3 md:py-4 border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Customer</span>
+                      <p className="font-medium text-[var(--foreground)] inline-block md:block">{order.customer?.firstName} {order.customer?.lastName}</p>
+                      <p className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0">{order.customer?.email}</p>
+                      <p className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0">{order.customer?.phone}</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
+                    <td className="block md:table-cell px-6 py-3 md:py-4 border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Items</span>
+                      <div className="space-y-1 inline-block md:block">
                         {order.items?.map((item, i) => (
                           <p key={i} className="text-xs text-[var(--text-muted)]">
                             {item.name} × {item.quantity} <span className="opacity-60">(Size: {item.size})</span>
@@ -163,30 +166,36 @@ export default function AdminOrders() {
                         ))}
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-semibold text-[var(--foreground)]">
+                    <td className="block md:table-cell px-6 py-3 md:py-4 font-semibold text-[var(--foreground)] border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Total:</span>
                       ₹{order.financials?.total?.toLocaleString('en-IN')}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs font-medium uppercase bg-[var(--bg)] px-2 py-1 rounded">
+                    <td className="block md:table-cell px-6 py-3 md:py-4 border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Payment:</span>
+                      <span className="text-xs font-medium uppercase bg-[var(--bg)] px-2 py-1 rounded inline-block md:block w-fit">
                         {order.paymentMethod}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs text-[var(--text-muted)]">
+                    <td className="block md:table-cell px-6 py-3 md:py-4 text-xs text-[var(--text-muted)] border-b border-gray-100 md:border-b-0">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Date:</span>
                       {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <select
-                          value={order.orderStatus}
-                          onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                          disabled={updatingId === order._id}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-md border-0 ring-1 ring-inset ring-black/5 focus:ring-2 focus:ring-[var(--accent)] outline-none cursor-pointer shadow-sm transition-all ${STATUS_COLORS[order.orderStatus] || 'bg-gray-100'} disabled:opacity-50`}
-                        >
-                          <option value="Processing" className="bg-white text-gray-900 py-1">Processing</option>
-                          <option value="Shipped" className="bg-white text-gray-900 py-1">Shipped</option>
-                          <option value="Delivered" className="bg-white text-gray-900 py-1">Delivered</option>
-                          <option value="Cancelled" className="bg-white text-gray-900 py-1">Cancelled</option>
-                        </select>
+                    <td className="flex md:table-cell px-6 py-4 md:py-4 justify-between md:justify-start items-center bg-gray-50 md:bg-transparent">
+                      <div className="flex items-center gap-3 w-full justify-between md:justify-start">
+                        <div className="flex items-center gap-2">
+                          <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Status:</span>
+                          <select
+                            value={order.orderStatus}
+                            onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                            disabled={updatingId === order._id}
+                            className={`text-xs font-bold px-3 py-1.5 rounded-md border-0 ring-1 ring-inset ring-black/5 focus:ring-2 focus:ring-[var(--accent)] outline-none cursor-pointer shadow-sm transition-all ${STATUS_COLORS[order.orderStatus] || 'bg-gray-100'} disabled:opacity-50`}
+                          >
+                            <option value="Processing" className="bg-white text-gray-900 py-1">Processing</option>
+                            <option value="Shipped" className="bg-white text-gray-900 py-1">Shipped</option>
+                            <option value="Delivered" className="bg-white text-gray-900 py-1">Delivered</option>
+                            <option value="Cancelled" className="bg-white text-gray-900 py-1">Cancelled</option>
+                          </select>
+                        </div>
                         <button
                           onClick={() => handleDeleteOrder(order._id)}
                           disabled={updatingId === order._id}
