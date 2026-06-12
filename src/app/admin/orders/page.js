@@ -5,6 +5,9 @@ import { useAuth } from '@/context/AuthContext';
 import useSWR from 'swr';
 
 const STATUS_COLORS = {
+  'Pending Delivery Quote': 'bg-orange-100 text-orange-800',
+  'Waiting for Customer Confirmation': 'bg-purple-100 text-purple-800',
+  'Confirmed': 'bg-indigo-100 text-indigo-800',
   Processing: 'bg-yellow-100 text-yellow-800',
   Shipped: 'bg-blue-100 text-blue-800',
   Delivered: 'bg-green-100 text-green-800',
@@ -16,6 +19,7 @@ export default function AdminOrders() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [updatingId, setUpdatingId] = useState(null);
+  const [deliveryQuotes, setDeliveryQuotes] = useState({});
 
   const fetcher = (url) =>
     fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json());
@@ -54,6 +58,28 @@ export default function AdminOrders() {
       mutate(); // Re-fetch
     } catch (err) {
       console.error('Failed to update status', err);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleSendQuote = async (orderId) => {
+    const cost = deliveryQuotes[orderId];
+    if (!cost) return alert('Please enter a delivery cost');
+    
+    setUpdatingId(orderId);
+    try {
+      await fetch(`${apiBase}/api/orders/${orderId}/delivery-quote`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ deliveryCharge: cost }),
+      });
+      mutate();
+    } catch (err) {
+      console.error('Failed to send quote', err);
     } finally {
       setUpdatingId(null);
     }
@@ -108,6 +134,9 @@ export default function AdminOrders() {
           className="border border-[var(--border)] rounded-lg px-4 py-2 text-sm focus:outline-none bg-white"
         >
           <option value="all">All Statuses</option>
+          <option value="Pending Delivery Quote">Pending Delivery Quote</option>
+          <option value="Waiting for Customer Confirmation">Waiting for Customer Confirmation</option>
+          <option value="Confirmed">Confirmed</option>
           <option value="Processing">Processing</option>
           <option value="Shipped">Shipped</option>
           <option value="Delivered">Delivered</option>
@@ -155,6 +184,11 @@ export default function AdminOrders() {
                       <p className="font-medium text-[var(--foreground)] inline-block md:block">{order.customer?.firstName} {order.customer?.lastName}</p>
                       <p className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0">{order.customer?.email}</p>
                       <p className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0">{order.customer?.phone}</p>
+                      {order.shippingAddress && (
+                        <p className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0 mt-1">
+                          {order.shippingAddress.address}, {order.shippingAddress.city} - {order.shippingAddress.pinCode}
+                        </p>
+                      )}
                     </td>
                     <td className="block md:table-cell px-6 py-3 md:py-4 border-b border-gray-100 md:border-b-0">
                       <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Items</span>
@@ -184,17 +218,48 @@ export default function AdminOrders() {
                       <div className="flex items-center gap-3 w-full justify-between md:justify-start">
                         <div className="flex items-center gap-2">
                           <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Status:</span>
-                          <select
-                            value={order.orderStatus}
-                            onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                            disabled={updatingId === order._id}
-                            className={`text-xs font-bold px-3 py-1.5 rounded-md border-0 ring-1 ring-inset ring-black/5 focus:ring-2 focus:ring-[var(--accent)] outline-none cursor-pointer shadow-sm transition-all ${STATUS_COLORS[order.orderStatus] || 'bg-gray-100'} disabled:opacity-50`}
-                          >
-                            <option value="Processing" className="bg-white text-gray-900 py-1">Processing</option>
-                            <option value="Shipped" className="bg-white text-gray-900 py-1">Shipped</option>
-                            <option value="Delivered" className="bg-white text-gray-900 py-1">Delivered</option>
-                            <option value="Cancelled" className="bg-white text-gray-900 py-1">Cancelled</option>
-                          </select>
+                          <div className="flex flex-col gap-2">
+                            <select
+                              value={order.orderStatus}
+                              onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                              disabled={updatingId === order._id}
+                              className={`text-xs font-bold px-3 py-1.5 rounded-md border-0 ring-1 ring-inset ring-black/5 focus:ring-2 focus:ring-[var(--accent)] outline-none cursor-pointer shadow-sm transition-all ${STATUS_COLORS[order.orderStatus] || 'bg-gray-100'} disabled:opacity-50`}
+                            >
+                              <option value="Pending Delivery Quote" className="bg-white text-gray-900 py-1">Pending Delivery Quote</option>
+                              <option value="Waiting for Customer Confirmation" className="bg-white text-gray-900 py-1">Waiting Confirmation</option>
+                              <option value="Confirmed" className="bg-white text-gray-900 py-1">Confirmed</option>
+                              <option value="Processing" className="bg-white text-gray-900 py-1">Processing</option>
+                              <option value="Shipped" className="bg-white text-gray-900 py-1">Shipped</option>
+                              <option value="Delivered" className="bg-white text-gray-900 py-1">Delivered</option>
+                              <option value="Cancelled" className="bg-white text-gray-900 py-1">Cancelled</option>
+                            </select>
+                            
+                            {order.orderStatus === 'Pending Delivery Quote' && (
+                              <div className="flex items-center gap-1 mt-1 bg-white p-1 rounded border border-orange-200">
+                                <span className="text-xs text-gray-500 font-medium pl-1">₹</span>
+                                <input 
+                                  type="number" 
+                                  placeholder="Cost" 
+                                  className="w-16 px-1 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:border-orange-400"
+                                  value={deliveryQuotes[order._id] || ''}
+                                  onChange={(e) => setDeliveryQuotes({...deliveryQuotes, [order._id]: e.target.value})}
+                                />
+                                <button 
+                                  onClick={() => handleSendQuote(order._id)}
+                                  disabled={updatingId === order._id}
+                                  className="px-2 py-1 bg-orange-500 hover:bg-orange-600 text-white text-[10px] uppercase tracking-wider font-bold rounded transition-colors"
+                                >
+                                  Send
+                                </button>
+                              </div>
+                            )}
+                            
+                            {order.deliveryCharge !== null && order.deliveryCharge !== undefined && (
+                               <div className="text-[10px] text-gray-500 font-medium bg-gray-50 px-2 py-1 rounded inline-block mt-1">
+                                 Delivery: ₹{order.deliveryCharge}
+                               </div>
+                            )}
+                          </div>
                         </div>
                         <button
                           onClick={() => handleDeleteOrder(order._id)}

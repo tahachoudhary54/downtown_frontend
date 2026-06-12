@@ -61,8 +61,23 @@ export function CustomerNotificationsProvider({ children }) {
     }
   };
 
+  const deleteNotification = async (id) => {
+    if (!token) return;
+    try {
+      await fetch(`${apiBase}/api/notifications/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Optimistic update
+      mutate();
+      mutateCount();
+    } catch (err) {
+      console.error("Failed to delete notification", err);
+    }
+  };
+
   return (
-    <CustomerNotificationsContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead }}>
+    <CustomerNotificationsContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification }}>
       {children}
     </CustomerNotificationsContext.Provider>
   );

@@ -124,19 +124,17 @@ export default function CartPage() {
             </div>
             <div className={styles.summaryRow}>
               <span>Shipping</span>
-              <span className={styles.free}>{totalPrice >= 999 ? "FREE" : "₹99"}</span>
+              <span>Calculated later</span>
             </div>
             <div className={styles.summaryDivider} />
             <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
               <span>Total</span>
-              <span>₹{(totalPrice + (totalPrice >= 999 ? 0 : 99)).toLocaleString("en-IN")}</span>
+              <span>₹{totalPrice.toLocaleString("en-IN")}</span>
             </div>
 
-            {totalPrice < 999 && (
-              <p className={styles.shippingNote}>
-                Add ₹{(999 - totalPrice).toLocaleString("en-IN")} more for <strong>FREE shipping</strong>
-              </p>
-            )}
+            <p className={styles.shippingNote} style={{ color: '#666', background: '#f5f5f5', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', lineHeight: '1.4', textAlign: 'center' }}>
+              Delivery charges are not included in the order total. Delivery will be arranged after order confirmation and charges will be paid by the customer.
+            </p>
 
             {hasOutOfStockItems ? (
               <button className={styles.btnCheckout} style={{ display: 'block', width: '100%', textAlign: 'center', opacity: 0.5, cursor: 'not-allowed' }} disabled>REMOVE OUT OF STOCK ITEMS TO PROCEED</button>

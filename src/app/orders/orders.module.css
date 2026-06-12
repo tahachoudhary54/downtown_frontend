@@ -1,0 +1,122 @@
+.page {
+  min-height: 100vh;
+  padding: 120px 20px 60px;
+  background-color: var(--bg);
+}
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin-bottom: 2rem;
+}
+.orderCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+}
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+.orderId {
+  font-family: monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.orderDate {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.orderStatusBadge {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.timeline {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.timelineStep {
+  flex: 1;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 8px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+.timelineStep.active {
+  background: black;
+  color: white;
+}
+.timelineStep.completed {
+  background: #e5e7eb;
+  color: #374151;
+}
+.quoteSection {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.quoteText {
+  color: #9a3412;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+}
+.btnConfirm {
+  background: #f97316;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btnConfirm:hover { opacity: 0.9; }
+.btnCancel {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btnCancel:hover { background: #fef2f2; }
+.orderItems {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}

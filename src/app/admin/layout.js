@@ -218,8 +218,15 @@ function AdminLayoutContent({ children }) {
                         onClick={() => {
                           markAsRead(notif.id);
                           setNotifOpen(false);
-                          if (notif.type === 'order') router.push('/admin/orders');
-                          if (notif.type === 'user') router.push('/admin/users');
+                          if (notif.type && notif.type.includes('order')) {
+                            router.push('/admin/orders');
+                          } else if (notif.type === 'user') {
+                            router.push('/admin/users');
+                          } else if (notif.type === 'alert' || notif.type === 'stock_alert') {
+                            router.push('/admin/stock');
+                          } else {
+                            router.push('/admin/notifications');
+                          }
                         }}
                         className={`p-4 border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors cursor-pointer ${notif.unread ? 'bg-[#FAF8F5]/50 border-l-4 border-l-[var(--accent)]' : 'border-l-4 border-l-transparent'}`}
                       >
@@ -271,6 +278,19 @@ function AdminLayoutContent({ children }) {
       {/* New Order Toast Popup */}
       {toast && (
         <div
+          onClick={() => {
+            if (toast.id) markAsRead(toast.id);
+            setToast(null);
+            if (toast.type && toast.type.includes('order')) {
+              router.push('/admin/orders');
+            } else if (toast.type === 'user') {
+              router.push('/admin/users');
+            } else if (toast.type === 'alert' || toast.type === 'stock_alert') {
+              router.push('/admin/stock');
+            } else {
+              router.push('/admin/notifications');
+            }
+          }}
           style={{
             position: 'fixed',
             top: '80px',
@@ -286,6 +306,7 @@ function AdminLayoutContent({ children }) {
             gap: '14px',
             alignItems: 'flex-start',
             animation: 'slideInToast 0.35s ease',
+            cursor: 'pointer'
           }}
         >
           <div style={{

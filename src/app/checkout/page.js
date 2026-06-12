@@ -20,6 +20,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' or 'netbanking'
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [deliveryConfirmed, setDeliveryConfirmed] = useState(false);
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -54,8 +55,8 @@ export default function CheckoutPage() {
     return null;
   }
 
-  const shippingCost = totalPrice >= 999 ? 0 : 99;
-  const finalTotal = totalPrice + shippingCost;
+  const shippingCost = 0;
+  const finalTotal = totalPrice;
 
   const handlePay = async (e) => {
     e.preventDefault();
@@ -273,7 +274,7 @@ export default function CheckoutPage() {
             </div>
             <div className={styles.summaryRow}>
               <span>Shipping</span>
-              <span>{shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}</span>
+              <span>Calculated later</span>
             </div>
 
             <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
@@ -281,11 +282,29 @@ export default function CheckoutPage() {
               <span>₹{finalTotal.toLocaleString('en-IN')}</span>
             </div>
 
+            <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', padding: '12px', borderRadius: '8px', marginBottom: '20px' }}>
+              <p style={{ color: '#9a3412', fontSize: '0.85rem', lineHeight: '1.4', marginBottom: '10px', fontWeight: '500' }}>
+                Delivery charges are calculated separately after address verification. Our team will contact you with the final delivery cost before dispatch.
+              </p>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={deliveryConfirmed} 
+                  onChange={(e) => setDeliveryConfirmed(e.target.checked)} 
+                  style={{ marginTop: '3px' }}
+                />
+                <span style={{ fontSize: '0.8rem', color: '#c2410c', fontWeight: '600' }}>
+                  I understand that delivery charges are separate and will be paid by me.
+                </span>
+              </label>
+            </div>
+
             <button 
               type="submit" 
               form="checkout-form"
               className={styles.btnPay}
-              disabled={isProcessing}
+              disabled={isProcessing || !deliveryConfirmed}
+              style={{ opacity: (!deliveryConfirmed) ? 0.5 : 1 }}
             >
               {isProcessing ? (
                 'Processing...'
