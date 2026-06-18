@@ -53,6 +53,7 @@
 }
 
 .input {
+  width: 100%;
   padding: 0.9rem 1.2rem;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -113,8 +114,11 @@
 }
 
 @media (max-width: 600px) {
+  .page {
+    padding: 2rem 1rem;
+  }
   .authContainer {
-    padding: 2rem;
+    padding: 2rem 1.5rem;
   }
 }
 
@@ -128,6 +132,7 @@
 
 .passwordWrapper .input {
   flex: 1;
+  min-width: 0;
   padding-right: 2.5rem; /* space for eye icon */
 }
 
