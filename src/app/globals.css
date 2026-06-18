@@ -80,3 +80,11 @@ a {
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+/* Hide scrollbar visually but allow scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

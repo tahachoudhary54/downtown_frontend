@@ -1,10 +1,10 @@
-import PolicyPage from '@/components/PolicyPage';
+import ContactUsContent from './ContactUsContent';
 
 export const metadata = {
   title: 'Contact Us | Downtown Boutique',
-  description: 'Get in touch with Downtown Boutique.',
+  description: 'Get in touch with Downtown Boutique. We are here to assist you.',
 };
 
 export default function ContactUsPage() {
-  return <PolicyPage title="Contact Us" policyKey="contactUs" />;
+  return <ContactUsContent />;
 }

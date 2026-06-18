@@ -1,0 +1,194 @@
+.page {
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+/* Timeline */
+.timelineSection {
+  margin-bottom: 5rem;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.sectionTitle {
+  font-family: var(--font-playfair);
+  font-size: 2rem;
+  color: #2e2a27;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.timeline {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(0,0,0,0.05);
+  z-index: 1;
+}
+
+.timelineItem {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  flex: 1;
+  padding: 0 1rem;
+}
+
+.timelineIcon {
+  width: 64px;
+  height: 64px;
+  background: #fff;
+  border: 2px solid var(--accent, #3b82f6);
+  color: var(--accent, #3b82f6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.timelineItem:hover .timelineIcon {
+  transform: scale(1.1);
+  background: var(--accent, #3b82f6);
+  color: #fff;
+}
+
+.timelineContent h3 {
+  font-family: var(--font-playfair);
+  font-size: 1.125rem;
+  color: #2e2a27;
+  margin-bottom: 0.5rem;
+}
+
+.timelineContent p {
+  font-family: var(--font-inter);
+  font-size: 0.9rem;
+  color: rgba(46,42,39,0.7);
+  line-height: 1.5;
+}
+
+/* Info Cards */
+.infoCards {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: fadeIn 1s ease forwards;
+}
+
+.infoCard {
+  background: var(--secondary, #fcfaf8);
+  border: 1px solid rgba(0,0,0,0.03);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.infoCard:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+}
+
+.cardHeader {
+  background: #fff;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.cardTitle {
+  font-family: var(--font-playfair);
+  font-size: 1.5rem;
+  color: #2e2a27;
+}
+
+.cardBody {
+  padding: 2rem;
+}
+
+.cardBody ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.cardBody ul li {
+  font-family: var(--font-inter);
+  color: rgba(46,42,39,0.8);
+  line-height: 1.7;
+  margin-bottom: 0.75rem;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.cardBody ul li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent, #3b82f6);
+}
+
+.cardBody p {
+  font-family: var(--font-inter);
+  color: rgba(46,42,39,0.8);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.cardBody p:last-child {
+  margin-bottom: 0;
+}
+
+.cardNote {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: rgba(46,42,39,0.6);
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .timeline {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .timeline::before {
+    display: none;
+  }
+  .timelineItem {
+    display: flex;
+    text-align: left;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .timelineIcon {
+    margin: 0;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 2rem 1rem;
+  }
+  .cardHeader, .cardBody {
+    padding: 1.5rem;
+  }
+}

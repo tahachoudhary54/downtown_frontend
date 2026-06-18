@@ -1,0 +1,68 @@
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--secondary, #fcfaf8); /* Warm ivory fallback */
+  color: #2e2a27;
+  text-align: center;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.withImage {
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  border-bottom: none;
+}
+
+.overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.withImage .overlay {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.content {
+  max-width: 800px;
+  position: relative;
+  z-index: 2;
+  animation: fadeInDown 0.8s ease forwards;
+}
+
+.title {
+  font-family: var(--font-playfair);
+  font-size: 3rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-family: var(--font-inter);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .title { font-size: 2.25rem; }
+  .subtitle { font-size: 1rem; }
+  .hero { min-height: 250px; }
+}

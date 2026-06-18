@@ -1,10 +1,10 @@
-import PolicyPage from '@/components/PolicyPage';
+import TermsContent from './TermsContent';
 
 export const metadata = {
   title: 'Terms & Conditions | Downtown Boutique',
-  description: 'Terms and Conditions for Downtown Boutique.',
+  description: 'Terms and Conditions governing your use of Downtown Boutique services.',
 };
 
-export default function TermsPage() {
-  return <PolicyPage title="Terms & Conditions" policyKey="termsAndConditions" />;
+export default function TermsConditionsPage() {
+  return <TermsContent />;
 }

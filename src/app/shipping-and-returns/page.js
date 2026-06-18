@@ -1,10 +1,10 @@
-import PolicyPage from '@/components/PolicyPage';
+import ShippingContent from './ShippingContent';
 
 export const metadata = {
   title: 'Shipping & Returns | Downtown Boutique',
-  description: 'Shipping & Returns Policy for Downtown Boutique.',
+  description: 'Everything you need to know about our delivery process and return policy.',
 };
 
-export default function ShippingPage() {
-  return <PolicyPage title="Shipping & Returns" policyKey="shippingAndReturns" />;
+export default function ShippingReturnsPage() {
+  return <ShippingContent />;
 }

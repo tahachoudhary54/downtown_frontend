@@ -134,7 +134,7 @@ export default function AdminTicketsPage() {
                       <td className="flex md:table-cell px-4 pt-3 pb-4 md:p-4 items-center gap-4 mt-2 md:mt-0 bg-gray-50 md:bg-transparent border-t md:border-t-0 border-gray-100">
                         <button 
                           onClick={() => router.push(`/admin/tickets/${ticket._id}`)}
-                          className="text-[var(--accent)] hover:underline text-sm font-medium text-left"
+                          className="text-[var(--accent)] hover:underline text-sm font-medium text-left md:mr-4"
                         >
                           View & Reply
                         </button>

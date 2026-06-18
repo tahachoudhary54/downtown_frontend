@@ -1,10 +1,10 @@
-import PolicyPage from '@/components/PolicyPage';
+import FAQContent from './FAQContent';
 
 export const metadata = {
   title: 'FAQ | Downtown Boutique',
-  description: 'Frequently Asked Questions for Downtown Boutique.',
+  description: 'Frequently Asked Questions about orders, delivery, returns, and payments.',
 };
 
 export default function FAQPage() {
-  return <PolicyPage title="FAQ" policyKey="faq" />;
+  return <FAQContent />;
 }

@@ -1,10 +1,10 @@
-import PolicyPage from '@/components/PolicyPage';
+import PrivacyContent from './PrivacyContent';
 
 export const metadata = {
   title: 'Privacy Policy | Downtown Boutique',
-  description: 'Privacy Policy for Downtown Boutique.',
+  description: 'Learn how Downtown Boutique collects, uses, and protects your personal data.',
 };
 
-export default function PrivacyPage() {
-  return <PolicyPage title="Privacy Policy" policyKey="privacyPolicy" />;
+export default function PrivacyPolicyPage() {
+  return <PrivacyContent />;
 }

@@ -1,10 +1,10 @@
-import PolicyPage from '@/components/PolicyPage';
+import SizeGuideContent from './SizeGuideContent';
 
 export const metadata = {
   title: 'Size Guide | Downtown Boutique',
-  description: 'Size Guide for Downtown Boutique.',
+  description: 'Find your perfect fit with our comprehensive menswear size guide.',
 };
 
 export default function SizeGuidePage() {
-  return <PolicyPage title="Size Guide" policyKey="sizeGuide" />;
+  return <SizeGuideContent />;
 }

@@ -127,8 +127,8 @@ export default function AdminProducts() {
                     <td className="p-4 font-medium text-[var(--foreground)] whitespace-nowrap">{product.name}</td>
                     <td className="p-4 text-[var(--text-muted)] capitalize whitespace-nowrap">{product.category}</td>
                     <td className="p-4 text-[var(--foreground)] font-medium whitespace-nowrap">
-                      ₹{product.price}
-                      {product.isOnSale && <span className="ml-2 text-xs text-red-500 line-through">₹{product.originalPrice}</span>}
+                      {String(product.price).startsWith('₹') ? product.price : `₹${product.price}`}
+                      {product.isOnSale && <span className="ml-2 text-xs text-red-500 line-through">{String(product.originalPrice).startsWith('₹') ? product.originalPrice : `₹${product.originalPrice}`}</span>}
                     </td>
                     <td className="p-4 whitespace-nowrap">
                       {product.isOnSale && (

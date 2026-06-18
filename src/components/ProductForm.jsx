@@ -74,8 +74,21 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     e.preventDefault();
     setLoading(true);
     try {
+      const rawPrice = String(formData.price);
+      if (rawPrice.includes('-')) {
+        alert("Price cannot be negative.");
+        setLoading(false);
+        return;
+      }
+
+      if (formData.isOnSale && String(formData.originalPrice).includes('-')) {
+        alert("Original price cannot be negative.");
+        setLoading(false);
+        return;
+      }
+
       // derive priceValue
-      const priceValue = parseFloat(formData.price.replace(/[^0-9.]/g, ''));
+      const priceValue = parseFloat(rawPrice.replace(/[^0-9.]/g, ''));
       const payload = { ...formData, priceValue };
 
       const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${isEdit ? `/${initialData._id}` : ''}`;

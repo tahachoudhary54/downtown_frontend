@@ -52,6 +52,7 @@ import { RealtimeStockProvider } from "../context/RealtimeStockContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import WhatsAppButton from "../components/WhatsAppButton";
+import FaqButton from "../components/FaqButton";
 
 export default function RootLayout({ children }) {
   console.log("GOOGLE_CLIENT_ID loaded:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
@@ -71,6 +72,7 @@ export default function RootLayout({ children }) {
                       <ClientLayoutWrapper>
                         {children}
                       </ClientLayoutWrapper>
+                      <FaqButton />
                       <WhatsAppButton />
                     </WishlistProvider>
                   </CartProvider>

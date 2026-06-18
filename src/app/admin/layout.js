@@ -7,13 +7,16 @@ import { useAuth } from '@/context/AuthContext';
 import { NotificationsProvider, useNotifications } from '@/context/NotificationsContext';
 
 function AdminLayoutContent({ children }) {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, token } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const notifRef = useRef(null);
+  const searchContainerRef = useRef(null);
 
   const getPageTitle = (path) => {
     if (path === '/admin' || path === '/admin/') return 'Dashboard';
@@ -32,10 +35,38 @@ function AdminLayoutContent({ children }) {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setNotifOpen(false);
       }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setIsSuggestionsOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!globalSearch.trim() || !token) {
+      setSuggestions([]);
+      setIsSuggestionsOpen(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products?search=${encodeURIComponent(globalSearch.trim())}&limit=5`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSuggestions(data.data);
+          setIsSuggestionsOpen(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch suggestions:", err);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [globalSearch, token]);
 
   // Show a toast popup whenever a new notification arrives (cross-tab sync)
   useEffect(() => {
@@ -80,7 +111,7 @@ function AdminLayoutContent({ children }) {
 
   return (
     <>
-    <div className="min-h-screen bg-[var(--background)] flex relative overflow-hidden">
+    <div className="h-screen bg-[var(--background)] flex relative overflow-hidden">
       {/* Sidebar Overlay for Mobile */}
       {sidebarOpen && (
         <div 
@@ -99,7 +130,7 @@ function AdminLayoutContent({ children }) {
           </Link>
         </div>
         
-        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
           {navLinks.map((link) => {
             const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.href !== '/admin');
             return (
@@ -160,14 +191,16 @@ function AdminLayoutContent({ children }) {
           <div className="flex flex-1 justify-end items-center gap-3 sm:gap-6">
             
             {/* Search */}
-            <div className="relative max-w-[140px] sm:max-w-sm w-full">
+            <div className="relative max-w-[140px] sm:max-w-sm w-full" ref={searchContainerRef}>
               <input 
                 type="text" 
                 placeholder="Search products..." 
                 value={globalSearch}
+                onFocus={() => { if (globalSearch.trim() && suggestions.length > 0) setIsSuggestionsOpen(true); }}
                 onChange={(e) => setGlobalSearch(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
+                    setIsSuggestionsOpen(false);
                     if (globalSearch.trim()) {
                       router.push(`/admin/products?search=${encodeURIComponent(globalSearch.trim())}`);
                     } else {
@@ -179,6 +212,7 @@ function AdminLayoutContent({ children }) {
               />
               <button 
                 onClick={() => {
+                  setIsSuggestionsOpen(false);
                   if (globalSearch.trim()) {
                     router.push(`/admin/products?search=${encodeURIComponent(globalSearch.trim())}`);
                   } else {
@@ -189,6 +223,43 @@ function AdminLayoutContent({ children }) {
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               </button>
+
+              {/* Suggestions Dropdown */}
+              {isSuggestionsOpen && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-[var(--border)] z-50 overflow-hidden">
+                  <div className="max-h-60 overflow-y-auto">
+                    {suggestions.map((product) => (
+                      <div 
+                        key={product._id} 
+                        onClick={() => {
+                          setGlobalSearch('');
+                          setIsSuggestionsOpen(false);
+                          router.push(`/admin/products/edit/${product._id}`);
+                        }}
+                        className="p-3 border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors cursor-pointer flex items-center gap-3"
+                      >
+                        <img src={product.img} alt={product.name} className="w-10 h-10 object-cover rounded border border-[var(--border)]" />
+                        <div className="flex-1 overflow-hidden">
+                          <h4 className="text-sm font-medium text-[var(--foreground)] truncate">{product.name}</h4>
+                          <p className="text-xs text-[var(--text-muted)] truncate capitalize">{product.category}</p>
+                        </div>
+                        <div className="text-sm font-semibold text-[var(--foreground)] whitespace-nowrap">
+                          ₹{product.price}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div 
+                    className="p-2 text-center text-sm text-[var(--accent)] hover:underline cursor-pointer bg-gray-50 border-t border-[var(--border)]"
+                    onClick={() => {
+                      setIsSuggestionsOpen(false);
+                      router.push(`/admin/products?search=${encodeURIComponent(globalSearch.trim())}`);
+                    }}
+                  >
+                    View all results
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Notifications */}

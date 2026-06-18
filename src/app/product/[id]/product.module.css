@@ -336,3 +336,28 @@
     margin-bottom: 2rem;
   }
 }
+
+.btnWhatsAppProduct {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.2rem;
+  background-color: transparent;
+  color: #25d366;
+  border: 1px solid #25d366;
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 3rem;
+  text-decoration: none;
+}
+
+.btnWhatsAppProduct:hover {
+  background-color: rgba(37, 211, 102, 0.1);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.15);
+}
