@@ -40,8 +40,12 @@ export default function MyAccount() {
 
   // Support Tickets State
   const [showAddTicket, setShowAddTicket] = useState(false);
-  const [newTicket, setNewTicket] = useState({ subject: '', category: 'General Inquiry', description: '' });
+  const [newTicket, setNewTicket] = useState({ subject: '', category: 'Payment Issue', description: '' });
   const [savingTicket, setSavingTicket] = useState(false);
+  const [ticketError, setTicketError] = useState('');
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
+  const [ticketReply, setTicketReply] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   const fetcher = (url) => fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json());
@@ -54,6 +58,12 @@ export default function MyAccount() {
   const { data: ticketsData, mutate: mutateTickets } = useSWR(
     token && activeTab === 'support' ? `${apiBase}/api/tickets/my-tickets` : null,
     fetcher
+  );
+
+  const { data: singleTicketData, mutate: mutateSingleTicket } = useSWR(
+    token && selectedTicketId ? `${apiBase}/api/tickets/${selectedTicketId}` : null,
+    fetcher,
+    { refreshInterval: 5000 }
   );
 
   useEffect(() => { setMounted(true); }, []);
@@ -178,6 +188,7 @@ export default function MyAccount() {
 
   const handleCreateTicket = async (e) => {
     e.preventDefault();
+    setTicketError('');
     setSavingTicket(true);
     try {
       const res = await fetch(`${apiBase}/api/tickets`, {
@@ -188,15 +199,39 @@ export default function MyAccount() {
       if (res.ok) {
         mutateTickets();
         setShowAddTicket(false);
-        setNewTicket({ subject: '', category: 'General Inquiry', description: '' });
+        setNewTicket({ subject: '', category: 'Payment Issue', description: '' });
       } else {
         const data = await res.json();
-        alert(data.message || 'Failed to create ticket');
+        setTicketError(data.message || 'Failed to create ticket');
       }
     } catch (err) {
-      alert('Error creating ticket');
+      setTicketError('Error creating ticket');
     } finally {
       setSavingTicket(false);
+    }
+  };
+
+  const handleReplyTicket = async (e) => {
+    e.preventDefault();
+    if (!ticketReply.trim()) return;
+    setSendingReply(true);
+    try {
+      const res = await fetch(`${apiBase}/api/tickets/${selectedTicketId}/reply`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: ticketReply })
+      });
+      if (res.ok) {
+        setTicketReply('');
+        mutateSingleTicket();
+        mutateTickets();
+      } else {
+        alert('Failed to send reply');
+      }
+    } catch (err) {
+      alert('Error sending reply');
+    } finally {
+      setSendingReply(false);
     }
   };
 
@@ -371,6 +406,11 @@ export default function MyAccount() {
 
                 {showAddTicket ? (
                   <form onSubmit={handleCreateTicket}>
+                    {ticketError && (
+                      <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#fef2f2', color: '#dc2626', borderRadius: '8px', border: '1px solid #fecaca' }}>
+                        {ticketError}
+                      </div>
+                    )}
                     <div className={styles.formGroup}>
                       <label className={styles.label}>Subject</label>
                       <input type="text" value={newTicket.subject} onChange={(e) => setNewTicket({...newTicket, subject: e.target.value})} className={styles.input} required />
@@ -378,10 +418,13 @@ export default function MyAccount() {
                     <div className={styles.formGroup}>
                       <label className={styles.label}>Category</label>
                       <select value={newTicket.category} onChange={(e) => setNewTicket({...newTicket, category: e.target.value})} className={styles.input} required>
-                        <option value="General Inquiry">General Inquiry</option>
-                        <option value="Order Issue">Order Issue</option>
-                        <option value="Returns/Refunds">Returns/Refunds</option>
-                        <option value="Technical Support">Technical Support</option>
+                        <option value="Payment Issue">Payment Issue</option>
+                        <option value="Delivery Issue">Delivery Issue</option>
+                        <option value="Wrong Product">Wrong Product</option>
+                        <option value="Damaged Product">Damaged Product</option>
+                        <option value="Return Request">Return Request</option>
+                        <option value="Refund Request">Refund Request</option>
+                        <option value="Other">Other</option>
                       </select>
                     </div>
                     <div className={styles.formGroup}>
@@ -393,6 +436,51 @@ export default function MyAccount() {
                       <button type="button" className={`${styles.button} ${styles.btnSecondary}`} onClick={() => setShowAddTicket(false)}>Cancel</button>
                     </div>
                   </form>
+                ) : selectedTicketId ? (
+                  <div>
+                    <button onClick={() => setSelectedTicketId(null)} className={styles.addressActionBtn} style={{ marginBottom: '16px' }}>← Back to Tickets</button>
+                    {!singleTicketData ? (
+                      <p>Loading ticket details...</p>
+                    ) : (
+                      <div>
+                        <div style={{ marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
+                          <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{singleTicketData.data.subject}</h3>
+                          <div style={{ display: 'flex', gap: '12px', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px', alignItems: 'center' }}>
+                            <span>#{singleTicketData.data._id.slice(-6).toUpperCase()}</span>
+                            <span>•</span>
+                            <span>{singleTicketData.data.category}</span>
+                            <span>•</span>
+                            <span className={`${styles.ticketStatus} ${styles[singleTicketData.data.status.toLowerCase()] || ''}`} style={{ padding: '4px 10px', fontSize: '0.75rem', borderRadius: '12px' }}>{singleTicketData.data.status}</span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px', maxHeight: '400px', overflowY: 'auto', paddingRight: '8px' }}>
+                          {singleTicketData.data.messages.map((msg, i) => (
+                            <div key={i} style={{ alignSelf: msg.sender === 'customer' ? 'flex-end' : 'flex-start', maxWidth: '85%', backgroundColor: msg.sender === 'customer' ? '#FAF8F5' : '#f3f4f6', padding: '12px 16px', borderRadius: '12px', border: msg.sender === 'customer' ? '1px solid var(--border)' : 'none' }}>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: '600' }}>{msg.sender === 'customer' ? 'You' : 'Downtown Support'} • {new Date(msg.createdAt).toLocaleString()}</div>
+                              <div style={{ fontSize: '0.95rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{msg.text}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {singleTicketData.data.status !== 'Closed' && (
+                          <form onSubmit={handleReplyTicket} style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                            <textarea 
+                              value={ticketReply} 
+                              onChange={(e) => setTicketReply(e.target.value)} 
+                              placeholder="Type your reply here..." 
+                              className={styles.textarea} 
+                              style={{ minHeight: '80px', marginBottom: '12px' }} 
+                              required 
+                            />
+                            <button type="submit" className={styles.button} disabled={sendingReply}>
+                              {sendingReply ? 'Sending...' : 'Send Reply'}
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <>
                     {tickets.length === 0 ? (
@@ -400,7 +488,14 @@ export default function MyAccount() {
                     ) : (
                       <div className={styles.ticketList}>
                         {tickets.map(ticket => (
-                          <div key={ticket._id} className={styles.ticketItem}>
+                          <div 
+                            key={ticket._id} 
+                            className={styles.ticketItem}
+                            onClick={() => setSelectedTicketId(ticket._id)}
+                            style={{ cursor: 'pointer', transition: 'background-color 0.2s' }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#FAF8F5'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                          >
                             <div className={styles.ticketMain}>
                               <span className={styles.ticketSubject}>{ticket.subject}</span>
                               <span className={styles.ticketMeta}>

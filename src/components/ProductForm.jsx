@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { categories } from '@/data/categories';
 
 export default function ProductForm({ initialData = null, isEdit = false }) {
   const { token } = useAuth();
@@ -12,7 +13,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     name: '',
     price: '',
     description: '',
-    category: 'clothing',
+    category: categories[0]?.name || 'clothing',
     img: '',
     isOnSale: false,
     originalPrice: '',
@@ -22,6 +23,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
   
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -59,11 +61,11 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
       if (result.success) {
         setFormData(prev => ({ ...prev, img: result.imageUrl || result.url || '' }));
       } else {
-        alert(result.message || 'Image upload failed');
+        setError(result.message || 'Image upload failed');
       }
     } catch (err) {
       console.error(err);
-      alert('Error uploading image');
+      setError('Error uploading image');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -72,17 +74,18 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
     try {
       const rawPrice = String(formData.price);
       if (rawPrice.includes('-')) {
-        alert("Price cannot be negative.");
+        setError("Price cannot be negative.");
         setLoading(false);
         return;
       }
 
       if (formData.isOnSale && String(formData.originalPrice).includes('-')) {
-        alert("Original price cannot be negative.");
+        setError("Original price cannot be negative.");
         setLoading(false);
         return;
       }
@@ -108,7 +111,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
         router.refresh(); // purge next.js cache
         router.push('/admin/products');
       } else {
-        alert(data.message);
+        setError(data.message || 'Something went wrong');
       }
     } catch (err) {
       console.error(err);
@@ -121,6 +124,12 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     <div className="bg-white p-6 rounded-xl shadow-sm border border-[var(--border)] max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6">{isEdit ? 'Edit Product' : 'Add New Product'}</h2>
       
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-[var(--text-muted)]">Product Name *</label>
@@ -148,6 +157,20 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
               />
             </div>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-[var(--text-muted)]">Category *</label>
+          <select
+            name="category"
+            value={formData.category || (categories[0]?.name || 'clothing')}
+            onChange={handleChange}
+            className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
+          >
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.name}>{cat.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">

@@ -295,6 +295,8 @@ function AdminLayoutContent({ children }) {
                             router.push('/admin/users');
                           } else if (notif.type === 'alert' || notif.type === 'stock_alert') {
                             router.push('/admin/stock');
+                          } else if (notif.type && notif.type.includes('ticket')) {
+                            router.push('/admin/tickets');
                           } else {
                             router.push('/admin/notifications');
                           }
@@ -358,6 +360,8 @@ function AdminLayoutContent({ children }) {
               router.push('/admin/users');
             } else if (toast.type === 'alert' || toast.type === 'stock_alert') {
               router.push('/admin/stock');
+            } else if (toast.type && toast.type.includes('ticket')) {
+              router.push('/admin/tickets');
             } else {
               router.push('/admin/notifications');
             }
