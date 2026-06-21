@@ -30,7 +30,7 @@ export default async function CollectionPage({ params }) {
     notFound();
   }
 
-  const products = await fetchProducts({ category: category.name });
+  const products = await fetchProducts({ category: category.name, limit: 1000 });
 
   return (
     <div className={styles.page}>
@@ -42,7 +42,7 @@ export default async function CollectionPage({ params }) {
 
         <LiveProductGrid 
           initialProducts={products} 
-          queryParams={{ category: category.name }}
+          queryParams={{ category: category.name, limit: 1000 }}
           emptyMessage="No products found in this collection." 
         />
       </section>

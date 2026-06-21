@@ -1,6 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-export async function fetchProducts(params = {}) {
+export async function fetchProducts(params = {}, returnFullRes = false) {
   try {
     const query = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/api/products${query ? `?${query}` : ""}`, {
@@ -8,6 +8,7 @@ export async function fetchProducts(params = {}) {
     });
     if (res.ok) {
       const data = await res.json();
+      if (returnFullRes) return { products: data.data || [], categoryCounts: data.categoryCounts || {} };
       return data.data;
     }
   } catch (e) {
@@ -16,8 +17,10 @@ export async function fetchProducts(params = {}) {
   // Fallback to static product list
   try {
     const { products } = require('../data/products');
+    if (returnFullRes) return { products: products || [], categoryCounts: {} };
     return products || [];
   } catch (_) {
+    if (returnFullRes) return { products: [], categoryCounts: {} };
     return [];
   }
 }

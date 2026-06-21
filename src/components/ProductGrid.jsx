@@ -6,13 +6,16 @@ import { useWishlist } from '../context/WishlistContext';
 import IconHeartOutline from './IconHeartOutline';
 import IconHeartFilled from './IconHeartFilled';
 
-import { useLiveStock } from '../context/RealtimeStockContext';
+import { useLiveStock, useLiveVisibility } from '../context/RealtimeStockContext';
 import { getSalePricing } from '../utils/price';
 
 function ProductCard({ item }) {
   const { toggleWishlist, isWishlisted } = useWishlist();
   const liveStock = useLiveStock(item._id || item.id, item.stock !== undefined ? item.stock : (item.totalStock || 0));
+  const liveVisibility = useLiveVisibility(item._id || item.id, item.inStock !== undefined ? item.inStock : true);
   const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing(item);
+
+  if (liveVisibility === false) return null;
 
   let badgeText = null;
   let badgeClass = styles.statusBadge;
@@ -22,8 +25,8 @@ function ProductCard({ item }) {
   }
 
   return (
-    <Link href={`/product/${item._id || item.id}`} style={{ textDecoration: 'none' }}>
-      <div className={styles.productCard}>
+    <Link href={`/product/${item._id || item.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }}>
+      <div className={styles.productCard} style={{ width: '100%', height: '100%' }}>
         <div className={styles.productImageWrapper}>
           <Image src={item.img} alt={item.name} fill className={`${styles.productImage} ${liveStock === 0 ? styles.premiumOutOfStockImage : ''}`} />
           
@@ -69,10 +72,12 @@ function ProductCard({ item }) {
             </button>
           </div>
         </div>
-        <div className={styles.productInfo}>
-          <h4 className={styles.productName}>{item.name}</h4>
-          <p className={styles.productSubtitle}>Luxury Essentials Collection</p>
-          <div className={styles.premiumSeparator}></div>
+        <div className={styles.productInfo} style={{ flexGrow: 1, justifyContent: 'space-between' }}>
+          <div>
+            <h4 className={styles.productName}>{item.name}</h4>
+            <p className={styles.productSubtitle}>Luxury Essentials Collection</p>
+            <div className={styles.premiumSeparator}></div>
+          </div>
           {isSaleValid ? (
             <div className="premiumPriceContainer">
               <span className="premiumOriginalPrice">{originalPriceStr}</span>

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { categories } from '@/data/categories';
+// Dynamic categories loaded via API
 
 export default function ProductForm({ initialData = null, isEdit = false }) {
   const { token } = useAuth();
@@ -13,7 +13,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     name: '',
     price: '',
     description: '',
-    category: categories[0]?.name || 'clothing',
+    category: '',
     img: '',
     isOnSale: false,
     originalPrice: '',
@@ -21,10 +21,30 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     sizes: [],
   });
   
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/categories?activeOnly=true`);
+        const data = await res.json();
+        if (data.success) {
+          setCategories(data.data);
+          // Auto-select first category if not set
+          if (!formData.category && data.data.length > 0) {
+            setFormData(prev => ({ ...prev, category: data.data[0].name }));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (initialData) {
@@ -163,12 +183,14 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
           <label className="block text-sm font-medium text-[var(--text-muted)]">Category *</label>
           <select
             name="category"
-            value={formData.category || (categories[0]?.name || 'clothing')}
+            value={formData.category || ''}
             onChange={handleChange}
+            required
             className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
           >
+            <option value="" disabled>Select a category</option>
             {categories.map(cat => (
-              <option key={cat.id} value={cat.name}>{cat.name}</option>
+              <option key={cat._id || cat.id} value={cat.name}>{cat.name}</option>
             ))}
           </select>
         </div>

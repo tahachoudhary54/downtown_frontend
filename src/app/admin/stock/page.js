@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { io } from 'socket.io-client';
 
 export default function AdminStock() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function AdminStock() {
     try {
       // Use a limit of 10 to match the products page pagination
       let query = `?page=${page}&limit=10`;
-      if (search) query += `&search=${search}`;
+      if (search) query += `&search=${encodeURIComponent(search)}`;
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${query}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -51,6 +52,21 @@ export default function AdminStock() {
   useEffect(() => {
     if (token) fetchProducts();
   }, [token, page, search]);
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const socket = io(apiUrl);
+
+    socket.on('stock_updated', (data) => {
+      setProducts(prev => prev.map(p => 
+        p._id === data.productId 
+          ? { ...p, stock: data.stock, inStock: data.inStock, inventory: data.inventory } 
+          : p
+      ));
+    });
+
+    return () => socket.disconnect();
+  }, []);
 
   const toggleVisibility = async (id, currentStatus) => {
     try {

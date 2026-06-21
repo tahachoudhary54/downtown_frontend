@@ -6,22 +6,19 @@ import styles from "../page.module.css";
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-async function getSettings() {
+async function fetchCategories() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/categories?activeOnly=true`, { cache: 'no-store' });
     const data = await res.json();
     if (data.success) return data.data;
   } catch (err) {
-    console.error("Failed to fetch settings", err);
+    console.error("Failed to fetch categories", err);
   }
-  return null;
+  return [];
 }
 
 export default async function ClothingPage() {
-  const settings = await getSettings();
-  const activeCategories = (settings?.categories && Array.isArray(settings.categories) ? settings.categories : defaultCategories)
-    .filter(c => c.isActive !== false)
-    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  const activeCategories = await fetchCategories();
   return (
     <div className={styles.page}>
       <section className={styles.sectionContainer}>

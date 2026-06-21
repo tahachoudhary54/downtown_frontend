@@ -73,7 +73,7 @@ export default async function Home() {
           <h2 className={styles.sectionTitle}>TRENDING NOW</h2>
           <div className={styles.sectionLine}></div>
         </div>
-        <ProductGrid products={products.filter(p => p.inStock && !p.isOnSale).slice(0, 8)} />
+        <ProductGrid products={products.filter(p => !p.isOnSale).slice(0, 8)} />
       </section>
       
       {/* Why Choose Us Section */}

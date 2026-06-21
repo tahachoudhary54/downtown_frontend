@@ -38,10 +38,12 @@ function WishlistItem({ item, toggleWishlist }) {
           <IconHeartFilled />
         </button>
       </div>
-      <div className={styles.wishlistInfo}>
-        <h4 className={styles.wishlistName}>{item.name}</h4>
-        <p className={styles.wishlistSubtitle}>Luxury Essentials Collection</p>
-        <div className={styles.premiumSeparator}></div>
+      <div className={styles.wishlistInfo} style={{ flexGrow: 1, justifyContent: 'space-between' }}>
+        <div>
+          <h4 className={styles.wishlistName}>{item.name}</h4>
+          <p className={styles.wishlistSubtitle}>Luxury Essentials Collection</p>
+          <div className={styles.premiumSeparator}></div>
+        </div>
         {isSaleValid ? (
           <div className="premiumPriceContainer">
             <span className="premiumOriginalPrice">{originalPriceStr}</span>
