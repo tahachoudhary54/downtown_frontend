@@ -8,6 +8,7 @@ import { getSalePricing } from "../../../utils/price";
 
 import { useLiveVariants } from "../../../context/RealtimeStockContext";
 import ReviewsSection from "./ReviewsSection";
+import ColorSelector from "./ColorSelector";
 
 export default function ProductDisplayClient({ product }) {
   const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing(product);
@@ -93,6 +94,15 @@ export default function ProductDisplayClient({ product }) {
                 ))}
               </div>
             )}
+            
+            <ColorSelector
+              variants={variants}
+              product={product}
+              availableColors={availableColors}
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor}
+              className={styles.mobileColors}
+            />
           </div>
           <div className={styles.detailsCol}>
             <p className={styles.brand}>DOWNTOWN EXCLUSIVE</p>

@@ -302,25 +302,27 @@ export default function CheckoutPage() {
               </label>
             </div>
 
-            <button 
-              type="submit" 
-              form="checkout-form"
-              className={styles.btnPay}
-              disabled={isProcessing || !deliveryConfirmed}
-              style={{ opacity: (!deliveryConfirmed) ? 0.5 : 1 }}
-            >
-              {isProcessing ? (
-                'Processing...'
-              ) : (
-                <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                  Pay ₹{finalTotal.toLocaleString('en-IN')} securely
-                </>
-              )}
-            </button>
-            <Link href="/cart" className={styles.btnBack}>
-              Return to Cart
-            </Link>
+            <div className={styles.payActionContainer}>
+              <button 
+                type="submit" 
+                form="checkout-form"
+                className={styles.btnPay}
+                disabled={isProcessing || !deliveryConfirmed}
+                style={{ opacity: (!deliveryConfirmed) ? 0.5 : 1 }}
+              >
+                {isProcessing ? (
+                  'Processing...'
+                ) : (
+                  <>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Pay ₹{finalTotal.toLocaleString('en-IN')} securely
+                  </>
+                )}
+              </button>
+              <Link href="/cart" className={styles.btnBack}>
+                Return to Cart
+              </Link>
+            </div>
 
           </div>
         </div>

@@ -64,7 +64,7 @@ export default function ReviewsSection({ product }) {
 
   return (
     <section className="mt-20 pt-16 border-t border-[var(--border)] max-w-[1200px] mx-auto px-4 md:px-8">
-      <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+      <div className="flex flex-col items-center justify-center text-center mb-12 gap-6">
         <div>
           <h2 className="text-3xl font-playfair tracking-wide text-[var(--foreground)] mb-2">Customer Reviews</h2>
           <p className="text-[var(--text-muted)] font-inter">{reviewCount} {reviewCount === 1 ? 'review' : 'reviews'} for {product.name}</p>

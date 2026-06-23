@@ -311,6 +311,14 @@
   background: linear-gradient(to top right, transparent calc(50% - 1px), #1A1A1A calc(50% - 1px), #1A1A1A calc(50% + 1px), transparent calc(50% + 1px));
 }
 
+.desktopColors {
+  display: block;
+}
+
+.mobileColors {
+  display: none;
+}
+
 /* -- Mobile Responsiveness -- */
 @media (max-width: 992px) {
   .main {
@@ -358,6 +366,12 @@
   .btnAddToCart {
     padding: 1rem;
     margin-bottom: 2rem;
+  }
+  .desktopColors {
+    display: none;
+  }
+  .mobileColors {
+    display: block;
   }
 }
 
