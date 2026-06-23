@@ -20,7 +20,7 @@
 
 @media (max-width: 600px) {
   .faqFloat {
-    bottom: calc(90px + env(safe-area-inset-bottom));
-    right: 32px;
+    bottom: calc(85px + env(safe-area-inset-bottom));
+    right: 22.5px;
   }
 }
