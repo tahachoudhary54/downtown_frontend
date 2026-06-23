@@ -16,7 +16,7 @@ export default function AdminTicketDetailsPage({ params }) {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) router.push('/login');
+    if (!loading && (!user || user.role !== 'admin')) router.push('/admin/login');
   }, [user, loading, router]);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';

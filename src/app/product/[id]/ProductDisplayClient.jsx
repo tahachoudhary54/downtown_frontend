@@ -15,8 +15,11 @@ export default function ProductDisplayClient({ product }) {
   const liveVariants = useLiveVariants(product._id || product.id, product.variants || []);
   const variants = liveVariants;
   
-  // Default to the first available variant color to ensure its name/image shows immediately
-  const initialColor = product.variants && product.variants.length > 0 ? product.variants[0].colorName : "";
+  // Default to the first available color to ensure the main product shows immediately
+  const variantColors = product.variants ? product.variants.map(v => v.colorName) : [];
+  const globalColors = product.colors || [];
+  const availableColors = Array.from(new Set([...globalColors, ...variantColors]));
+  const initialColor = availableColors.length > 0 ? availableColors[0] : "";
   const [selectedColor, setSelectedColor] = useState(initialColor);
   
   const [mainImage, setMainImage] = useState(product.img);

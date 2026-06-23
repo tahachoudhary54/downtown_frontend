@@ -309,7 +309,11 @@ export default function Navbar() {
                             onClick={() => {
                               markAsRead(notif._id);
                               setNotifOpen(false);
-                              if (notif.orderId) { /* Do nothing since profile is removed */ }
+                              if (notif.orderId || notif.type?.startsWith('order_')) {
+                                router.push('/orders');
+                              } else if (notif.type === 'support_ticket_reply') {
+                                router.push('/account?tab=support');
+                              }
                             }}
                           >
                             <span className={styles.notifIcon}>

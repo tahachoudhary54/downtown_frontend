@@ -237,11 +237,14 @@ export default function CheckoutPage() {
                 const origVal = parseFloat((item.product.originalPrice || "0").toString().replace(/[^0-9.]/g, "")) || 0;
                 const isSaleValid = item.product.isOnSale && !isNaN(origVal) && !isNaN(priceVal) && origVal > priceVal;
 
+                const variant = item.color ? item.product.variants?.find(v => v.colorName === item.color) : null;
+                const itemImage = variant?.images?.length > 0 ? variant.images[0] : (item.product.img || '/placeholder.png');
+
                 return (
                   <div key={index} className={styles.summaryItem}>
                     <div className={styles.itemImage}>
                       <div className={styles.itemBadge}>{item.quantity}</div>
-                      <Image src={item.product.img || '/placeholder.png'} alt={item.product.name} fill />
+                      <Image src={itemImage} alt={item.product.name} fill />
                     </div>
                     <div className={styles.itemInfo}>
                       <h4 className={styles.itemName}>{item.product.name}</h4>

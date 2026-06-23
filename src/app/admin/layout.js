@@ -84,7 +84,7 @@ function AdminLayoutContent({ children }) {
   useEffect(() => {
     if (!loading) {
       if (!user || user.role !== 'admin') {
-        router.replace('/login');
+        router.replace('/admin/login');
       }
     }
   }, [user, loading, router]);
@@ -157,7 +157,7 @@ function AdminLayoutContent({ children }) {
           <button
             onClick={() => {
               logout();
-              router.push('/login');
+              router.push('/admin/login');
             }}
             className="w-full text-left px-4 py-3 rounded-lg text-red-400 hover:bg-[#222] hover:text-red-300 transition-colors"
           >
