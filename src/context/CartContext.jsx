@@ -47,16 +47,16 @@ export function CartProvider({ children }) {
     localStorage.setItem(cartKey, JSON.stringify(cart));
   }, [cart, cartKey, loadedKey]);
 
-  const addToCart = (product, size = "M", quantity = 1) => {
+  const addToCart = (product, size = "M", color = "", quantity = 1) => {
     setCart((prev) => {
-      const key = `${product._id || product.id}-${size}`;
+      const key = color ? `${product._id || product.id}-${size}-${color}` : `${product._id || product.id}-${size}`;
       const existing = prev.find((item) => item.key === key);
       if (existing) {
         return prev.map((item) =>
           item.key === key ? { ...item, quantity: item.quantity + quantity } : item
         );
       }
-      return [...prev, { key, product, size, quantity }];
+      return [...prev, { key, product, size, color, quantity }];
     });
   };
 

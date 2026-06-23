@@ -11,7 +11,11 @@ import { getSalePricing } from '../utils/price';
 
 function ProductCard({ item }) {
   const { toggleWishlist, isWishlisted } = useWishlist();
-  const liveStock = useLiveStock(item._id || item.id, item.stock !== undefined ? item.stock : (item.totalStock || 0));
+  let initialStock = item.stock !== undefined ? item.stock : (item.totalStock || 0);
+  if (item.variants && item.variants.length > 0) {
+    initialStock = item.variants.reduce((acc, curr) => acc + (curr.stock || 0), 0);
+  }
+  const liveStock = useLiveStock(item._id || item.id, initialStock);
   const liveVisibility = useLiveVisibility(item._id || item.id, item.inStock !== undefined ? item.inStock : true);
   const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing(item);
 
@@ -84,7 +88,7 @@ function ProductCard({ item }) {
               <span className="premiumSalePrice">{salePriceStr}</span>
             </div>
           ) : (
-            <p className={styles.productPrice}>{item.price}</p>
+            <p className={styles.productPrice}>{salePriceStr}</p>
           )}
 
           <button 

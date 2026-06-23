@@ -19,12 +19,17 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     originalPrice: '',
     inStock: true,
     sizes: [],
+    colors: [],
+    variants: [],
   });
   
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [customColor, setCustomColor] = useState('');
+  const [currentVariantPage, setCurrentVariantPage] = useState(1);
+  const VARIANTS_PER_PAGE = 1;
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -92,32 +97,58 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const rawPrice = String(formData.price);
-      if (rawPrice.includes('-')) {
-        setError("Price cannot be negative.");
-        setLoading(false);
-        return;
-      }
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setError('');
+      setLoading(true);
+      try {
+        const rawPrice = String(formData.price);
+        if (rawPrice.includes('-')) {
+          setError("Price cannot be negative.");
+          setLoading(false);
+          return;
+        }
 
-      if (formData.isOnSale && String(formData.originalPrice).includes('-')) {
-        setError("Original price cannot be negative.");
-        setLoading(false);
-        return;
-      }
+        if (formData.isOnSale && String(formData.originalPrice).includes('-')) {
+          setError("Original price cannot be negative.");
+          setLoading(false);
+          return;
+        }
 
-      // derive priceValue
-      const priceValue = parseFloat(rawPrice.replace(/[^0-9.]/g, ''));
-      const payload = { ...formData, priceValue };
+        // derive priceValue
+        const priceValue = parseFloat(rawPrice.replace(/[^0-9.]/g, ''));
+        
+        // Auto-flush any pending urlInputs into images
+        const finalVariants = (formData.variants || []).map(v => {
+          const newV = { ...v };
+          if (newV.urlInput && newV.urlInput.trim() !== '') {
+            newV.images = [...(newV.images || []), newV.urlInput.trim()];
+            newV.urlInput = '';
+          }
+          return newV;
+        });
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${isEdit ? `/${initialData._id}` : ''}`;
-      const method = isEdit ? 'PUT' : 'POST';
+        let finalStock = parseInt(formData.stock) || 0;
+        if (finalVariants && finalVariants.length > 0) {
+          finalStock = finalVariants.reduce((acc, v) => acc + (parseInt(v.stock) || 0), 0);
+        }
 
-      const res = await fetch(url, {
+        let formattedPrice = rawPrice.trim();
+        if (formattedPrice && !formattedPrice.includes('₹') && !formattedPrice.includes('$')) {
+          formattedPrice = `₹${formattedPrice}`;
+        }
+
+        let formattedOriginalPrice = formData.originalPrice ? String(formData.originalPrice).trim() : '';
+        if (formattedOriginalPrice && !formattedOriginalPrice.includes('₹') && !formattedOriginalPrice.includes('$')) {
+          formattedOriginalPrice = `₹${formattedOriginalPrice}`;
+        }
+        
+        const payload = { ...formData, variants: finalVariants, price: formattedPrice, originalPrice: formattedOriginalPrice, priceValue, stock: finalStock };
+
+        const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${isEdit ? `/${initialData._id}` : ''}`;
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
         method,
         headers: { 
           'Content-Type': 'application/json',
@@ -252,6 +283,294 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
             ))}
           </div>
         </div>
+
+        <div className="space-y-2 pt-4">
+          <label className="block text-sm font-medium text-[var(--text-muted)]">Available Colors (Global)</label>
+          <input 
+            type="text" 
+            defaultValue={(formData.colors || []).join(', ')}
+            onBlur={(e) => {
+              const colorsArray = e.target.value.split(',').map(c => c.trim()).filter(c => c !== '');
+              setFormData({...formData, colors: colorsArray});
+            }}
+            placeholder="e.g. Black, White, Red (Separate with commas)"
+            className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
+          />
+          <p className="text-xs text-[var(--text-muted)]">Note: If you need specific images or stock per color, use the Product Variants section below instead.</p>
+        </div>
+
+        <div className="space-y-4 pt-4 border-t border-[var(--border)]">
+          <div className="flex justify-between items-center">
+            <label className="block text-sm font-medium text-[var(--text-muted)]">Product Variants (Colors & Images)</label>
+            <button 
+              type="button" 
+              onClick={() => {
+                const currentVariants = formData.variants || [];
+                setFormData({...formData, variants: [...currentVariants, { colorName: '', variantName: '', images: [], stock: 0, sizes: [], sizeInventory: {} }]});
+                setCurrentVariantPage(currentVariants.length + 1);
+              }}
+              className="text-xs bg-[var(--accent)] text-white px-3 py-1 rounded hover:bg-opacity-90"
+            >
+              + Add Variant
+            </button>
+          </div>
+          
+          {(() => {
+            const totalVariantPages = Math.ceil((formData.variants || []).length / VARIANTS_PER_PAGE);
+            const startIndex = (currentVariantPage - 1) * VARIANTS_PER_PAGE;
+            const paginatedVariants = (formData.variants || []).slice(startIndex, startIndex + VARIANTS_PER_PAGE);
+            
+            return (
+              <>
+                {paginatedVariants.map((variant, localIndex) => {
+                  const index = startIndex + localIndex;
+                  return (
+                    <div key={index} className="p-4 border border-[var(--border)] rounded-lg bg-[#fafafa] space-y-4 relative">
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newVariants = [...formData.variants];
+                          newVariants.splice(index, 1);
+                          setFormData({...formData, variants: newVariants});
+                          if (paginatedVariants.length === 1 && currentVariantPage > 1) {
+                            setCurrentVariantPage(currentVariantPage - 1);
+                          }
+                        }}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold"
+                      >
+                        ✕
+                      </button>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Variant Name</label>
+                  <input 
+                    type="text" 
+                    value={variant.variantName || ''}
+                    onChange={(e) => {
+                      const newVariants = [...formData.variants];
+                      newVariants[index].variantName = e.target.value;
+                      // Keep colorName in sync for backend schema requirements and color selection logic
+                      newVariants[index].colorName = e.target.value;
+                      setFormData({...formData, variants: newVariants});
+                    }}
+                    placeholder="e.g. Baggy Shirt - Black"
+                    className="w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Total Stock {variant.sizes?.length > 0 ? '(Auto)' : ''}</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    value={variant.stock}
+                    readOnly={variant.sizes?.length > 0}
+                    onChange={(e) => {
+                      if (variant.sizes?.length > 0) return;
+                      const newVariants = [...formData.variants];
+                      newVariants[index].stock = parseInt(e.target.value) || 0;
+                      setFormData({...formData, variants: newVariants});
+                    }}
+                    className={`w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm ${variant.sizes?.length > 0 ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Available Sizes & Stock for this Color</label>
+                <div className="flex flex-col gap-2">
+                  {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => {
+                    const isChecked = variant.sizes?.includes(size) || false;
+                    return (
+                      <div key={size} className="flex items-center gap-3">
+                        <label className="flex items-center gap-1.5 cursor-pointer w-16">
+                          <input 
+                            type="checkbox" 
+                            checked={isChecked}
+                            onChange={(e) => {
+                              const newVariants = [...formData.variants];
+                              const currentSizes = newVariants[index].sizes || [];
+                              if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
+                              
+                              if (e.target.checked) {
+                                newVariants[index].sizes = [...currentSizes, size];
+                                newVariants[index].sizeInventory[size] = 0;
+                              } else {
+                                newVariants[index].sizes = currentSizes.filter(s => s !== size);
+                                delete newVariants[index].sizeInventory[size];
+                              }
+                              
+                              // Auto sum total stock
+                              newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                              setFormData({...formData, variants: newVariants});
+                            }}
+                            className="w-3.5 h-3.5 accent-[var(--accent)]"
+                          />
+                          <span className="text-xs font-medium text-[var(--foreground)]">{size}</span>
+                        </label>
+                        {isChecked && (
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="Stock"
+                            value={variant.sizeInventory?.[size] || 0}
+                            onChange={(e) => {
+                               const newVariants = [...formData.variants];
+                               if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
+                               newVariants[index].sizeInventory[size] = parseInt(e.target.value) || 0;
+                               // Auto sum total stock
+                               newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                               setFormData({...formData, variants: newVariants});
+                            }}
+                            className="border border-[var(--border)] rounded px-2 py-1 text-xs w-20"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Variant Images</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(variant.images || []).map((img, imgIndex) => (
+                    <div key={imgIndex} className="relative group">
+                      <img src={img} className="w-16 h-16 object-cover border border-[var(--border)] rounded" />
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newVariants = [...formData.variants];
+                          newVariants[index].images.splice(imgIndex, 1);
+                          setFormData({...formData, variants: newVariants});
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={variant.urlInput || ''}
+                    onChange={(e) => {
+                      const newVariants = [...formData.variants];
+                      newVariants[index].urlInput = e.target.value;
+                      setFormData({...formData, variants: newVariants});
+                    }}
+                    placeholder="https://... (Add image URL)"
+                    className="flex-1 border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--accent)]"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const url = variant.urlInput?.trim();
+                        if (url) {
+                          const newVariants = [...formData.variants];
+                          newVariants[index].images = [...(newVariants[index].images || []), url];
+                          newVariants[index].urlInput = '';
+                          setFormData({...formData, variants: newVariants});
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = variant.urlInput?.trim();
+                      if (url) {
+                        const newVariants = [...formData.variants];
+                        newVariants[index].images = [...(newVariants[index].images || []), url];
+                        newVariants[index].urlInput = '';
+                        setFormData({...formData, variants: newVariants});
+                      }
+                    }}
+                    className="bg-[#F1ECE5] text-[var(--foreground)] px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-[#E5DED5] transition-colors whitespace-nowrap"
+                  >
+                    Add URL
+                  </button>
+                </div>
+
+                {variant.urlInput && (
+                  <div className="mb-3">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">Preview:</p>
+                    <img src={variant.urlInput} alt="Preview" className="h-32 object-contain border border-[var(--border)] rounded" />
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-semibold">OR</span>
+                  <label className="bg-[#F1ECE5] text-[var(--foreground)] px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-[#E5DED5] transition-colors cursor-pointer inline-block">
+                    {uploading ? 'Uploading...' : 'Upload Image File'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      multiple
+                      className="hidden"
+                      onChange={async (e) => {
+                        if (!e.target.files.length) return;
+                        setUploading(true);
+                        const newImages = [];
+                        for (let file of e.target.files) {
+                          const data = new FormData();
+                          data.append('image', file);
+                          try {
+                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
+                              method: 'POST',
+                              headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+                              body: data
+                            });
+                            const result = await res.json();
+                            if (result.success) {
+                              newImages.push(result.imageUrl || result.url);
+                            }
+                          } catch (err) {
+                            console.error('Upload error', err);
+                          }
+                        }
+                        const newVariants = [...formData.variants];
+                        newVariants[index].images = [...(newVariants[index].images || []), ...newImages];
+                        setFormData({...formData, variants: newVariants});
+                        setUploading(false);
+                        e.target.value = '';
+                      }}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        
+        {totalVariantPages > 0 && (
+          <div className="flex items-center justify-between mt-4 p-4 border border-[var(--border)] rounded-lg bg-[#fafafa]">
+            <span className="text-sm text-[var(--text-muted)]">Showing page {currentVariantPage} of {totalVariantPages}</span>
+            <div className="flex gap-2">
+              <button 
+                type="button"
+                disabled={currentVariantPage === 1}
+                onClick={() => setCurrentVariantPage(prev => Math.max(1, prev - 1))}
+                className="px-4 py-1.5 border border-[var(--border)] rounded text-sm disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button 
+                type="button"
+                disabled={currentVariantPage === totalVariantPages}
+                onClick={() => setCurrentVariantPage(prev => Math.min(totalVariantPages, prev + 1))}
+                className="px-4 py-1.5 border border-[var(--border)] rounded text-sm disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  })()}
+</div>
 
         <div className="flex flex-wrap gap-6 pt-4 border-t border-[var(--border)]">
           <label className="flex items-center gap-2 cursor-pointer">

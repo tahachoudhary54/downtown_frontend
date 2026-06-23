@@ -12,11 +12,14 @@ function CartItem({ item, updateQuantity, removeFromCart }) {
   const liveStock = useLiveStock(item.product._id || item.product.id, item.product.stock !== undefined ? item.product.stock : (item.product.totalStock || 0));
   const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing(item.product);
 
+  const variant = item.product.variants?.find(v => v.colorName === item.color);
+  const itemImage = variant && variant.images && variant.images.length > 0 ? variant.images[0] : item.product.img;
+
   return (
     <div className={styles.cartItem} style={{ opacity: liveStock === 0 ? 0.6 : 1 }}>
       <div className={styles.itemImage}>
         <Image
-          src={item.product.img}
+          src={itemImage}
           alt={item.product.name}
           fill
           style={{ objectFit: "cover", filter: liveStock === 0 ? 'grayscale(20%)' : 'none' }}
@@ -34,6 +37,7 @@ function CartItem({ item, updateQuantity, removeFromCart }) {
         <p className={styles.itemBrand}>DOWNTOWN EXCLUSIVE</p>
         <h3 className={styles.itemName}>{item.product.name}</h3>
         <p className={styles.itemSize}>Size: <strong>{item.size}</strong></p>
+        {item.color && <p className={styles.itemSize}>Color: <strong>{item.color}</strong></p>}
         {isSaleValid ? (
           <div className="premiumPriceContainer">
             <span className="premiumOriginalPrice">{originalPriceStr}</span>

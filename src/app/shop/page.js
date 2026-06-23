@@ -5,6 +5,9 @@ import { categories as defaultCategories } from "../../data/categories";
 import styles from "../page.module.css";
 import { staticSeo } from "../seoConfig";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function fetchCategories() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/categories?activeOnly=true`, { cache: 'no-store' });
@@ -43,18 +46,19 @@ export default async function ShopPage({ searchParams }) {
   const sale = resolvedSearchParams?.sale || "";
   const minPrice = resolvedSearchParams?.minPrice || "";
   const maxPrice = resolvedSearchParams?.maxPrice || "";
+  const page = resolvedSearchParams?.page || "1";
 
-  const params = { limit: 1000 };
+  const params = { limit: 50, page };
   if (query) params.search = query;
   if (category) params.category = category;
   if (sale) params.sale = sale;
-  // fetchProducts now returns { data: products, categoryCounts: {...} } from the backend if updated to pass the full response
-  // Wait, fetchProducts in lib/api currently only returns the data array. We need to modify lib/api.js or fetch it directly here to get categoryCounts.
-  // Actually, we can just modify fetchProducts in lib/api.js to return { products, categoryCounts } instead of just products.
-  // I will do that in the next step. Let's assume fetchProducts returns { products, categoryCounts }
+  if (minPrice) params.minPrice = minPrice;
+  if (maxPrice) params.maxPrice = maxPrice;
+  
   const res = await fetchProducts(params, true); 
   const products = res.products || [];
   const categoryCounts = res.categoryCounts || {};
+  const pagination = res.pagination || null;
   
   const activeCategories = await fetchCategories();
 
@@ -76,6 +80,7 @@ export default async function ShopPage({ searchParams }) {
           <div className={styles.shopGrid} style={{ width: '100%' }}>
             <LiveProductGrid 
               initialProducts={products} 
+              initialPagination={pagination}
               queryParams={params}
               emptyMessage="No products found matching your search." 
             />

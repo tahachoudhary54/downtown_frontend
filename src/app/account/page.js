@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCustomerNotifications } from '@/context/CustomerNotificationsContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import styles from './account.module.css';
 
@@ -11,10 +11,20 @@ export default function MyAccount() {
   const { token, user: authUser, loading, checkUser } = useAuth();
   const { notifications, deleteNotification } = useCustomerNotifications();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   
   // Active Tab
   const [activeTab, setActiveTab] = useState('profile');
+
+  useEffect(() => {
+    if (mounted) {
+      const tab = searchParams.get('tab');
+      if (tab) {
+        setActiveTab(tab);
+      }
+    }
+  }, [searchParams, mounted]);
 
   // Profile State
   const [name, setName] = useState('');

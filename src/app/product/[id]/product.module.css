@@ -191,6 +191,30 @@
   color: var(--background);
 }
 
+.sizeOptions button.colorTextOption {
+  min-width: 50px;
+  width: max-content;
+  padding: 0 1.2rem;
+  height: 50px;
+  border: 1px solid var(--text-muted);
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-inter);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sizeOptions button.colorTextOption:hover, .sizeOptions button.colorTextOption.active {
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+}
+
 .btnAddToCart {
   background-color: var(--foreground);
   color: var(--background);

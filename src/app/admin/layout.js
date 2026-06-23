@@ -105,6 +105,7 @@ function AdminLayoutContent({ children }) {
     { href: '/admin/orders', label: 'Orders' },
     { href: '/admin/users', label: 'Users' },
     { href: '/admin/tickets', label: 'Support Tickets' },
+    { href: '/admin/reviews', label: 'Reviews' },
     { href: '/admin/cms', label: 'CMS' },
     { href: '/admin/notifications', label: 'Notifications' },
     { href: '/admin/settings', label: 'Website Policies' },

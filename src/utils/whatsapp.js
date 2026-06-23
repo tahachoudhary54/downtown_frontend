@@ -9,13 +9,17 @@ export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "91986
  * @param {string} params.url - (Optional) URL to include
  * @returns {string} The formatted WhatsApp URL
  */
-export const generateWhatsAppMessage = ({ text, productName, selectedSize, url }) => {
+export const generateWhatsAppMessage = ({ text, productName, selectedSize, selectedColor, url }) => {
   let message = text || "Hi Downtown Boutique, I am interested in your collection. Please share more details.";
 
   if (productName) {
     message = `Hi Downtown Boutique, I am interested in the product: ${productName}`;
-    if (selectedSize) {
+    if (selectedSize && selectedColor) {
+      message += ` (Size: ${selectedSize}, Color: ${selectedColor})`;
+    } else if (selectedSize) {
       message += ` (Size: ${selectedSize})`;
+    } else if (selectedColor) {
+      message += ` (Color: ${selectedColor})`;
     }
     message += `. Please share pricing and availability.`;
   }

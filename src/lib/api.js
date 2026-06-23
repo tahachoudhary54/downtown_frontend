@@ -8,7 +8,7 @@ export async function fetchProducts(params = {}, returnFullRes = false) {
     });
     if (res.ok) {
       const data = await res.json();
-      if (returnFullRes) return { products: data.data || [], categoryCounts: data.categoryCounts || {} };
+      if (returnFullRes) return { products: data.data || [], categoryCounts: data.categoryCounts || {}, pagination: data.pagination || null };
       return data.data;
     }
   } catch (e) {
@@ -17,10 +17,10 @@ export async function fetchProducts(params = {}, returnFullRes = false) {
   // Fallback to static product list
   try {
     const { products } = require('../data/products');
-    if (returnFullRes) return { products: products || [], categoryCounts: {} };
+    if (returnFullRes) return { products: products || [], categoryCounts: {}, pagination: null };
     return products || [];
   } catch (_) {
-    if (returnFullRes) return { products: [], categoryCounts: {} };
+    if (returnFullRes) return { products: [], categoryCounts: {}, pagination: null };
     return [];
   }
 }

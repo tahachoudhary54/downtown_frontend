@@ -28,16 +28,19 @@ export default async function ClothingPage() {
         </div>
         
         <div className={styles.clothingGrid}>
-          {activeCategories.map((cat, index) => (
-            <Link key={`${cat.id}-${index}`} href={`/clothing/${cat.slug}`} className={styles.editorialCard} style={{ textDecoration: 'none' }}>
+          {activeCategories.map((cat, index) => {
+            const defaultCat = defaultCategories.find(c => c.slug === cat.slug);
+            const imgSrc = cat.img || defaultCat?.img || '/placeholder.png';
+            return (
+            <Link key={`${cat.id || cat._id || index}`} href={`/clothing/${cat.slug}`} className={styles.editorialCard} style={{ textDecoration: 'none' }}>
               <div className={styles.editorialImageWrapper}>
-                <Image src={cat.img} alt={cat.name} fill className={styles.editorialImage} style={{ objectFit: 'cover' }} />
+                <Image src={imgSrc} alt={cat.name} fill className={styles.editorialImage} style={{ objectFit: 'cover' }} />
               </div>
               <div className={styles.editorialContent} style={{ padding: '1rem 0' }}>
                 <h3 className={styles.editorialTitle} style={{ fontSize: '1.2rem', marginBottom: '0' }}>{cat.name}</h3>
               </div>
             </Link>
-          ))}
+          )})}
         </div>
       </section>
     </div>

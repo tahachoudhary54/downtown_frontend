@@ -2,20 +2,36 @@
 
 import useSWR from 'swr';
 import ProductGrid from './ProductGrid';
+import Pagination from './Pagination';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
-const fetcher = (url) => fetch(url).then(res => res.json()).then(res => res.data || []);
+const fetcher = (url) => fetch(url).then(res => res.json()).then(res => ({
+  products: res.data || [],
+  pagination: res.pagination || null
+}));
 
-export default function LiveProductGrid({ initialProducts, queryParams, emptyMessage }) {
+export default function LiveProductGrid({ initialProducts, queryParams, emptyMessage, initialPagination }) {
   const queryString = new URLSearchParams(queryParams).toString();
   const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${queryString ? `?${queryString}` : ''}`;
   
-  const { data: products } = useSWR(url, fetcher, {
-    fallbackData: initialProducts,
+  const { data } = useSWR(url, fetcher, {
+    fallbackData: { products: initialProducts, pagination: initialPagination },
     refreshInterval: 3000,
     revalidateOnFocus: true,
   });
 
-  const displayProducts = products || initialProducts;
+  const displayProducts = data?.products || initialProducts;
+  const currentPagination = data?.pagination || initialPagination;
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const handlePageChange = (page) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', page);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   if (!displayProducts || displayProducts.length === 0) {
     return (
@@ -25,5 +41,10 @@ export default function LiveProductGrid({ initialProducts, queryParams, emptyMes
     );
   }
 
-  return <ProductGrid products={displayProducts} />;
+  return (
+    <>
+      <ProductGrid products={displayProducts} />
+      <Pagination pagination={currentPagination} onPageChange={handlePageChange} />
+    </>
+  );
 }

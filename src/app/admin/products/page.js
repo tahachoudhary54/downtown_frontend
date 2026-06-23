@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Pagination from '@/components/Pagination';
+import { ITEMS_PER_PAGE } from '@/config/pagination';
 
 export default function AdminProducts() {
   const router = useRouter();
@@ -21,7 +23,7 @@ export default function AdminProducts() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      let query = `?page=${page}&limit=10`;
+      let query = `?page=${page}&limit=${ITEMS_PER_PAGE}`;
       if (search) query += `&search=${search}`;
       if (sale !== 'all') query += `&sale=${sale}`;
 
@@ -153,30 +155,9 @@ export default function AdminProducts() {
           </table>
         </div>
         
-        {/* Pagination Controls */}
-        {pagination && pagination.totalPages > 1 && (
-          <div className="p-4 border-t border-[var(--border)] flex flex-col sm:flex-row justify-between items-center gap-4">
-            <span className="text-sm text-[var(--text-muted)]">
-              Showing page {pagination.page} of {pagination.totalPages}
-            </span>
-            <div className="space-x-2">
-              <button 
-                disabled={pagination.page === 1} 
-                onClick={() => setPage(p => p - 1)}
-                className="px-3 py-1 border border-[var(--border)] rounded text-sm disabled:opacity-50 hover:bg-[#F9F7F4]"
-              >
-                Previous
-              </button>
-              <button 
-                disabled={pagination.page === pagination.totalPages} 
-                onClick={() => setPage(p => p + 1)}
-                className="px-3 py-1 border border-[var(--border)] rounded text-sm disabled:opacity-50 hover:bg-[#F9F7F4]"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="bg-white p-4">
+          <Pagination pagination={pagination} onPageChange={setPage} />
+        </div>
       </div>
     </div>
   );

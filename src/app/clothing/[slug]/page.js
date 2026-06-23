@@ -17,9 +17,11 @@ async function getSettings() {
   return null;
 }
 
-export default async function CollectionPage({ params }) {
+export default async function CollectionPage({ params, searchParams }) {
   const resolvedParams = await params;
   const slug = resolvedParams?.slug;
+  const resolvedSearchParams = await searchParams;
+  const page = resolvedSearchParams?.page || "1";
   
   const settings = await getSettings();
   const dynamicCategories = settings?.categories && Array.isArray(settings.categories) ? settings.categories : defaultCategories;
@@ -30,7 +32,9 @@ export default async function CollectionPage({ params }) {
     notFound();
   }
 
-  const products = await fetchProducts({ category: category.name, limit: 1000 });
+  const res = await fetchProducts({ category: category.name, limit: 50, page }, true);
+  const products = res.products || [];
+  const pagination = res.pagination || null;
 
   return (
     <div className={styles.page}>
@@ -42,7 +46,8 @@ export default async function CollectionPage({ params }) {
 
         <LiveProductGrid 
           initialProducts={products} 
-          queryParams={{ category: category.name, limit: 1000 }}
+          initialPagination={pagination}
+          queryParams={{ category: category.name, limit: 50, page }}
           emptyMessage="No products found in this collection." 
         />
       </section>

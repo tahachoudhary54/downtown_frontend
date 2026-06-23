@@ -2,6 +2,9 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import styles from '../app/page.module.css';
+import useSWR from 'swr';
+
+const fetcher = (url) => fetch(url).then(res => res.json());
 
 export default function ShopFilters({ categories = [], categoryCounts = {} }) {
   const router = useRouter();
@@ -11,10 +14,51 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
   const [isOpen, setIsOpen] = useState(false);
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '10000');
 
+  const { data: categoriesData } = useSWR(
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/categories?activeOnly=true`, 
+    fetcher, 
+    { 
+      fallbackData: { success: true, data: categories.map(name => ({ name })) },
+      refreshInterval: 3000 // Poll every 3 seconds for true realtime feel
+    }
+  );
+
+  // Construct URL for products SWR to get real-time category counts
+  const queryParams = new URLSearchParams(searchParams);
+  queryParams.set('limit', '50');
+  if (!queryParams.has('page')) queryParams.set('page', '1');
+  const productsUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products?${queryParams.toString()}`;
+
+  const { data: productsData } = useSWR(
+    productsUrl,
+    (url) => fetch(url).then(res => res.json()).then(res => ({ categoryCounts: res.categoryCounts || {} })),
+    {
+      fallbackData: { categoryCounts },
+      refreshInterval: 3000,
+    }
+  );
+
+  const liveCategoryCounts = productsData?.categoryCounts || categoryCounts;
+
   // Sync local state if URL changes externally
   useEffect(() => {
     setMaxPrice(searchParams.get('maxPrice') || '10000');
   }, [searchParams]);
+
+  // Disable body scroll when filter menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const handleFilterChange = (key, value) => {
     const params = new URLSearchParams(searchParams);
@@ -26,10 +70,12 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
     if (key === 'maxPrice' && value === '10000') {
       params.delete('maxPrice');
     }
-    router.push(`${pathname}?${params.toString()}`);
+    params.delete('page');
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const categoryOptions = ['', ...categories];
+  const liveCategories = categoriesData?.data?.map(c => c.name) || categories;
+  const categoryOptions = ['', ...liveCategories];
 
   return (
     <>
@@ -73,7 +119,7 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {categoryOptions.map((cat) => {
                 const isActive = (searchParams.get('category') || '') === cat;
-                const count = cat === '' ? '' : (categoryCounts[cat.toLowerCase()] || 0);
+                const count = cat === '' ? '' : (liveCategoryCounts[cat.toLowerCase()] || 0);
                 const isDisabled = cat !== '' && count === 0;
 
                 return (
@@ -86,7 +132,7 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
                       onChange={() => !isDisabled && handleFilterChange('category', cat)} 
                       style={{ accentColor: 'var(--foreground)', cursor: isDisabled ? 'not-allowed' : 'pointer' }}
                     />
-                    {cat === '' ? 'All Categories' : `${cat} (${count})`}
+                    {cat === '' ? 'All Categories' : cat}
                   </label>
                 );
               })}
@@ -104,17 +150,42 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
                 Up to ₹{maxPrice === '10000' ? '10000+' : maxPrice}
               </span>
             </div>
-            <input 
-              type="range" 
-              min="0" 
-              max="10000" 
-              step="100"
-              value={maxPrice}
-              className={styles.priceSlider}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              onMouseUp={(e) => handleFilterChange('maxPrice', e.target.value)}
-              onTouchEnd={(e) => handleFilterChange('maxPrice', e.target.value)}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <button 
+                type="button"
+                onClick={() => {
+                  const newVal = Math.max(0, parseInt(maxPrice) - 100).toString();
+                  setMaxPrice(newVal);
+                  handleFilterChange('maxPrice', newVal);
+                }}
+                style={{ width: '28px', height: '28px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '50%', cursor: 'pointer', color: 'var(--foreground)', fontSize: '1.2rem', lineHeight: 1 }}
+              >
+                -
+              </button>
+              <input 
+                type="range" 
+                min="0" 
+                max="10000" 
+                step="100"
+                value={maxPrice}
+                className={styles.priceSlider}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                onMouseUp={(e) => handleFilterChange('maxPrice', e.target.value)}
+                onTouchEnd={(e) => handleFilterChange('maxPrice', e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <button 
+                type="button"
+                onClick={() => {
+                  const newVal = Math.min(10000, parseInt(maxPrice) + 100).toString();
+                  setMaxPrice(newVal);
+                  handleFilterChange('maxPrice', newVal);
+                }}
+                style={{ width: '28px', height: '28px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: '50%', cursor: 'pointer', color: 'var(--foreground)', fontSize: '1.2rem', lineHeight: 1 }}
+              >
+                +
+              </button>
+            </div>
           </div>
 
           {/* Status Filter */}
