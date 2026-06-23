@@ -36,8 +36,8 @@ export default async function ClothingPage() {
               <div className={styles.editorialImageWrapper}>
                 <Image src={imgSrc} alt={cat.name} fill className={styles.editorialImage} style={{ objectFit: 'cover' }} />
               </div>
-              <div className={styles.editorialContent} style={{ padding: '1rem 0' }}>
-                <h3 className={styles.editorialTitle} style={{ fontSize: '1.2rem', marginBottom: '0' }}>{cat.name}</h3>
+              <div className={styles.editorialContent}>
+                <h3 className={styles.editorialTitle}>{cat.name}</h3>
               </div>
             </Link>
           )})}
