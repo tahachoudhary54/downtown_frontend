@@ -7,7 +7,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import styles from './account.module.css';
 
-export default function MyAccount() {
+import { Suspense } from 'react';
+
+function AccountContent() {
   const { token, user: authUser, loading, checkUser } = useAuth();
   const { notifications, deleteNotification } = useCustomerNotifications();
   const router = useRouter();
@@ -582,5 +584,13 @@ export default function MyAccount() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MyAccount() {
+  return (
+    <Suspense fallback={<div>Loading Account...</div>}>
+      <AccountContent />
+    </Suspense>
   );
 }
