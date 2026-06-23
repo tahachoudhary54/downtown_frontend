@@ -88,21 +88,3 @@ export async function resendOtp(email) {
   });
   return res.json();
 }
-
-export async function passwordlessRequest(email) {
-  const res = await fetch(`${API_URL}/api/auth/passwordless-request`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
-  });
-  return res.json();
-}
-
-export async function passwordlessVerify(data) {
-  const res = await fetch(`${API_URL}/api/auth/passwordless-verify`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  return res.json();
-}

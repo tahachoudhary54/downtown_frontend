@@ -40,6 +40,16 @@ function AccountContent() {
   const [newAddress, setNewAddress] = useState({ fullName: '', street: '', city: '', state: '', zip: '', phone: '' });
   const [savingAddress, setSavingAddress] = useState(false);
 
+  // Security State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [savingSecurity, setSavingSecurity] = useState(false);
+  const [securityMsg, setSecurityMsg] = useState({ text: '', type: '' });
+
   // Support Tickets State
   const [showAddTicket, setShowAddTicket] = useState(false);
   const [newTicket, setNewTicket] = useState({ subject: '', category: 'Payment Issue', description: '' });
@@ -107,6 +117,35 @@ function AccountContent() {
       setProfileMsg({ text: 'An error occurred.', type: 'error' });
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const handleSecuritySubmit = async (e) => {
+    e.preventDefault();
+    setSecurityMsg({ text: '', type: '' });
+    if (newPassword !== confirmPassword) {
+      return setSecurityMsg({ text: 'New passwords do not match.', type: 'error' });
+    }
+    setSavingSecurity(true);
+    try {
+      const res = await fetch(`${apiBase}/api/users/me/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        setSecurityMsg({ text: 'Password updated successfully!', type: 'success' });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setSecurityMsg({ text: resData.message || 'Failed to update password', type: 'error' });
+      }
+    } catch (err) {
+      setSecurityMsg({ text: 'An error occurred.', type: 'error' });
+    } finally {
+      setSavingSecurity(false);
     }
   };
 
@@ -222,6 +261,7 @@ function AccountContent() {
             <button className={`${styles.tabButton} ${activeTab === 'addresses' ? styles.active : ''}`} onClick={() => setActiveTab('addresses')}>Saved Addresses</button>
             <button className={`${styles.tabButton} ${activeTab === 'notifications' ? styles.active : ''}`} onClick={() => setActiveTab('notifications')}>Notifications</button>
             <button className={`${styles.tabButton} ${activeTab === 'support' ? styles.active : ''}`} onClick={() => setActiveTab('support')}>Support / Help Center</button>
+            <button className={`${styles.tabButton} ${activeTab === 'security' ? styles.active : ''}`} onClick={() => setActiveTab('security')}>Security Settings</button>
           </aside>
 
           {/* Main Content Area */}
@@ -483,6 +523,60 @@ function AccountContent() {
                     )}
                   </>
                 )}
+              </div>
+            )}
+
+            {/* SECURITY TAB */}
+            {activeTab === 'security' && (
+              <div className={styles.card}>
+                <h2 className={styles.cardTitle}>Security Settings</h2>
+                <form onSubmit={handleSecuritySubmit}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Current Password</label>
+                    <div className={styles.passwordWrapper}>
+                      <input type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className={styles.input} required />
+                      <button type="button" className={styles.eyeButton} onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                        {showCurrentPassword ? (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        ) : (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>New Password</label>
+                    <div className={styles.passwordWrapper}>
+                      <input type={showNewPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={styles.input} required minLength={6} />
+                      <button type="button" className={styles.eyeButton} onClick={() => setShowNewPassword(!showNewPassword)}>
+                        {showNewPassword ? (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        ) : (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Confirm New Password</label>
+                    <div className={styles.passwordWrapper}>
+                      <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={styles.input} required minLength={6} />
+                      <button type="button" className={styles.eyeButton} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                        {showConfirmPassword ? (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        ) : (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <button type="submit" className={styles.button} disabled={savingSecurity}>
+                    {savingSecurity ? 'Updating...' : 'Update Password'}
+                  </button>
+                  {securityMsg.text && (
+                    <div className={`${styles.message} ${styles[securityMsg.type]}`}>{securityMsg.text}</div>
+                  )}
+                </form>
               </div>
             )}
 
