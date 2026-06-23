@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Pagination from '@/components/Pagination';
 import { ITEMS_PER_PAGE } from '@/config/pagination';
 
-export default function AdminProducts() {
+function AdminProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token } = useAuth();
@@ -160,5 +160,13 @@ export default function AdminProducts() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminProducts() {
+  return (
+    <Suspense fallback={<div>Loading Products...</div>}>
+      <AdminProductsContent />
+    </Suspense>
   );
 }

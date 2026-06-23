@@ -4,6 +4,7 @@ import { fetchProducts } from "../../lib/api";
 import { categories as defaultCategories } from "../../data/categories";
 import styles from "../page.module.css";
 import { staticSeo } from "../seoConfig";
+import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -73,18 +74,20 @@ export default async function ShopPage({ searchParams }) {
         </div>
 
         <div className={styles.shopLayout} style={{ flexDirection: 'column', gap: '0' }}>
-          <aside style={{ width: '100%' }}>
-            <ShopFilters categories={activeCategories.map(c => c.name)} categoryCounts={categoryCounts} />
-          </aside>
-          
-          <div className={styles.shopGrid} style={{ width: '100%' }}>
-            <LiveProductGrid 
-              initialProducts={products} 
-              initialPagination={pagination}
-              queryParams={params}
-              emptyMessage="No products found matching your search." 
-            />
-          </div>
+          <Suspense fallback={<div style={{padding: '40px', textAlign: 'center'}}>Loading shop...</div>}>
+            <aside style={{ width: '100%' }}>
+              <ShopFilters categories={activeCategories.map(c => c.name)} categoryCounts={categoryCounts} />
+            </aside>
+            
+            <div className={styles.shopGrid} style={{ width: '100%' }}>
+              <LiveProductGrid 
+                initialProducts={products} 
+                initialPagination={pagination}
+                queryParams={params}
+                emptyMessage="No products found matching your search." 
+              />
+            </div>
+          </Suspense>
         </div>
       </section>
     </div>

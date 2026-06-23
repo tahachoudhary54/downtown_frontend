@@ -3,6 +3,7 @@ import { fetchProducts } from "../../../lib/api";
 import { categories as defaultCategories } from "../../../data/categories";
 import styles from "../../page.module.css";
 import { notFound } from "next/navigation";
+import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,12 +45,14 @@ export default async function CollectionPage({ params, searchParams }) {
           <div className={styles.sectionLine}></div>
         </div>
 
-        <LiveProductGrid 
-          initialProducts={products} 
-          initialPagination={pagination}
-          queryParams={{ category: category.name, limit: 50, page }}
-          emptyMessage="No products found in this collection." 
-        />
+        <Suspense fallback={<div style={{padding: '40px', textAlign: 'center'}}>Loading collection...</div>}>
+          <LiveProductGrid 
+            initialProducts={products} 
+            initialPagination={pagination}
+            queryParams={{ category: category.name, limit: 50, page }}
+            emptyMessage="No products found in this collection." 
+          />
+        </Suspense>
       </section>
     </div>
   );
