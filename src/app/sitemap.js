@@ -1,4 +1,4 @@
-import { fetchProducts } from "../../lib/api";
+import { fetchProducts } from "../lib/api";
 
 export default async function sitemap() {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
