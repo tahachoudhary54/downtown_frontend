@@ -74,9 +74,21 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const liveCategories = categoriesData?.data?.map(c => c.name) || categories;
-  const categoryOptions = ['', ...liveCategories];
+  const baseCategories = ['SHIRT', 'JEANS', 'T-SHIRT', 'PANT'];
+  const categoryOptions = ['', ...baseCategories];
 
+  const groupedCounts = { shirt: 0, jeans: 0, 't-shirt': 0, pant: 0 };
+  Object.keys(liveCategoryCounts).forEach(key => {
+    if (key.includes('t-shirt')) {
+      groupedCounts['t-shirt'] += liveCategoryCounts[key];
+    } else if (key.includes('shirt')) {
+      groupedCounts['shirt'] += liveCategoryCounts[key];
+    } else if (key.includes('jeans')) {
+      groupedCounts['jeans'] += liveCategoryCounts[key];
+    } else if (key.includes('pant')) {
+      groupedCounts['pant'] += liveCategoryCounts[key];
+    }
+  });
   return (
     <>
       <button 
@@ -119,7 +131,7 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {categoryOptions.map((cat) => {
                 const isActive = (searchParams.get('category') || '') === cat;
-                const count = cat === '' ? '' : (liveCategoryCounts[cat.toLowerCase()] || 0);
+                const count = cat === '' ? '' : (groupedCounts[cat.toLowerCase()] || 0);
                 const isDisabled = cat !== '' && count === 0;
 
                 return (
