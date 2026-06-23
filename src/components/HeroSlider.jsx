@@ -10,7 +10,7 @@ export default function HeroSlider({ initialSettings }) {
   const { settings } = useSettings(initialSettings);
   
   const heroSettings = settings?.hero || {
-    slides: ["/hero_bg.png", "/hero_bg_v4.png", "/hero_bg_v6.png"],
+    slides: ["/hero_bg.png", "/mens_fashion_hero_2.png", "/hero_bg_v6.png"],
     title: "ELEVATE YOUR\nEVERYDAY",
     subtitle: "Discover the new standard of modern luxury menswear. Designed for the discerning individual.",
     buttonText: "Shop Collection",
@@ -22,7 +22,7 @@ export default function HeroSlider({ initialSettings }) {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % heroSettings.slides.length);
-    }, 5000); // 5 seconds
+    }, 3000); // 3 seconds
     
     return () => clearInterval(timer);
   }, [heroSettings.slides.length]);
