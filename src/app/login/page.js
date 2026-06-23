@@ -89,7 +89,6 @@ export default function LoginPage() {
             theme="outline"
             text="continue_with"
             size="large"
-            width="100%"
           />
         </div>
 

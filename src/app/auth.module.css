@@ -173,15 +173,14 @@
   /* Ensure consistent focus behavior */
 }
 
-/* Make Google login full width */
+/* Center Google login button */
 .googleBtnWrapper {
   width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 .googleBtnWrapper > div {
-  width: 100% !important;
-}
-.googleBtnWrapper iframe {
-  width: 100% !important;
+  display: flex;
+  justify-content: center;
 }
