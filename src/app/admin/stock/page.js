@@ -248,7 +248,7 @@ export default function AdminStock() {
           <input 
             type="text" 
             placeholder="Search Name, Category, or SKU..." 
-            className="flex-1 min-w-[250px] border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
+            className="flex-1 min-w-[150px] sm:min-w-[250px] border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
@@ -291,7 +291,7 @@ export default function AdminStock() {
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-[#F9F7F4] text-[var(--text-muted)] border-b border-[var(--border)]">
               <tr>
-                <th className="p-4 w-12 text-center">
+                <th className="p-2 sm:p-4 w-10 text-center">
                   <input 
                     type="checkbox" 
                     className="w-4 h-4 rounded border-gray-300 text-[var(--accent)] focus:ring-[var(--accent)] cursor-pointer"
@@ -299,13 +299,13 @@ export default function AdminStock() {
                     checked={filteredProducts.length > 0 && selectedIds.length === filteredProducts.length}
                   />
                 </th>
-                <th className="p-4 font-semibold w-16">Image</th>
-                <th className="p-4 font-semibold">Product Details</th>
-                <th className="p-4 font-semibold">SKU</th>
-                <th className="p-4 font-semibold text-center">Stock Quantity</th>
-                <th className="p-4 font-semibold text-center">Inventory Status</th>
-                <th className="p-4 font-semibold text-center">Active/Inactive</th>
-                <th className="p-4 font-semibold text-center">Actions</th>
+                <th className="p-2 sm:p-4 font-semibold w-12 sm:w-16">Img</th>
+                <th className="p-2 sm:p-4 font-semibold">Product</th>
+                <th className="p-2 sm:p-4 font-semibold hidden md:table-cell">SKU</th>
+                <th className="p-2 sm:p-4 font-semibold text-center">Qty</th>
+                <th className="p-2 sm:p-4 font-semibold text-center hidden sm:table-cell">Status</th>
+                <th className="p-2 sm:p-4 font-semibold text-center hidden lg:table-cell">Active</th>
+                <th className="p-2 sm:p-4 font-semibold text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -324,7 +324,7 @@ export default function AdminStock() {
                   
                   return (
                     <tr key={product._id} className={`border-b border-[var(--border)] transition-colors ${total === 0 ? 'bg-red-50/20' : 'hover:bg-[#FAF8F5]'}`}>
-                      <td className="p-4 text-center">
+                      <td className="p-2 sm:p-4 text-center">
                         <input 
                           type="checkbox" 
                           className="w-4 h-4 rounded border-gray-300 text-[var(--accent)] focus:ring-[var(--accent)] cursor-pointer"
@@ -332,25 +332,25 @@ export default function AdminStock() {
                           onChange={(e) => handleSelectOne(e, product._id)}
                         />
                       </td>
-                      <td className="p-4">
-                        <img src={product.img} alt={product.name} className="w-12 h-12 object-cover rounded border border-[var(--border)] shadow-sm" />
+                      <td className="p-2 sm:p-4">
+                        <img src={product.img} alt={product.name} className="w-10 h-10 sm:w-12 sm:h-12 min-w-[40px] sm:min-w-[48px] object-cover rounded border border-[var(--border)] shadow-sm" />
                       </td>
-                      <td className="p-4">
-                        <p className="font-bold text-[var(--foreground)]">{product.name}</p>
-                        <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mt-1">{product.category}</p>
+                      <td className="p-2 sm:p-4">
+                        <p className="font-bold text-[var(--foreground)] text-sm sm:text-base line-clamp-2">{product.name}</p>
+                        <p className="text-[10px] sm:text-xs text-[var(--text-muted)] uppercase tracking-wider mt-0.5 sm:mt-1">{product.category}</p>
                       </td>
-                      <td className="p-4 font-mono text-xs text-gray-500">
+                      <td className="p-2 sm:p-4 font-mono text-xs text-gray-500 hidden md:table-cell">
                         {product.sku || 'N/A'}
                       </td>
-                      <td className="p-4 text-center">
-                        <span className="font-bold text-lg">{total}</span>
+                      <td className="p-2 sm:p-4 text-center">
+                        <span className="font-bold text-base sm:text-lg">{total}</span>
                       </td>
-                      <td className="p-4 text-center">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${status.color}`}>
+                      <td className="p-2 sm:p-4 text-center hidden sm:table-cell">
+                        <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border ${status.color}`}>
                           {status.label}
                         </span>
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="p-2 sm:p-4 text-center hidden lg:table-cell">
                         <div className="flex flex-col items-center gap-1">
                           <button 
                             onClick={() => toggleVisibility(product._id, product.inStock)}
@@ -368,12 +368,12 @@ export default function AdminStock() {
                           </span>
                         </div>
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="p-2 sm:p-4 text-center">
                         <button 
                           onClick={() => openEditModal(product)}
-                          className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1.5 rounded border border-gray-300 transition-colors"
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded border border-gray-300 transition-colors"
                         >
-                          Edit Stock
+                          Edit
                         </button>
                       </td>
                     </tr>

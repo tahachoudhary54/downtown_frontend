@@ -82,7 +82,7 @@ function AdminProductsContent() {
         <input 
           type="text" 
           placeholder="Search products..." 
-          className="flex-1 min-w-[200px] border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
+          className="flex-1 min-w-[150px] sm:min-w-[200px] border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
@@ -103,12 +103,12 @@ function AdminProductsContent() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[#F9F7F4] text-[var(--text-muted)] border-b border-[var(--border)]">
               <tr>
-                <th className="p-4 font-semibold whitespace-nowrap">Image</th>
-                <th className="p-4 font-semibold whitespace-nowrap">Name</th>
-                <th className="p-4 font-semibold whitespace-nowrap">Category</th>
-                <th className="p-4 font-semibold whitespace-nowrap">Price</th>
-                <th className="p-4 font-semibold whitespace-nowrap">Status</th>
-                <th className="p-4 font-semibold text-right whitespace-nowrap">Actions</th>
+                <th className="p-2 sm:p-4 font-semibold">Image</th>
+                <th className="p-2 sm:p-4 font-semibold">Product</th>
+                <th className="p-2 sm:p-4 font-semibold hidden sm:table-cell">Category</th>
+                <th className="p-2 sm:p-4 font-semibold hidden sm:table-cell">Price</th>
+                <th className="p-2 sm:p-4 font-semibold hidden md:table-cell">Status</th>
+                <th className="p-2 sm:p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -123,16 +123,26 @@ function AdminProductsContent() {
               ) : (
                 products.map((product) => (
                   <tr key={product._id} className="border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors">
-                    <td className="p-4">
-                      <img src={product.img} alt={product.name} className="w-12 h-12 min-w-[48px] object-cover rounded border border-[var(--border)]" />
+                    <td className="p-2 sm:p-4">
+                      <img src={product.img} alt={product.name} className="w-10 h-10 sm:w-12 sm:h-12 min-w-[40px] sm:min-w-[48px] object-cover rounded border border-[var(--border)]" />
                     </td>
-                    <td className="p-4 font-medium text-[var(--foreground)] whitespace-nowrap">{product.name}</td>
-                    <td className="p-4 text-[var(--text-muted)] capitalize whitespace-nowrap">{product.category}</td>
-                    <td className="p-4 text-[var(--foreground)] font-medium whitespace-nowrap">
+                    <td className="p-2 sm:p-4">
+                      <p className="font-medium text-[var(--foreground)] break-words line-clamp-2">{product.name}</p>
+                      {/* Show price and status on mobile only under the name */}
+                      <div className="sm:hidden mt-1 flex flex-col gap-1 text-xs">
+                        <span className="text-[var(--foreground)] font-semibold">
+                          {String(product.price).startsWith('₹') ? product.price : `₹${product.price}`}
+                        </span>
+                        {product.isOnSale && <span className="bg-red-100 text-red-700 font-semibold px-1.5 py-0.5 rounded w-max">Sale</span>}
+                        {!product.inStock && <span className="bg-gray-100 text-gray-700 font-semibold px-1.5 py-0.5 rounded w-max">Out of Stock</span>}
+                      </div>
+                    </td>
+                    <td className="p-2 sm:p-4 text-[var(--text-muted)] capitalize hidden sm:table-cell">{product.category}</td>
+                    <td className="p-2 sm:p-4 text-[var(--foreground)] font-medium hidden sm:table-cell">
                       {String(product.price).startsWith('₹') ? product.price : `₹${product.price}`}
                       {product.isOnSale && <span className="ml-2 text-xs text-red-500 line-through">{String(product.originalPrice).startsWith('₹') ? product.originalPrice : `₹${product.originalPrice}`}</span>}
                     </td>
-                    <td className="p-4 whitespace-nowrap">
+                    <td className="p-2 sm:p-4 hidden md:table-cell">
                       {product.isOnSale && (
                         <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded">Sale</span>
                       )}
@@ -140,13 +150,15 @@ function AdminProductsContent() {
                         <span className="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-1 rounded ml-2">Out of Stock</span>
                       )}
                     </td>
-                    <td className="p-4 text-right space-x-3 whitespace-nowrap">
-                      <Link href={`/admin/products/edit/${product._id}`} className="text-blue-600 hover:text-blue-800 font-medium">
-                        Edit
-                      </Link>
-                      <button onClick={() => handleDelete(product._id)} className="text-red-600 hover:text-red-800 font-medium">
-                        Delete
-                      </button>
+                    <td className="p-2 sm:p-4 text-right">
+                      <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+                        <Link href={`/admin/products/edit/${product._id}`} className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                          Edit
+                        </Link>
+                        <button onClick={() => handleDelete(product._id)} className="text-red-600 hover:text-red-800 font-medium text-sm">
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

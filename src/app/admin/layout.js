@@ -174,7 +174,7 @@ function AdminLayoutContent({ children }) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Header */}
         <header className="bg-white border-b border-[var(--border)] px-4 md:px-8 py-4 flex justify-between items-center shadow-sm">
           {/* Left Side: Title & Mobile Hamburger */}
@@ -191,13 +191,13 @@ function AdminLayoutContent({ children }) {
           </div>
 
           {/* Right Side / Center: Top Bar Items */}
-          <div className="flex flex-1 justify-end items-center gap-3 sm:gap-6">
+          <div className="flex flex-1 justify-end items-center gap-3 sm:gap-6 min-w-0">
             
             {/* Search */}
-            <div className="relative max-w-[140px] sm:max-w-sm w-full" ref={searchContainerRef}>
+            <div className="relative max-w-[180px] sm:max-w-sm w-full" ref={searchContainerRef}>
               <input 
                 type="text" 
-                placeholder="Search products..." 
+                placeholder="Search..." 
                 value={globalSearch}
                 onFocus={() => { if (globalSearch.trim() && suggestions.length > 0) setIsSuggestionsOpen(true); }}
                 onChange={(e) => setGlobalSearch(e.target.value)}
@@ -211,7 +211,7 @@ function AdminLayoutContent({ children }) {
                     }
                   }
                 }}
-                className="w-full bg-[#FAF8F5] border border-[var(--border)] rounded-full px-4 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"
+                className="w-full bg-[#FAF8F5] border border-[var(--border)] rounded-full pl-4 pr-10 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"
               />
               <button 
                 onClick={() => {
@@ -222,7 +222,7 @@ function AdminLayoutContent({ children }) {
                     router.push('/admin/products');
                   }
                 }}
-                className="absolute right-4 top-3 text-[var(--text-muted)] hover:text-[var(--accent)]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--accent)] flex items-center justify-center"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               </button>
@@ -242,7 +242,7 @@ function AdminLayoutContent({ children }) {
                         className="p-3 border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors cursor-pointer flex items-center gap-3"
                       >
                         <img src={product.img} alt={product.name} className="w-10 h-10 object-cover rounded border border-[var(--border)]" />
-                        <div className="flex-1 overflow-hidden">
+                        <div className="flex-1 overflow-hidden min-w-0">
                           <h4 className="text-sm font-medium text-[var(--foreground)] truncate">{product.name}</h4>
                           <p className="text-xs text-[var(--text-muted)] truncate capitalize">{product.category}</p>
                         </div>
@@ -278,7 +278,7 @@ function AdminLayoutContent({ children }) {
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[var(--border)] z-50 overflow-hidden -mr-16 sm:mr-0">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[var(--border)] z-50 overflow-hidden -mr-16 sm:mr-0 max-w-[calc(100vw-2rem)]">
                   <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
                     <h3 className="font-bold text-[var(--foreground)]">Notifications</h3>
                     {unreadCount > 0 && (
@@ -329,8 +329,8 @@ function AdminLayoutContent({ children }) {
             </div>
 
             {/* Admin Profile */}
-            <div className="flex items-center gap-3 border-l border-[var(--border)] pl-3 sm:pl-6">
-              <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-sm">
+            <div className="flex items-center gap-3 border-l border-[var(--border)] pl-3 sm:pl-6 shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-sm shrink-0">
                 {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
               </div>
               <div className="hidden lg:block text-sm">
@@ -343,8 +343,8 @@ function AdminLayoutContent({ children }) {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-7xl mx-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 w-full min-w-0">
+          <div className="max-w-7xl mx-auto w-full min-w-0">
             {children}
           </div>
         </div>
