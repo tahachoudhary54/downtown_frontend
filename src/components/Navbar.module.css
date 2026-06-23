@@ -5,6 +5,8 @@
   letter-spacing: 0.1em;
   padding: 0.8rem;
   text-align: center;
+  overflow: hidden;
+  max-width: 100vw;
 }
 .topBar span {
   font-weight: 700;
@@ -18,6 +20,7 @@
   align-items: center;
   z-index: 100;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 100vw;
 }
 
 .headerHome {
@@ -65,10 +68,10 @@
   position: relative;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-weight: 400;
+  font-weight: 500;
   transition: all 0.3s ease;
   padding-bottom: 6px;
 }
@@ -180,6 +183,39 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.avatarButton {
+  padding: 0;
+}
+
+.userAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--foreground);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.userAvatar:hover {
+  transform: scale(1.1);
+  background-color: #3c3733;
+}
+
+@media (min-width: 992px) {
+  .userAvatar {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
 }
 
 .searchWrapper {

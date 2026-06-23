@@ -95,30 +95,7 @@ function AccountContent() {
   if (!mounted || loading || !authUser) return null;
 
   // -- Handlers --
-  const handleProfileSubmit = async (e) => {
-    e.preventDefault();
-    setSavingProfile(true);
-    setProfileMsg({ text: '', type: '' });
-
-    try {
-      const res = await fetch(`${apiBase}/api/users/me`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ name, email })
-      });
-      const resData = await res.json();
-      if (resData.success) {
-        setProfileMsg({ text: 'Profile updated successfully!', type: 'success' });
-        if (checkUser) await checkUser();
-      } else {
-        setProfileMsg({ text: resData.message || 'Failed to update profile', type: 'error' });
-      }
-    } catch (err) {
-      setProfileMsg({ text: 'An error occurred.', type: 'error' });
-    } finally {
-      setSavingProfile(false);
-    }
-  };
+  // Profile updates are currently disabled.
 
   const handleSecuritySubmit = async (e) => {
     e.preventDefault();
@@ -271,22 +248,16 @@ function AccountContent() {
             {activeTab === 'profile' && (
               <div className={styles.card}>
                 <h2 className={styles.cardTitle}>Profile Information</h2>
-                <form onSubmit={handleProfileSubmit}>
+                <div>
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Full Name</label>
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={styles.input} required />
+                    <input type="text" value={name} readOnly className={styles.input} style={{ backgroundColor: '#f5f5f5', color: '#666', cursor: 'not-allowed' }} />
                   </div>
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Email Address</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={styles.input} required />
+                    <input type="email" value={email} readOnly className={styles.input} style={{ backgroundColor: '#f5f5f5', color: '#666', cursor: 'not-allowed' }} />
                   </div>
-                  <button type="submit" className={styles.button} disabled={savingProfile}>
-                    {savingProfile ? 'Saving...' : 'Save Changes'}
-                  </button>
-                  {profileMsg.text && (
-                    <div className={`${styles.message} ${styles[profileMsg.type]}`}>{profileMsg.text}</div>
-                  )}
-                </form>
+                </div>
               </div>
             )}
 

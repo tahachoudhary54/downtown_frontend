@@ -14,6 +14,14 @@ import styles from "./Navbar.module.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+const getInitials = (name) => {
+  if (!name) return "";
+  const parts = name.trim().split(" ");
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -120,7 +128,7 @@ export default function Navbar() {
           {/* Logo in Left */}
           <div className={styles.logo}>
             <a href="/">
-              <Image src="/logo-horizontal-v2.png" alt="MEN'S" width={145} height={36} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
+              <Image src="/logo-horizontal-v2.png" alt="MEN'S" width={200} height={49} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
             </a>
           </div>
           
@@ -197,14 +205,20 @@ export default function Navbar() {
               <div className={styles.userMenuWrapper} ref={userMenuRef}>
                 <button 
                   type="button"
-                  className={styles.iconButton} 
+                  className={`${styles.iconButton} ${user.name ? styles.avatarButton : ''}`} 
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   aria-label="User Menu"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
+                  {user.name ? (
+                    <div className={styles.userAvatar}>
+                      {getInitials(user.name)}
+                    </div>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  )}
                 </button>
                 {userMenuOpen && (
                   <div className={styles.userDropdown}>
@@ -213,12 +227,12 @@ export default function Navbar() {
                       <span className={styles.userDropdownEmail} title={user.email}>{user.email}</span>
                     </div>
 
-                    <Link href="/account" className={styles.userDropdownItem} onClick={() => setUserMenuOpen(false)}>
+                    <Link href="/account?tab=profile" className={styles.userDropdownItem} onClick={() => setUserMenuOpen(false)}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '12px'}}>
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                       </svg>
-                      My Account
+                      My Profile
                     </Link>
 
                     <Link href="/orders" className={styles.userDropdownItem} onClick={() => setUserMenuOpen(false)}>
@@ -228,6 +242,21 @@ export default function Navbar() {
                         <path d="M16 10a4 4 0 0 1-8 0"></path>
                       </svg>
                       My Orders
+                    </Link>
+
+                    <Link href="/wishlist" className={styles.userDropdownItem} onClick={() => setUserMenuOpen(false)}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '12px'}}>
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                      </svg>
+                      Wishlist
+                    </Link>
+
+                    <Link href="/account?tab=addresses" className={styles.userDropdownItem} onClick={() => setUserMenuOpen(false)}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '12px'}}>
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                      </svg>
+                      Saved Addresses
                     </Link>
 
                     {user.role === 'admin' && (

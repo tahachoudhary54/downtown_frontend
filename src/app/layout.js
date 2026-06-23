@@ -42,6 +42,13 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 import ClientLayoutWrapper from "../components/ClientLayoutWrapper";
 import { CartProvider } from "../context/CartContext";
 import { AuthProvider } from "../context/AuthContext";
@@ -62,25 +69,27 @@ export default function RootLayout({ children }) {
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "placeholder_id"}>
-          <AuthProvider>
-            <CustomerNotificationsProvider>
-              <NotificationsProvider>
-                <RealtimeStockProvider>
-                  <CartProvider>
-                    <WishlistProvider>
-                      <ClientLayoutWrapper>
-                        {children}
-                      </ClientLayoutWrapper>
-                      <FaqButton />
-                      <WhatsAppButton />
-                    </WishlistProvider>
-                  </CartProvider>
-                </RealtimeStockProvider>
-              </NotificationsProvider>
-            </CustomerNotificationsProvider>
-          </AuthProvider>
-        </GoogleOAuthProvider>
+        <div style={{ overflowX: 'hidden', width: '100%', position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "placeholder_id"}>
+            <AuthProvider>
+              <CustomerNotificationsProvider>
+                <NotificationsProvider>
+                  <RealtimeStockProvider>
+                    <CartProvider>
+                      <WishlistProvider>
+                        <ClientLayoutWrapper>
+                          {children}
+                        </ClientLayoutWrapper>
+                        <FaqButton />
+                        <WhatsAppButton />
+                      </WishlistProvider>
+                    </CartProvider>
+                  </RealtimeStockProvider>
+                </NotificationsProvider>
+              </CustomerNotificationsProvider>
+            </AuthProvider>
+          </GoogleOAuthProvider>
+        </div>
       </body>
     </html>
   );

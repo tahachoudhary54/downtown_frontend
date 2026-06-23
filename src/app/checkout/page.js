@@ -13,7 +13,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cart, totalPrice, clearCart } = useCart();
   const { addNotification } = useNotifications();
-  const { user, loading } = useAuth();
+  const { user, loading, token } = useAuth();
   const [mounted, setMounted] = useState(false);
   
   // Checkout State
@@ -46,6 +46,46 @@ export default function CheckoutPage() {
       router.push('/login');
     }
   }, [loading, user, router]);
+
+  useEffect(() => {
+    if (user && token) {
+      // Basic autofill from user context first
+      setFormData(prev => ({
+        ...prev,
+        firstName: prev.firstName || user.name?.split(' ')[0] || '',
+        lastName: prev.lastName || user.name?.split(' ').slice(1).join(' ') || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || ''
+      }));
+
+      // Fetch user profile to get saved addresses
+      const fetchProfile = async () => {
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+          const res = await fetch(`${apiUrl}/api/users/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (data.success && data.data?.addresses?.length > 0) {
+            const defaultAddr = data.data.addresses.find(a => a.isDefault) || data.data.addresses[0];
+            const names = defaultAddr.fullName ? defaultAddr.fullName.split(' ') : [];
+            setFormData(prev => ({
+              ...prev,
+              firstName: prev.firstName || names[0] || '',
+              lastName: prev.lastName || names.slice(1).join(' ') || '',
+              phone: prev.phone || defaultAddr.phone || '',
+              address: prev.address || defaultAddr.street || '',
+              city: prev.city || defaultAddr.city || '',
+              pinCode: prev.pinCode || defaultAddr.zip || ''
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to fetch user addresses", err);
+        }
+      };
+      fetchProfile();
+    }
+  }, [user, token]);
 
   if (!mounted || loading || (!user && !isSuccess)) return null;
 
