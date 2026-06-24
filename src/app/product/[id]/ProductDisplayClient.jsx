@@ -16,11 +16,21 @@ export default function ProductDisplayClient({ product }) {
   const liveVariants = useLiveVariants(product._id || product.id, product.variants || []);
   const variants = liveVariants;
   
-  // Default to the first available color to ensure the main product shows immediately
   const variantColors = product.variants ? product.variants.map(v => v.colorName) : [];
   const globalColors = product.colors || [];
-  const availableColors = Array.from(new Set([...globalColors, ...variantColors]));
-  const initialColor = availableColors.length > 0 ? availableColors[0] : "";
+  
+  // If there are variants, we should ensure the main product image is accessible.
+  // We'll add a 'Default' color if we have variants.
+  let availableColors = Array.from(new Set([...globalColors, ...variantColors]));
+  const hasVariants = availableColors.length > 0;
+  
+  if (hasVariants && product.img) {
+     // If they have variants, inject 'Default' so the user can switch back to the main product image
+     availableColors = ['Default', ...availableColors];
+  }
+
+  // Do not auto-select a color on load, so the main product image is shown initially.
+  const initialColor = "";
   const [selectedColor, setSelectedColor] = useState(initialColor);
   
   const [mainImage, setMainImage] = useState(product.img);
@@ -28,7 +38,11 @@ export default function ProductDisplayClient({ product }) {
 
   // Sync main image when color changes
   useEffect(() => {
-    if (!selectedColor) return;
+    if (!selectedColor || selectedColor === 'Default') {
+      setMainImage(product.img);
+      setDisplayImages([product.img].filter(Boolean));
+      return;
+    }
     const newVariant = variants.find(v => v.colorName === selectedColor);
     if (newVariant?.images?.length > 0) {
       setMainImage(newVariant.images[0]);
@@ -107,7 +121,7 @@ export default function ProductDisplayClient({ product }) {
           <div className={styles.detailsCol}>
             <p className={styles.brand}>DOWNTOWN EXCLUSIVE</p>
             <h1 className={styles.title}>
-              {selectedColor && variants.find(v => v.colorName === selectedColor)?.variantName 
+              {selectedColor && selectedColor !== 'Default' && variants.find(v => v.colorName === selectedColor)?.variantName 
                 ? variants.find(v => v.colorName === selectedColor).variantName 
                 : product.name}
             </h1>

@@ -8,9 +8,18 @@ import IconHeartFilled from './IconHeartFilled';
 
 import { useLiveStock, useLiveVisibility } from '../context/RealtimeStockContext';
 import { getSalePricing } from '../utils/price';
+import { useCart } from '../context/CartContext';
 
 function ProductCard({ item }) {
   const { toggleWishlist, isWishlisted } = useWishlist();
+  const { cart } = useCart();
+  
+  const quantityInCart = cart.reduce((total, cartItem) => {
+    if ((cartItem.product._id || cartItem.product.id) === (item._id || item.id)) {
+      return total + cartItem.quantity;
+    }
+    return total;
+  }, 0);
   let initialStock = item.stock !== undefined ? item.stock : (item.totalStock || 0);
   if (item.variants && item.variants.length > 0) {
     initialStock = item.variants.reduce((acc, curr) => acc + (curr.stock || 0), 0);
@@ -19,20 +28,29 @@ function ProductCard({ item }) {
   const liveVisibility = useLiveVisibility(item._id || item.id, item.inStock !== undefined ? item.inStock : true);
   const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing(item);
 
-  if (liveVisibility === false) return null;
+  // If inStock is explicitly set to false, treat it as out of stock (0 stock) instead of hiding it completely.
+  const effectiveLiveStock = liveVisibility === false ? 0 : liveStock;
 
   let badgeText = null;
   let badgeClass = styles.statusBadge;
 
-  if (liveStock > 0 && (item.isNew || (item.createdAt && (Date.now() - new Date(item.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000)))) {
+  if (effectiveLiveStock > 0 && (item.isNew || (item.createdAt && (Date.now() - new Date(item.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000)))) {
     badgeText = 'New Arrival';
   }
 
   return (
     <Link href={`/product/${item._id || item.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }}>
-      <div className={styles.productCard} style={{ width: '100%', height: '100%' }}>
-        <div className={styles.productImageWrapper}>
-          <Image src={item.img} alt={item.name} fill className={`${styles.productImage} ${liveStock === 0 ? styles.premiumOutOfStockImage : ''}`} />
+      <div className={styles.productCard} style={{ width: '100%', height: '100%', position: 'relative', overflow: 'visible' }}>
+        
+        {/* Quantity in Cart Badge */}
+        {quantityInCart > 0 && (
+          <div className={styles.cartQuantityBadge}>
+            {quantityInCart}
+          </div>
+        )}
+
+        <div className={styles.productImageWrapper} style={{ borderTopLeftRadius: '20px', borderTopRightRadius: '20px' }}>
+          <Image src={item.img} alt={item.name} fill className={`${styles.productImage} ${effectiveLiveStock === 0 ? styles.premiumOutOfStockImage : ''}`} />
           
           {/* Status Badge over Image (New Arrival) */}
           {badgeText && (
@@ -42,23 +60,23 @@ function ProductCard({ item }) {
           )}
 
           {/* Premium Sale Badge */}
-          {isSaleValid && liveStock > 0 && (
+          {isSaleValid && effectiveLiveStock > 0 && (
             <div className="premiumSaleBadge">
               SALE
             </div>
           )}
 
           {/* Premium Out of Stock Badge */}
-          {liveStock === 0 && (
+          {effectiveLiveStock === 0 && (
             <div className={styles.premiumOutOfStockBadge}>
               Out of Stock
             </div>
           )}
 
           {/* Premium Low Stock Badge */}
-          {liveStock > 0 && liveStock <= 20 && (
+          {effectiveLiveStock > 0 && effectiveLiveStock <= 20 && (
             <div className={styles.premiumLowStockBadge}>
-              Only {liveStock} left
+              Only {effectiveLiveStock} left
             </div>
           )}
 
@@ -92,11 +110,11 @@ function ProductCard({ item }) {
           )}
 
           <button 
-            className={`${styles.btnCardAdd} ${liveStock === 0 ? styles.btnCardAddDisabled : ''}`}
+            className={`${styles.btnCardAdd} ${effectiveLiveStock === 0 ? styles.btnCardAddDisabled : ''}`}
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Handle Add to Cart */ }}
-            disabled={liveStock === 0}
+            disabled={effectiveLiveStock === 0}
           >
-            {liveStock === 0 ? 'NOTIFY ME' : 'ADD TO CART'}
+            {effectiveLiveStock === 0 ? 'NOTIFY ME' : 'ADD TO CART'}
           </button>
         </div>
       </div>

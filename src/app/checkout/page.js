@@ -282,9 +282,11 @@ export default function CheckoutPage() {
 
                 return (
                   <div key={index} className={styles.summaryItem}>
-                    <div className={styles.itemImage}>
-                      <div className={styles.itemBadge}>{item.quantity}</div>
-                      <Image src={itemImage} alt={item.product.name} fill />
+                    <div className={styles.productImageWrapper}>
+                      <div className={styles.productImageContainer}>
+                        <Image src={itemImage} alt={item.product.name} fill style={{ objectFit: 'cover' }} />
+                      </div>
+                      <span className={styles.quantityBadge}>{item.quantity}</span>
                     </div>
                     <div className={styles.itemInfo}>
                       <h4 className={styles.itemName}>{item.product.name}</h4>

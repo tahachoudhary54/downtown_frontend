@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
@@ -29,7 +29,7 @@ export default function AdminSettings() {
           Authorization: `Bearer ${token}` 
         },
         body: JSON.stringify({ seasonalBanner: settings.seasonalBanner })
-      }).then(() => router.refresh()).catch(console.error);
+      }).catch(console.error);
     }, 1000);
     return () => clearTimeout(timer);
   }, [settings?.seasonalBanner, token, router]);
@@ -59,13 +59,10 @@ export default function AdminSettings() {
   };
 
   const handleCategoryChange = async (index, field, value) => {
-    let newSettings;
-    setSettings(prev => {
-      const newCats = [...(prev.categories || [])];
-      newCats[index] = { ...newCats[index], [field]: value };
-      newSettings = { ...prev, categories: newCats };
-      return newSettings;
-    });
+    const newCats = [...(settings.categories || [])];
+    newCats[index] = { ...newCats[index], [field]: value };
+    
+    setSettings(prev => ({ ...prev, categories: newCats }));
 
     if (field === 'isActive') {
       try {
@@ -75,11 +72,15 @@ export default function AdminSettings() {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}` 
           },
-          body: JSON.stringify({ categories: newSettings.categories })
+          body: JSON.stringify({ categories: newCats })
         });
         const data = await res.json();
-        if (data.success) {
-          router.refresh();
+        if (!data.success) {
+          console.error("Failed to save on server:", data.message);
+        } else {
+          startTransition(() => {
+            router.refresh();
+          });
         }
       } catch (err) {
         console.error("Failed to auto-save category status", err);
@@ -117,8 +118,12 @@ export default function AdminSettings() {
         body: JSON.stringify({ categories: newCats })
       });
       const data = await res.json();
-      if (data.success) {
-        router.refresh();
+      if (!data.success) {
+        console.error("Failed to auto-save category removal");
+      } else {
+        startTransition(() => {
+          router.refresh();
+        });
       }
     } catch (err) {
       console.error("Failed to auto-save category removal", err);

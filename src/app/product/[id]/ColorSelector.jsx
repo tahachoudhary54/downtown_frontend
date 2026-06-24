@@ -28,10 +28,10 @@ export default function ColorSelector({ variants, product, availableColors, sele
                 style={{ 
                   position: 'relative', width: '60px', height: '80px', padding: 0, cursor: 'pointer',
                   border: selectedColor === color ? '2px solid var(--accent)' : '1px solid var(--border)',
-                  borderRadius: '4px', overflow: 'hidden'
+                  borderRadius: '4px'
                 }}
               >
-                <img src={swatchImage} alt={color} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={swatchImage} alt={color} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '2px' }} />
               </button>
             );
           }

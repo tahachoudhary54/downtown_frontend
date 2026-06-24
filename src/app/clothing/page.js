@@ -5,14 +5,17 @@ import styles from "../page.module.css";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 async function fetchCategories() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/categories?activeOnly=true`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings?_t=${Date.now()}`, { cache: 'no-store' });
     const data = await res.json();
-    if (data.success) return data.data;
+    if (data.success && data.data?.categories) {
+      return data.data.categories.filter(c => c.isActive !== false).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    }
   } catch (err) {
-    console.error("Failed to fetch categories", err);
+    console.error("Failed to fetch settings categories", err);
   }
   return [];
 }

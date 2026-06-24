@@ -6,7 +6,7 @@ import Link from "next/link";
 import { generateWhatsAppMessage, trackWhatsAppClick } from "../../../utils/whatsapp";
 import styles from "./product.module.css";
 
-import { useLiveStock, useLiveVariants } from "../../../context/RealtimeStockContext";
+import { useLiveStock, useLiveVariants, useLiveVisibility } from "../../../context/RealtimeStockContext";
 import ColorSelector from "./ColorSelector";
 
 export default function AddToCartSection({ product, selectedColor, setSelectedColor }) {
@@ -33,7 +33,13 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
   }, [availableSizes, selectedSize, product.inventory, selectedColor, selectedVariantInfo]);
   const variantColors = variants.map(v => v.colorName);
   const globalColors = product.colors || [];
-  const availableColors = Array.from(new Set([...globalColors, ...variantColors]));
+  
+  let availableColors = Array.from(new Set([...globalColors, ...variantColors]));
+  const hasVariants = availableColors.length > 0;
+  
+  if (hasVariants && product.img) {
+     availableColors = ['Default', ...availableColors];
+  }
   const [added, setAdded] = useState(false);
   const [currentUrl, setCurrentUrl] = useState('');
   const { addToCart } = useCart();
@@ -57,9 +63,11 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
   }
   
   const liveStock = useLiveStock(product._id || product.id, initialStock);
+  const liveVisibility = useLiveVisibility(product._id || product.id, product.inStock !== undefined ? product.inStock : true);
 
   // Use initialStock for variant-specific display because liveStock is the global product stock.
-  const effectiveStock = (variants.length > 0 && selectedColor) ? initialStock : liveStock;
+  // Also treat liveVisibility === false (inStock: false) as 0 stock.
+  const effectiveStock = liveVisibility === false ? 0 : ((variants.length > 0 && selectedColor) ? initialStock : liveStock);
 
   let stockStatus = { text: '', className: '' };
   if (effectiveStock === 0) {
@@ -72,9 +80,10 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
     if (effectiveStock === 0) return;
     
     let colorToAdd = selectedColor;
-    if (availableColors.length > 0 && !selectedColor) {
-      colorToAdd = availableColors[0];
-      setSelectedColor(colorToAdd);
+    if (availableColors.length > 0 && (!selectedColor || selectedColor === 'Default')) {
+      // If no color selected or 'Default' selected, default to 'Default' instead of the first variant.
+      // However, if they truly have no color, let's keep it empty so the backend doesn't complain about 'Default' color.
+      colorToAdd = selectedColor === 'Default' ? '' : selectedColor;
     }
     
     addToCart(product, selectedSize, colorToAdd, 1);
