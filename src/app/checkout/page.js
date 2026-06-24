@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import Script from 'next/script';
 import styles from './checkout.module.css';
 
 export default function CheckoutPage() {
@@ -102,59 +103,136 @@ export default function CheckoutPage() {
     e.preventDefault();
     setIsProcessing(true);
 
-    const orderPayload = {
-      ...(user?.id && { user: user.id }),
-      customer: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-      },
-      shippingAddress: {
-        address: formData.address,
-        city: formData.city,
-        pinCode: formData.pinCode,
-      },
-      items: cart.map(item => ({
-        product: item.product._id || item.product.id,
-        name: item.product.name,
-        size: item.size,
-        quantity: item.quantity,
-        price: parseFloat((item.product.price || "0").toString().replace(/[^0-9.]/g, "")) || 0,
-      })),
-      financials: {
-        subtotal: totalPrice,
-        shippingCost: shippingCost,
-        total: finalTotal,
-      },
-      paymentMethod: paymentMethod
-    };
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const res = await fetch(`${apiUrl}/api/orders`, {
+      // 1. Create Razorpay Order
+      const orderRes = await fetch(`${apiUrl}/api/payment/create-order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ amount: finalTotal * 100, currency: 'INR' })
       });
-      const data = await res.json();
-      
-      if (data.success) {
-        const orderId = data.data?._id?.slice(-6).toUpperCase() || '------';
-        addNotification({
-          title: 'New Order Received',
-          desc: `Order #${orderId} placed by ${formData.firstName} ${formData.lastName} for ₹${finalTotal.toLocaleString('en-IN')}. Please review and prepare for shipping.`,
-          type: 'order',
-        });
-        setIsSuccess(true);
-        clearCart();
-      } else {
-        alert("Failed to place order: " + data.message);
+      const orderData = await orderRes.json();
+
+      if (!orderData.success) {
+        alert("Failed to initialize payment: " + orderData.message);
+        setIsProcessing(false);
+        return;
       }
+
+      // 2. Open Razorpay Checkout Modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: orderData.order.amount,
+        currency: orderData.order.currency,
+        name: "Downtown Boutique",
+        description: "Order Payment",
+        order_id: orderData.order.id,
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          contact: formData.phone
+        },
+        theme: {
+          color: "#2e2a27"
+        },
+        handler: async function (response) {
+          // 3. Verify Payment
+          try {
+            const verifyRes = await fetch(`${apiUrl}/api/payment/verify-payment`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              // 4. Save Order to Database
+              const orderPayload = {
+                ...(user?.id && { user: user.id }),
+                customer: {
+                  firstName: formData.firstName,
+                  lastName: formData.lastName,
+                  email: formData.email,
+                  phone: formData.phone,
+                },
+                shippingAddress: {
+                  address: formData.address,
+                  city: formData.city,
+                  pinCode: formData.pinCode,
+                },
+                items: cart.map(item => ({
+                  product: item.product._id || item.product.id,
+                  name: item.product.name,
+                  size: item.size,
+                  quantity: item.quantity,
+                  price: parseFloat((item.product.price || "0").toString().replace(/[^0-9.]/g, "")) || 0,
+                })),
+                financials: {
+                  subtotal: totalPrice,
+                  shippingCost: shippingCost,
+                  total: finalTotal,
+                },
+                paymentMethod: paymentMethod,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id
+              };
+
+              const saveRes = await fetch(`${apiUrl}/api/orders`, {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(orderPayload)
+              });
+              const saveData = await saveRes.json();
+              
+              if (saveData.success) {
+                const orderId = saveData.data?._id?.slice(-6).toUpperCase() || '------';
+                addNotification({
+                  title: 'New Order Received',
+                  desc: `Order #${orderId} placed by ${formData.firstName} ${formData.lastName} for ₹${finalTotal.toLocaleString('en-IN')}. Please review and prepare for shipping.`,
+                  type: 'order',
+                });
+                setIsSuccess(true);
+                clearCart();
+              } else {
+                alert("Failed to place order: " + saveData.message);
+              }
+            } else {
+              alert("Payment verification failed. Please contact support.");
+            }
+          } catch (err) {
+            console.error("Payment verification error:", err);
+            alert("Payment verification failed.");
+          } finally {
+            setIsProcessing(false);
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        console.error("Payment failed:", response.error);
+        alert("Payment failed: " + response.error.description);
+        setIsProcessing(false);
+      });
+      rzp.open();
+
     } catch (error) {
-      console.error(error);
-      alert("Error placing order");
-    } finally {
+      console.error("Checkout error:", error);
+      alert("Error initializing checkout");
       setIsProcessing(false);
     }
   };
@@ -183,6 +261,7 @@ export default function CheckoutPage() {
 
   return (
     <div className={styles.page}>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <h1 className={styles.title}>Checkout</h1>
       
       <div className={styles.container}>

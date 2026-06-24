@@ -37,7 +37,13 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
   let availableColors = Array.from(new Set([...globalColors, ...variantColors]));
   const hasVariants = availableColors.length > 0;
   
-  if (hasVariants && product.img) {
+  // Check if any existing color falls back to the main product image.
+  const hasColorFallingBackToMainImage = availableColors.some(color => {
+    const variant = product.variants?.find(v => v.colorName === color);
+    return !(variant && variant.images && variant.images.length > 0);
+  });
+
+  if (hasVariants && product.img && !hasColorFallingBackToMainImage) {
      availableColors = ['Default', ...availableColors];
   }
   const [added, setAdded] = useState(false);

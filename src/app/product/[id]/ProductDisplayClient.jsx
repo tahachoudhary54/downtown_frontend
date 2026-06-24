@@ -24,13 +24,19 @@ export default function ProductDisplayClient({ product }) {
   let availableColors = Array.from(new Set([...globalColors, ...variantColors]));
   const hasVariants = availableColors.length > 0;
   
-  if (hasVariants && product.img) {
-     // If they have variants, inject 'Default' so the user can switch back to the main product image
+  // Check if any existing color falls back to the main product image.
+  // A color falls back if it has no matching variant, or the matching variant has no images.
+  const hasColorFallingBackToMainImage = availableColors.some(color => {
+    const variant = product.variants?.find(v => v.colorName === color);
+    return !(variant && variant.images && variant.images.length > 0);
+  });
+
+  if (hasVariants && product.img && !hasColorFallingBackToMainImage) {
      availableColors = ['Default', ...availableColors];
   }
 
-  // Do not auto-select a color on load, so the main product image is shown initially.
-  const initialColor = "";
+  // Select the first available color by default, so it highlights properly
+  const initialColor = availableColors.length > 0 ? availableColors[0] : "";
   const [selectedColor, setSelectedColor] = useState(initialColor);
   
   const [mainImage, setMainImage] = useState(product.img);
