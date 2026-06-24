@@ -18,7 +18,9 @@ export const metadata = {
 
 async function getSettings() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings?_t=${Date.now()}`, { cache: 'no-store' });
+    let apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    if (apiUrl.endsWith('/')) apiUrl = apiUrl.slice(0, -1);
+    const res = await fetch(`${apiUrl}/api/settings?_t=${Date.now()}`, { cache: 'no-store' });
     const data = await res.json();
     if (data.success) return data.data;
   } catch (err) {
