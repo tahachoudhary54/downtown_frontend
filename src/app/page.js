@@ -39,7 +39,7 @@ export default async function Home() {
   }
 
   const heroSettings = settings?.hero || {
-    slides: ["/hero_bg.png", "/hero_bg_v4.png", "/hero_bg_v6.png"],
+    slides: ["/hero_bg.png", "/hero_banner_v2.png", "/hero_bg_v6.png"],
     title: "ELEVATE YOUR\nEVERYDAY",
     subtitle: "Discover the new standard of modern luxury menswear. Designed for the discerning individual.",
     buttonText: "Shop Collection",
