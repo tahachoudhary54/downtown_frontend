@@ -10,7 +10,7 @@ export default function HeroSlider({ initialSettings }) {
   const { settings } = useSettings(initialSettings);
   
   const heroSettings = settings?.hero || {
-    slides: ["/hero_bg.png", "/mens_fashion_hero_2.png", "/hero_bg_v6.png"],
+    slides: ["/hero_bg.png", "/hero_banner_new.png", "/hero_bg_v6.png"],
     title: "ELEVATE YOUR\nEVERYDAY",
     subtitle: "Discover the new standard of modern luxury menswear. Designed for the discerning individual.",
     buttonText: "Shop Collection",

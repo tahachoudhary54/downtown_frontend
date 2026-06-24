@@ -128,7 +128,7 @@ export default function Navbar() {
           {/* Logo in Left */}
           <div className={styles.logo}>
             <a href="/">
-              <Image src="/logo-horizontal-v2.png" alt="MEN'S" width={200} height={49} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
+              <Image src="/logo-horizontal-v2.png" alt="MEN'S" width={140} height={34} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
             </a>
           </div>
           
