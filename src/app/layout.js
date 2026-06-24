@@ -60,7 +60,6 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import WhatsAppButton from "../components/WhatsAppButton";
 import FaqButton from "../components/FaqButton";
-import KeepAlive from "../components/KeepAlive";
 
 import { RealtimeSettingsProvider } from "../context/RealtimeSettingsContext";
 
@@ -84,7 +83,6 @@ export default function RootLayout({ children }) {
                           <ClientLayoutWrapper>
                             {children}
                           </ClientLayoutWrapper>
-                          <KeepAlive />
                           <FaqButton />
                           <WhatsAppButton />
                         </WishlistProvider>

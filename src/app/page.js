@@ -18,9 +18,7 @@ export const metadata = {
 
 async function getSettings() {
   try {
-    let apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    if (apiUrl.endsWith('/')) apiUrl = apiUrl.slice(0, -1);
-    const res = await fetch(`${apiUrl}/api/settings?_t=${Date.now()}`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings?_t=${Date.now()}`, { cache: 'no-store' });
     const data = await res.json();
     if (data.success) return data.data;
   } catch (err) {
@@ -41,7 +39,7 @@ export default async function Home() {
   }
 
   const heroSettings = settings?.hero || {
-    slides: ["/hero_bg.png", "/hero_banner_v2.png", "/hero_bg_v6.png"],
+    slides: ["/hero_bg.png", "/hero_bg_v4.png", "/hero_bg_v6.png"],
     title: "ELEVATE YOUR\nEVERYDAY",
     subtitle: "Discover the new standard of modern luxury menswear. Designed for the discerning individual.",
     buttonText: "Shop Collection",

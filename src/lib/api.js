@@ -1,5 +1,4 @@
-let API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-if (API_URL.endsWith('/')) API_URL = API_URL.slice(0, -1);
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export async function fetchProducts(params = {}, returnFullRes = false) {
   try {
@@ -64,24 +63,12 @@ export async function verifyOtp(data) {
 }
 
 export async function login(credentials) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25000); // 25 second timeout
-  try {
-    const res = await fetch(`${API_URL}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-    return res.json();
-  } catch (err) {
-    clearTimeout(timeout);
-    if (err.name === 'AbortError') {
-      return { success: false, message: "Server is starting up, please try again in 30 seconds." };
-    }
-    throw err;
-  }
+  const res = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
+  return res.json();
 }
 
 export async function loginWithGoogle(credential) {
