@@ -1,8 +1,11 @@
 .topBar {
   background-color: var(--bg-secondary);
   color: var(--foreground);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  font-family: 'Inter', 'Outfit', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   padding: 0.8rem;
   text-align: center;
   overflow: hidden;
@@ -10,6 +13,7 @@
 }
 .topBar span {
   font-weight: 700;
+  letter-spacing: 0.18em;
 }
 
 .header {

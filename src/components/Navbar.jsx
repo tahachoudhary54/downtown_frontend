@@ -118,7 +118,7 @@ export default function Navbar() {
       {/* Top Notification Bar */}
       <div className={styles.topBar}>
         <div className={styles.topBarCenter}>
-          <span>FREE SHIPPING</span> ON ORDERS ABOVE ₹999 | CASH ON DELIVERY AVAILABLE
+          <span>PORT</span> — Designed for those who move with purpose.
         </div>
       </div>
       
