@@ -18,10 +18,14 @@ export default function HeroSlider({ initialSettings }) {
   };
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [prevIndex, setPrevIndex] = useState(-1);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % heroSettings.slides.length);
+      setCurrentIndex((prev) => {
+        setPrevIndex(prev);
+        return (prev + 1) % heroSettings.slides.length;
+      });
     }, 3000); // 3 seconds
     
     return () => clearInterval(timer);
@@ -32,7 +36,7 @@ export default function HeroSlider({ initialSettings }) {
       {heroSettings.slides.map((src, index) => (
         <div
           key={src}
-          className={`${styles.heroSlide} ${index === currentIndex ? styles.active : ''}`}
+          className={`${styles.heroSlide} ${index === currentIndex ? styles.active : index === prevIndex ? styles.prev : ''}`}
         >
           <div className={styles.heroBackground}>
             <Image
