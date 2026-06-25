@@ -572,9 +572,31 @@
     opacity: 1;
     visibility: visible;
   }
+  @keyframes slideInLeftLink {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
   .nav a {
     font-size: 1.5rem;
+    opacity: 0;
+    transition: color 0.3s ease, letter-spacing 0.3s ease, text-shadow 0.3s ease;
   }
+  
+  .nav a:hover, .nav a:active {
+    color: #C9A86A;
+    letter-spacing: 0.18em;
+    text-shadow: 0 0 15px rgba(201, 168, 106, 0.4);
+  }
+  
+  .nav.navOpen a {
+    animation: slideInLeftLink 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  }
+  .nav.navOpen a:nth-child(1) { animation-delay: 0.15s; }
+  .nav.navOpen a:nth-child(2) { animation-delay: 0.25s; }
+  .nav.navOpen a:nth-child(3) { animation-delay: 0.35s; }
+  .nav.navOpen a:nth-child(4) { animation-delay: 0.45s; }
+  .nav.navOpen a:nth-child(5) { animation-delay: 0.55s; }
   .searchInput {
     width: 150px;
     right: 0;
