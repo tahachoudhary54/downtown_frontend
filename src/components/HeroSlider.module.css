@@ -37,6 +37,7 @@
   margin-left: 10%;
   max-width: 600px;
   color: #fff;
+  padding-top: 2rem;
 }
 
 .heroBadge {
@@ -133,6 +134,7 @@
   .heroContent {
     margin-left: 5%;
     max-width: 80%;
+    padding-top: 2rem;
   }
   .heroTitle {
     font-size: 3.5rem;
@@ -148,6 +150,7 @@
     max-width: 90%;
     text-align: center;
     margin: 0 auto;
+    padding-top: 1.5rem;
   }
   .heroOverlay {
     background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%);

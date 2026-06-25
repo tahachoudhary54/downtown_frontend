@@ -16,6 +16,8 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     category: '',
     img: '',
     isOnSale: false,
+    isEssential: false,
+    essentialCollection: '',
     originalPrice: '',
     inStock: true,
     sizes: [],
@@ -574,6 +576,47 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
             />
             <span className="text-[var(--foreground)] font-medium">In Stock</span>
           </label>
+        </div>
+
+        {/* Essential Collection Selector */}
+        <div className="space-y-2 pt-2">
+          <label className="block text-sm font-medium text-[var(--text-muted)]">Essential Collection</label>
+          <p className="text-xs text-[var(--text-muted)] mb-1">Select which Essential Collection this product appears in on the homepage.</p>
+          <select
+            value={formData.essentialCollection || ''}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFormData(prev => ({
+                ...prev,
+                essentialCollection: val,
+                isEssential: val !== ''
+              }));
+            }}
+            className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
+          >
+            <option value="">— None (Not in Essential Collection) —</option>
+            <optgroup label="Shirts">
+              <option value="BAGGY SHIRT">Baggy Shirt</option>
+              <option value="REGULAR SHIRT">Regular Shirt</option>
+              <option value="LINEN SHIRT">Linen Shirt</option>
+              <option value="HALF SLEEVE SHIRT">Half Sleeve Shirt</option>
+            </optgroup>
+            <optgroup label="T-Shirts">
+              <option value="T-SHIRT">T-Shirt</option>
+              <option value="POLO T-SHIRT">Polo T-Shirt</option>
+              <option value="FULL SLEEVE T-SHIRT">Full Sleeve T-Shirt</option>
+            </optgroup>
+            <optgroup label="Bottoms">
+              <option value="BAGGY JEANS">Baggy Jeans</option>
+              <option value="BOOT CUT JEANS">Boot Cut Jeans</option>
+              <option value="REGULAR FIT JEANS">Regular Fit Jeans</option>
+              <option value="STRAIGHT FIT JEANS">Straight Fit Jeans</option>
+              <option value="TRACK PANT">Track Pant</option>
+            </optgroup>
+          </select>
+          {formData.isEssential && formData.essentialCollection && (
+            <p className="text-xs text-green-600 mt-1">✓ Product will appear in <strong>{formData.essentialCollection}</strong> collection.</p>
+          )}
         </div>
 
         <div className="pt-6 border-t border-[var(--border)] flex justify-end gap-4">

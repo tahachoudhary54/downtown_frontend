@@ -39,8 +39,8 @@ export default async function Home() {
   }
 
   const heroSettings = settings?.hero || {
-    slides: ["/hero_bg.png", "/hero_bg_v4.png", "/hero_bg_v6.png"],
-    title: "ELEVATE YOUR\nEVERYDAY",
+    slides: ["/hero_slide_1.jpg", "/hero_slide_2.jpg", "/hero_slide_3.jpg"],
+    title: "Everyday Style. Premium Comfort.",
     subtitle: "Discover the new standard of modern luxury menswear. Designed for the discerning individual.",
     buttonText: "Shop Collection",
     buttonLink: "/shop"
