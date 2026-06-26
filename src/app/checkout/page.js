@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
+import { useLiveStock, useLiveVisibility, useLiveDeleted, useLivePrice, useLiveSalePrice } from '../../context/RealtimeStockContext';
+import { getSalePricing } from '../../utils/price';
 import { useNotifications } from '../../context/NotificationsContext';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -9,6 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import styles from './checkout.module.css';
+import SummaryItem from '../../components/SummaryItem';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -311,43 +314,9 @@ export default function CheckoutPage() {
             <h2 className={styles.sectionTitle}>Order Summary</h2>
             
             <div className={styles.summaryItems}>
-              {cart.map((item, index) => {
-                const priceVal = parseFloat((item.product.price || "0").toString().replace(/[^0-9.]/g, "")) || 0;
-                const origVal = parseFloat((item.product.originalPrice || "0").toString().replace(/[^0-9.]/g, "")) || 0;
-                const isSaleValid = item.product.isOnSale && !isNaN(origVal) && !isNaN(priceVal) && origVal > priceVal;
-
-                const variant = item.color ? item.product.variants?.find(v => v.colorName === item.color) : null;
-                const itemImage = variant?.images?.length > 0 ? variant.images[0] : (item.product.img || '/placeholder.png');
-
-                return (
-                  <div key={index} className={styles.summaryItem}>
-                    <div className={styles.productImageWrapper}>
-                      <div className={styles.productImageContainer}>
-                        <Image src={itemImage} alt={item.product.name} fill style={{ objectFit: 'cover' }} />
-                      </div>
-                      <span className={styles.quantityBadge}>{item.quantity}</span>
-                    </div>
-                    <div className={styles.itemInfo}>
-                      <h4 className={styles.itemName}>{item.product.name}</h4>
-                      <p className={styles.itemMeta}>Size: {item.size}</p>
-                    </div>
-                    <div className={styles.itemPrice}>
-                      {isSaleValid ? (
-                        <div className="premiumPriceContainer" style={{ justifyContent: 'flex-end', gap: '0.5rem' }}>
-                          <span className="premiumOriginalPrice" style={{ fontSize: '0.8em' }}>
-                            ₹{(origVal * item.quantity).toLocaleString('en-IN')}
-                          </span>
-                          <span className="premiumSalePrice" style={{ fontSize: '1em' }}>
-                            ₹{(priceVal * item.quantity).toLocaleString('en-IN')}
-                          </span>
-                        </div>
-                      ) : (
-                        `₹${(priceVal * item.quantity).toLocaleString('en-IN')}`
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              {cart.map((item, index) => (
+                <SummaryItem key={index} item={item} />
+              ))}
             </div>
 
             <div className={styles.summaryDivider} />

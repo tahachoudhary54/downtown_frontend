@@ -12,7 +12,7 @@ import { useCart } from '../context/CartContext';
 import { motion } from 'framer-motion';
 import { useLoading } from '../context/LoadingContext';
 
-function ProductCard({ item }) {
+function ProductCard({ item, showBadges = false }) {
   const isDeleted = useLiveDeleted(item._id || item.id);
   if (isDeleted) return null;
   const { toggleWishlist, isWishlisted } = useWishlist();
@@ -37,11 +37,14 @@ const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing({ ...item
   // If inStock is explicitly set to false, treat it as out of stock (0 stock) instead of hiding it completely.
   const effectiveLiveStock = liveVisibility === false ? 0 : liveStock;
 
+  // Badge rendering – only when showBadges is true
   let badgeText = null;
   let badgeClass = styles.statusBadge;
 
-  if (effectiveLiveStock > 0 && (item.isNew || (item.createdAt && (Date.now() - new Date(item.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000)))) {
-    badgeText = 'New Arrival';
+  if (showBadges) {
+    if (effectiveLiveStock > 0 && (item.isNew || (item.createdAt && Date.now() - new Date(item.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000))) {
+      badgeText = 'New Arrival';
+    }
   }
 
   return (
@@ -59,28 +62,28 @@ const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing({ ...item
           <Image src={item.img} alt={item.name} fill className={`${styles.productImage} ${effectiveLiveStock === 0 ? styles.premiumOutOfStockImage : ''}`} />
           
           {/* Status Badge over Image (New Arrival) */}
-          {badgeText && (
+          {showBadges && badgeText && (
             <div className={badgeClass}>
               {badgeText}
             </div>
           )}
 
           {/* Premium Sale Badge */}
-          {isSaleValid && effectiveLiveStock > 0 && (
+          {showBadges && isSaleValid && effectiveLiveStock > 0 && (
             <div className="premiumSaleBadge">
               SALE
             </div>
           )}
 
           {/* Premium Out of Stock Badge */}
-          {effectiveLiveStock === 0 && (
+          {showBadges && effectiveLiveStock === 0 && (
             <div className={styles.premiumOutOfStockBadge}>
               Out of Stock
             </div>
           )}
 
           {/* Premium Low Stock Badge */}
-          {effectiveLiveStock > 0 && effectiveLiveStock <= 20 && (
+          {showBadges && effectiveLiveStock > 0 && effectiveLiveStock <= 20 && (
             <div className={styles.premiumLowStockBadge}>
               Only {effectiveLiveStock} left
             </div>
