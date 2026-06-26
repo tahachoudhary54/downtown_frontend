@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import { useLiveStock, useLiveVisibility, useLivePrice, useLiveSalePrice } from '../../context/RealtimeStockContext';
-import { getSalePricing } from '../../utils/price';
-import styles from './checkout.module.css';
+import { useLiveStock, useLiveVisibility, useLivePrice, useLiveSalePrice } from '../context/RealtimeStockContext';
+import { getSalePricing } from '../utils/price';
+import styles from '../app/checkout/checkout.module.css';
 
 export default function SummaryItem({ item }) {
   const product = item.product;
@@ -27,9 +27,7 @@ export default function SummaryItem({ item }) {
         {effectiveLiveStock > 0 && (product.isNew || (product.createdAt && Date.now() - new Date(product.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000)) && (
           <div className={styles.statusBadge}>New Arrival</div>
         )}
-        {liveSaleValid && effectiveLiveStock > 0 && (
-          <div className="premiumSaleBadge">SALE</div>
-        )}
+        {/* Removed SALE badge as requested */}
         {effectiveLiveStock === 0 && (
           <div className={styles.premiumOutOfStockBadge}>Out of Stock</div>
         )}
