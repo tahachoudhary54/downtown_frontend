@@ -269,6 +269,7 @@
 
 .editorialCard {
   flex: 0 0 calc((100% / var(--slider-items)) - (var(--slider-gap) * (var(--slider-items) - 1)) / var(--slider-items));
+  min-width: 0;
   display: flex;
   flex-direction: column;
   cursor: pointer;
@@ -307,9 +308,10 @@
   color: #1F1A17;
   margin: 0 0 1rem 0;
   text-transform: uppercase;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .editorialCtaWrapper {
