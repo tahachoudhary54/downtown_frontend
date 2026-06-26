@@ -6,16 +6,18 @@ import { useWishlist } from '../context/WishlistContext';
 import IconHeartOutline from './IconHeartOutline';
 import IconHeartFilled from './IconHeartFilled';
 
-import { useLiveStock, useLiveVisibility } from '../context/RealtimeStockContext';
+import { useLiveStock, useLiveVisibility, useLiveDeleted, useLivePrice, useLiveSalePrice } from '../context/RealtimeStockContext';
 import { getSalePricing } from '../utils/price';
 import { useCart } from '../context/CartContext';
 import { motion } from 'framer-motion';
 import { useLoading } from '../context/LoadingContext';
 
 function ProductCard({ item }) {
+  const isDeleted = useLiveDeleted(item._id || item.id);
+  if (isDeleted) return null;
   const { toggleWishlist, isWishlisted } = useWishlist();
-  const { cart } = useCart();
   
+const { cart } = useCart();
   const quantityInCart = cart.reduce((total, cartItem) => {
     if ((cartItem.product._id || cartItem.product.id) === (item._id || item.id)) {
       return total + cartItem.quantity;
@@ -28,7 +30,9 @@ function ProductCard({ item }) {
   }
   const liveStock = useLiveStock(item._id || item.id, initialStock);
   const liveVisibility = useLiveVisibility(item._id || item.id, item.inStock !== undefined ? item.inStock : true);
-  const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing(item);
+  const livePrice = useLivePrice(item._id || item.id, item.price);
+const liveSalePrice = useLiveSalePrice(item._id || item.id, item.salePrice);
+const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing({ ...item, price: livePrice, salePrice: liveSalePrice });
 
   // If inStock is explicitly set to false, treat it as out of stock (0 stock) instead of hiding it completely.
   const effectiveLiveStock = liveVisibility === false ? 0 : liveStock;

@@ -46,7 +46,7 @@ export default function AdminDashboard() {
         const usersData = await usersRes.json();
 
         setStats({
-          products: productsData.success ? productsData.pagination?.total || productsData.data.length : 0,
+          products: productsData.success ? productsData.pagination?.totalProducts || productsData.data.length : 0,
           users: usersData.success ? usersData.data.length : 0,
         });
       } catch (err) {

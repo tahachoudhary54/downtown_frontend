@@ -9,27 +9,42 @@ export function RealtimeStockProvider({ children }) {
   const [stocks, setStocks] = useState({});
   const [visibilities, setVisibilities] = useState({});
   const [variants, setVariants] = useState({});
+  const [deleted, setDeleted] = useState({});
+  const [prices, setPrices] = useState({});
+  const [salePrices, setSalePrices] = useState({});
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     const socket = io(apiUrl);
 
     socket.on('stock_updated', (data) => {
-      setStocks(prev => ({
-        ...prev,
-        [data.productId]: data.stock
-      }));
-      if (data.inStock !== undefined) {
-        setVisibilities(prev => ({
-          ...prev,
-          [data.productId]: data.inStock
-        }));
+      // Update stock count
+      if (data.stock !== undefined) {
+        setStocks((prev) => ({ ...prev, [data.productId]: data.stock }));
       }
+      // Update in‑stock visibility
+      if (data.inStock !== undefined) {
+        setVisibilities((prev) => ({ ...prev, [data.productId]: data.inStock }));
+      }
+      // Update variant list
       if (data.variants !== undefined) {
-        setVariants(prev => ({
-          ...prev,
-          [data.productId]: data.variants
-        }));
+        setVariants((prev) => ({ ...prev, [data.productId]: data.variants }));
+      }
+      // Update price
+      if (data.price !== undefined) {
+        setPrices((prev) => ({ ...prev, [data.productId]: data.price }));
+      }
+      // Update sale price
+      if (data.salePrice !== undefined) {
+        setSalePrices((prev) => ({ ...prev, [data.productId]: data.salePrice }));
+      }
+      // Mark as deleted when the product is out of stock, not visible, and has no variants
+      if (
+        data.stock === 0 &&
+        data.inStock === false &&
+        (Array.isArray(data.variants) ? data.variants.length === 0 : true)
+      ) {
+        setDeleted((prev) => ({ ...prev, [data.productId]: true }));
       }
     });
 
@@ -37,31 +52,51 @@ export function RealtimeStockProvider({ children }) {
   }, []);
 
   return (
-    <RealtimeStockContext.Provider value={{ stocks, visibilities, variants }}>
+    <RealtimeStockContext.Provider
+      value={{ stocks, visibilities, variants, deleted, prices, salePrices }}
+    >
       {children}
     </RealtimeStockContext.Provider>
   );
 }
 
 export function useLiveStock(productId, initialStock) {
-  const context = useContext(RealtimeStockContext);
-  const stocks = context ? context.stocks : {};
+  const ctx = useContext(RealtimeStockContext);
+  const stocks = ctx ? ctx.stocks : {};
   return stocks && stocks[productId] !== undefined ? stocks[productId] : initialStock;
 }
 
-export function useLiveVariants(productId, initialVariants) {
-  const context = useContext(RealtimeStockContext);
-  const variants = context ? context.variants : {};
-  return variants && variants[productId] !== undefined ? variants[productId] : initialVariants;
+export function useLiveVisibility(productId, initialVisibility) {
+  const ctx = useContext(RealtimeStockContext);
+  const vis = ctx ? ctx.visibilities : {};
+  return vis && vis[productId] !== undefined ? vis[productId] : initialVisibility;
 }
 
-export function useLiveVisibility(productId, initialVisibility) {
-  const context = useContext(RealtimeStockContext);
-  const visibilities = context ? context.visibilities : {};
-  return visibilities && visibilities[productId] !== undefined ? visibilities[productId] : initialVisibility;
+export function useLiveVariants(productId, initialVariants) {
+  const ctx = useContext(RealtimeStockContext);
+  const vars = ctx ? ctx.variants : {};
+  return vars && vars[productId] !== undefined ? vars[productId] : initialVariants;
+}
+
+export function useLiveDeleted(productId) {
+  const ctx = useContext(RealtimeStockContext);
+  const del = ctx ? ctx.deleted : {};
+  return !!(del && del[productId]);
+}
+
+export function useLivePrice(productId, initialPrice) {
+  const ctx = useContext(RealtimeStockContext);
+  const priceMap = ctx ? ctx.prices : {};
+  return priceMap && priceMap[productId] !== undefined ? priceMap[productId] : initialPrice;
+}
+
+export function useLiveSalePrice(productId, initialSalePrice) {
+  const ctx = useContext(RealtimeStockContext);
+  const saleMap = ctx ? ctx.salePrices : {};
+  return saleMap && saleMap[productId] !== undefined ? saleMap[productId] : initialSalePrice;
 }
 
 export function useAllLiveStocks() {
-  const context = useContext(RealtimeStockContext);
-  return context ? context.stocks : {};
+  const ctx = useContext(RealtimeStockContext);
+  return ctx ? ctx.stocks : {};
 }
