@@ -131,18 +131,18 @@ export default function Navbar() {
         <div className={styles.container}>
           {/* Logo in Left */}
           <div className={styles.logo}>
-            <a href="/">
+            <Link href="/">
               <Image src="/logo-horizontal-v2.png" alt="MEN'S" width={140} height={34} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} priority />
-            </a>
+            </Link>
           </div>
           
           {/* Navigation on Center */}
           <nav className={`${styles.nav} ${navOpen ? styles.navOpen : ''}`}>
-            <a href="/" className={pathname === '/' ? styles.active : ''} onClick={() => setNavOpen(false)}>Home</a>
-            <a href="/shop" className={pathname === '/shop' ? styles.active : ''} onClick={() => setNavOpen(false)}>Shop</a>
-            <a href="/clothing" className={pathname.startsWith('/clothing') ? styles.active : ''} onClick={() => setNavOpen(false)}>Clothing</a>
-            <a href="/sale" className={pathname === '/sale' ? styles.active : ''} onClick={() => setNavOpen(false)}>Sale</a>
-            <a href="/wishlist" className={`${pathname === '/wishlist' ? styles.active : ''} ${styles.mobileOnlyLink}`} onClick={() => setNavOpen(false)}>Wishlist</a>
+            <Link href="/" className={pathname === '/' ? styles.active : ''} onClick={() => setNavOpen(false)}>Home</Link>
+            <Link href="/shop" className={pathname === '/shop' ? styles.active : ''} onClick={() => setNavOpen(false)}>Shop</Link>
+            <Link href="/clothing" className={pathname.startsWith('/clothing') ? styles.active : ''} onClick={() => setNavOpen(false)}>Clothing</Link>
+            <Link href="/sale" className={pathname === '/sale' ? styles.active : ''} onClick={() => setNavOpen(false)}>Sale</Link>
+            <Link href="/wishlist" className={`${pathname === '/wishlist' ? styles.active : ''} ${styles.mobileOnlyLink}`} onClick={() => setNavOpen(false)}>Wishlist</Link>
           </nav>
           
           {/* Icons in Right */}
