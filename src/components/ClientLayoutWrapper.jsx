@@ -5,6 +5,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useCustomerNotifications } from '../context/CustomerNotificationsContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import LoadingScreen from './LoadingScreen';
+import { useLoading } from '../context/LoadingContext';
 
 export default function ClientLayoutWrapper({ children }) {
   const pathname = usePathname();
@@ -34,11 +37,16 @@ export default function ClientLayoutWrapper({ children }) {
     }
   }, [notifications, prevNotifCount, isAdmin]);
 
+  const { isAppReady } = useLoading();
+
   return (
     <>
-      {!isAdmin && <Navbar />}
-      <main style={{ flex: 1 }}>{children}</main>
-      {!isAdmin && <Footer />}
+      <LoadingScreen isAppReady={isAppReady} />
+      <div style={{ backgroundColor: 'var(--background)', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {!isAdmin && <Navbar />}
+        <main style={{ flex: 1 }}>{children}</main>
+        {!isAdmin && <Footer />}
+      </div>
 
       {/* Customer Notification Toast Popup */}
       {toast && !isAdmin && (

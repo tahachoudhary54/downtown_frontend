@@ -13,7 +13,7 @@
 }
 
 html, body {
-  background: var(--background);
+  background: #0B0B0B;
   color: var(--foreground);
   margin: 0;
   padding: 0;

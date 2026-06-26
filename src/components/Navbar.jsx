@@ -11,6 +11,8 @@ import { useCustomerNotifications } from "../context/CustomerNotificationsContex
 import IconHeartOutline from "./IconHeartOutline";
 import IconHeartFilled from "./IconHeartFilled";
 import styles from "./Navbar.module.css";
+import { motion } from "framer-motion";
+import { useLoading } from "../context/LoadingContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -105,6 +107,8 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const { isAppReady, isFirstVisit } = useLoading() || { isAppReady: true, isFirstVisit: false };
 
   let headerClass;
   if (isHome) {

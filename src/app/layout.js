@@ -62,6 +62,7 @@ import WhatsAppButton from "../components/WhatsAppButton";
 import FaqButton from "../components/FaqButton";
 
 import { RealtimeSettingsProvider } from "../context/RealtimeSettingsContext";
+import { LoadingProvider } from "../context/LoadingContext";
 
 export default function RootLayout({ children }) {
   console.log("GOOGLE_CLIENT_ID loaded:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
@@ -69,8 +70,18 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
+      style={{ backgroundColor: '#0B0B0B' }}
     >
-      <body className="min-h-full flex flex-col">
+      <head>
+        <style dangerouslySetInnerHTML={{__html: `
+          html, body, #__next, #root {
+            background-color: #0B0B0B !important;
+            margin: 0;
+            padding: 0;
+          }
+        `}} />
+      </head>
+      <body className="min-h-full flex flex-col" style={{ backgroundColor: '#0B0B0B', margin: 0 }}>
         <div style={{ overflowX: 'hidden', width: '100%', position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "placeholder_id"}>
             <AuthProvider>
@@ -80,11 +91,13 @@ export default function RootLayout({ children }) {
                     <RealtimeSettingsProvider>
                       <CartProvider>
                         <WishlistProvider>
-                          <ClientLayoutWrapper>
-                            {children}
-                          </ClientLayoutWrapper>
-                          <FaqButton />
-                          <WhatsAppButton />
+                          <LoadingProvider>
+                            <ClientLayoutWrapper>
+                              {children}
+                            </ClientLayoutWrapper>
+                            <FaqButton />
+                            <WhatsAppButton />
+                          </LoadingProvider>
                         </WishlistProvider>
                       </CartProvider>
                     </RealtimeSettingsProvider>

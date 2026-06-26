@@ -5,28 +5,24 @@
   display: flex;
   align-items: center;
   overflow: hidden;
+  background-color: var(--foreground);
 }
 
 .heroSlide {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transform: translateX(100%);
-  transition: none;
+  transition: opacity 1.5s ease-in-out;
   z-index: 0;
 }
 
 .heroSlide.active {
   opacity: 1;
-  transform: translateX(0);
-  transition: transform 1.8s cubic-bezier(0.25, 1, 0.5, 1);
   z-index: 2;
 }
 
 .heroSlide.prev {
   opacity: 1;
-  transform: translateX(-100%);
-  transition: transform 1.8s cubic-bezier(0.25, 1, 0.5, 1);
   z-index: 1;
 }
 

@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSettings } from "../hooks/useSettings";
 import styles from "./HeroSlider.module.css";
+import { motion } from "framer-motion";
+import { useLoading } from "../context/LoadingContext";
 
 export default function HeroSlider({ initialSettings }) {
   const { settings } = useSettings(initialSettings);

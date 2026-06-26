@@ -9,6 +9,8 @@ import IconHeartFilled from './IconHeartFilled';
 import { useLiveStock, useLiveVisibility } from '../context/RealtimeStockContext';
 import { getSalePricing } from '../utils/price';
 import { useCart } from '../context/CartContext';
+import { motion } from 'framer-motion';
+import { useLoading } from '../context/LoadingContext';
 
 function ProductCard({ item }) {
   const { toggleWishlist, isWishlisted } = useWishlist();
