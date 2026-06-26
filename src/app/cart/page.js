@@ -137,7 +137,7 @@ export default function CartPage() {
             </div>
 
             <p className={styles.shippingNote} style={{ color: '#666', background: '#f5f5f5', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', lineHeight: '1.4', textAlign: 'center' }}>
-              Delivery charges are not included in the order total. Delivery will be arranged after order confirmation and charges will be paid by the customer.
+              Delivery charges are not included in the order total. Delivery will be arranged after order confirmation and charges will be paid by the customer. You will be notified on the website for delivery charges.
             </p>
 
             {hasOutOfStockItems ? (

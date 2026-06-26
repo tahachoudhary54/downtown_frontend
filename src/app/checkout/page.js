@@ -368,7 +368,7 @@ export default function CheckoutPage() {
 
             <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', padding: '12px', borderRadius: '8px', marginBottom: '20px' }}>
               <p style={{ color: '#9a3412', fontSize: '0.85rem', lineHeight: '1.4', marginBottom: '10px', fontWeight: '500' }}>
-                Delivery charges are calculated separately after address verification. Our team will contact you with the final delivery cost before dispatch.
+                Delivery charges are calculated separately after address verification. Our team will contact you with the final delivery cost before dispatch. You will be notified on the website for delivery charges.
               </p>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
                 <input 
