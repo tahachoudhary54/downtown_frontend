@@ -12,13 +12,13 @@ export default function AdminDashboard() {
 
   // SWR for Real-Time Polling of Analytics
   const fetcher = (url) => fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.json());
-  
+
   const { data: analyticsRes } = useSWR(
-    token ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/stats` : null, 
-    fetcher, 
+    token ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/stats` : null,
+    fetcher,
     { refreshInterval: 3000 } // Poll every 3 seconds for "real-time"
   );
-  
+
   const totalRevenue = analyticsRes?.data?.totalRevenue || 0;
   const totalOrders = analyticsRes?.data?.totalOrders || 0;
 
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
     <div className="space-y-8 pb-12">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
+
         {/* Revenue Stat Card (Mock) */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-[var(--border)] flex flex-col justify-between">
           <div>
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
 
       {/* Main Content Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Recent Orders List */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-[var(--border)] overflow-hidden">
           <div className="p-6 border-b border-[var(--border)] flex justify-between items-center">
@@ -176,12 +176,11 @@ export default function AdminDashboard() {
                     </td>
                     <td className="flex md:table-cell px-6 py-4 md:py-4 items-center">
                       <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Status:</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
-                        order.orderStatus === 'Shipped' ? 'bg-blue-100 text-blue-800' :
-                        order.orderStatus === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>{order.orderStatus}</span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
+                          order.orderStatus === 'Shipped' ? 'bg-blue-100 text-blue-800' :
+                            order.orderStatus === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                        }`}>{order.orderStatus}</span>
                     </td>
                   </tr>
                 ))}

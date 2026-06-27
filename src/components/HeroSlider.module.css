@@ -6,29 +6,77 @@
   align-items: center;
   overflow: hidden;
   background-color: var(--foreground);
+  /* Isolate the hero from the rest of the page's paint/layout */
+  contain: layout style;
+  /* Promote the hero section itself to its own GPU layer */
+  transform: translateZ(0);
 }
 
+/* ─────────────────────────────────────────
+   HERO SLIDE — Crossfade + Ken Burns Zoom
+   Performance rules:
+   • will-change only on active/prev (2 slides max)
+   • Idle slides have NO will-change to avoid unnecessary
+     compositing layers for every slide in the array
+   • backface-visibility: hidden eliminates sub-pixel flicker
+───────────────────────────────────────── */
 .heroSlide {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out;
   z-index: 0;
+  /* No will-change on idle slides — only 2 slides are ever transitioning */
+  transition: opacity 1.2s ease-in-out;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .heroSlide.active {
   opacity: 1;
   z-index: 2;
+  /* Promote only the visible slide to GPU */
+  will-change: opacity;
 }
 
 .heroSlide.prev {
-  opacity: 1;
+  opacity: 0;
   z-index: 1;
+  /* Promote only the exiting slide to GPU */
+  will-change: opacity;
+  transition: opacity 1.2s ease-in-out;
 }
+
+/* Ken Burns: only on the active slide's background wrapper */
+.heroSlide.active .heroBackground {
+  animation: kenBurns 6.2s ease-out forwards;
+}
+
+@keyframes kenBurns {
+  from { transform: scale(1.06) translateZ(0); }
+  to   { transform: scale(1.00) translateZ(0); }
+}
+
 
 .heroBackground {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+  /* translateZ(0) promotes to its own layer so the Ken Burns scale
+     animation never triggers a layout recalculation on the parent */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* No will-change here — it would promote ALL slide backgrounds
+     permanently. will-change is inherited from .active parent. */
+}
+
+/* objectFit in a class to avoid inline-style recalculation each render.
+   object-position is driven by CSS custom properties set per-slide in JS
+   so each image has its own focal point on desktop and mobile separately. */
+.heroImage {
+  object-fit: cover;
+  /* Desktop focal point — set as CSS var from SLIDE_CONFIG in HeroSlider.jsx */
+  object-position: var(--focal-desktop, 50% center);
 }
 
 .heroOverlay {
@@ -39,11 +87,14 @@
 
 .heroContent {
   position: relative;
-  z-index: 2;
+  /* z-index 10 keeps text above all slide layers (z-index 0–2) at all times */
+  z-index: 10;
   margin-left: 10%;
   max-width: 600px;
   color: #fff;
   padding-top: 2rem;
+  /* Isolate the text from any compositing changes on the slides below */
+  transform: translate3d(0, 0, 0);
 }
 
 .heroBadge {
@@ -150,6 +201,11 @@
 @media (max-width: 600px) {
   .hero {
     height: 85vh;
+  }
+  /* On mobile, override object-position to the per-slide mobile focal point
+     so the model is centered in the single-column layout. */
+  .heroImage {
+    object-position: var(--focal-mobile, 50% center);
   }
   .heroContent {
     margin-left: 5%;
