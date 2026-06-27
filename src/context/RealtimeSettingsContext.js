@@ -35,6 +35,13 @@ export const RealtimeSettingsProvider = ({ children }) => {
       });
     });
 
+    socket.on('data_updated', (info) => {
+      console.log("Data updated globally, triggering refresh...", info);
+      startTransition(() => {
+        router.refresh();
+      });
+    });
+
     return () => {
       socket.disconnect();
     };
