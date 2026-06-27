@@ -104,8 +104,12 @@ export default function AdminTicketsPage() {
                       </td>
                       <td className="block md:table-cell px-4 py-1.5 md:p-4">
                         <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 inline-block">Customer:</span>
-                        <div className="font-medium text-[var(--foreground)] inline-block md:block">{ticket.user?.name || 'Unknown User'}</div>
-                        <div className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0 break-all">{ticket.user?.email}</div>
+                        <div className="font-medium text-[var(--foreground)] inline-block md:block">
+                          {ticket.user?.name || ticket.guestName || 'Unknown User'}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0 break-all">
+                          {ticket.user?.email || ticket.guestEmail || ''}
+                        </div>
                       </td>
                       <td className="block md:table-cell px-4 py-1.5 md:p-4">
                         <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 inline-block">Subject:</span>

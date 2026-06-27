@@ -159,11 +159,11 @@ export default function AdminTicketDetailsPage({ params }) {
                 <p className="text-xs font-semibold text-[var(--text-muted)] tracking-wider uppercase mb-1">Customer</p>
                 <div className="flex items-center gap-3 mt-1">
                   <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
-                    {ticket.user?.name ? ticket.user.name.charAt(0).toUpperCase() : '?'}
+                    {ticket.user?.name ? ticket.user.name.charAt(0).toUpperCase() : ticket.guestName ? ticket.guestName.charAt(0).toUpperCase() : '?'}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[var(--foreground)] leading-tight">{ticket.user?.name || 'Unknown User'}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{ticket.user?.email}</p>
+                    <p className="text-sm font-semibold text-[var(--foreground)] leading-tight">{ticket.user?.name || ticket.guestName || 'Unknown User'}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{ticket.user?.email || ticket.guestEmail}</p>
                   </div>
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default function AdminTicketDetailsPage({ params }) {
                   <div className="max-w-[80%]">
                     <div className={`flex items-center gap-2 mb-1 ${isAdmin ? 'justify-end' : 'justify-start'}`}>
                       <span className="text-xs font-semibold text-[var(--text-muted)]">
-                        {isAdmin ? 'You' : ticket.user?.name?.split(' ')[0] || 'Customer'}
+                        {isAdmin ? 'You' : ticket.user?.name?.split(' ')[0] || ticket.guestName?.split(' ')[0] || 'Customer'}
                       </span>
                       <span className="text-[10px] text-gray-400">
                         {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
