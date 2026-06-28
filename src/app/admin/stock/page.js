@@ -24,7 +24,8 @@ export default function AdminStock() {
 
   // Edit Modal State
   const [editProduct, setEditProduct] = useState(null);
-  const [editInventory, setEditInventory] = useState({ S: 0, M: 0, L: 0, XL: 0, XXL: 0, '3XL': 0 });
+  const [editVariantIndex, setEditVariantIndex] = useState(-1);
+  const [editInventory, setEditInventory] = useState({ S: 0, M: 0, L: 0, XL: 0, XXL: 0, '3XL': 0, '28': 0, '30': 0, '32': 0, '34': 0, '36': 0, '38': 0, '40': 0, '42': 0 });
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -116,7 +117,7 @@ export default function AdminStock() {
         fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ stock: 0, inventory: { S: 0, M: 0, L: 0, XL: 0, XXL: 0, '3XL': 0 } })
+          body: JSON.stringify({ stock: 0, inventory: { S: 0, M: 0, L: 0, XL: 0, XXL: 0, '3XL': 0, '28': 0, '30': 0, '32': 0, '34': 0, '36': 0, '38': 0, '40': 0, '42': 0 } })
         })
       ));
       await fetchProducts();
@@ -148,8 +149,11 @@ export default function AdminStock() {
   // Edit Modal Handlers
   const openEditModal = (product) => {
     setEditProduct(product);
+    const hasVariants = product.variants && product.variants.length > 0;
+    setEditVariantIndex(hasVariants ? 0 : -1);
+    
     // Initialize with existing inventory or defaults
-    const currentInventory = product.inventory || {};
+    const currentInventory = hasVariants ? (product.variants[0].sizeInventory || {}) : (product.inventory || {});
     setEditInventory({
       S: currentInventory.S || 0,
       M: currentInventory.M || 0,
@@ -157,11 +161,41 @@ export default function AdminStock() {
       XL: currentInventory.XL || 0,
       XXL: currentInventory.XXL || 0,
       '3XL': currentInventory['3XL'] || 0,
+      '28': currentInventory['28'] || 0,
+      '30': currentInventory['30'] || 0,
+      '32': currentInventory['32'] || 0,
+      '34': currentInventory['34'] || 0,
+      '36': currentInventory['36'] || 0,
+      '38': currentInventory['38'] || 0,
+      '40': currentInventory['40'] || 0,
+      '42': currentInventory['42'] || 0,
+    });
+  };
+
+  const handleVariantChange = (index) => {
+    setEditVariantIndex(index);
+    const currentInventory = editProduct.variants[index].sizeInventory || {};
+    setEditInventory({
+      S: currentInventory.S || 0,
+      M: currentInventory.M || 0,
+      L: currentInventory.L || 0,
+      XL: currentInventory.XL || 0,
+      XXL: currentInventory.XXL || 0,
+      '3XL': currentInventory['3XL'] || 0,
+      '28': currentInventory['28'] || 0,
+      '30': currentInventory['30'] || 0,
+      '32': currentInventory['32'] || 0,
+      '34': currentInventory['34'] || 0,
+      '36': currentInventory['36'] || 0,
+      '38': currentInventory['38'] || 0,
+      '40': currentInventory['40'] || 0,
+      '42': currentInventory['42'] || 0,
     });
   };
 
   const closeEditModal = () => {
     setEditProduct(null);
+    setEditVariantIndex(-1);
   };
 
   const handleInventoryChange = (size, value) => {
@@ -172,17 +206,32 @@ export default function AdminStock() {
   const saveInventory = async () => {
     if (!editProduct) return;
     // Calculate total stock
-    const stock = Object.values(editInventory).reduce((sum, val) => sum + val, 0);
+    const stockAmount = Object.values(editInventory).reduce((sum, val) => sum + val, 0);
+
+    let payload = {};
+    if (editVariantIndex >= 0) {
+      const updatedVariants = [...editProduct.variants];
+      updatedVariants[editVariantIndex] = {
+        ...updatedVariants[editVariantIndex],
+        sizeInventory: editInventory,
+        stock: stockAmount
+      };
+      
+      const totalStock = updatedVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
+      payload = { variants: updatedVariants, stock: totalStock };
+    } else {
+      payload = { inventory: editInventory, stock: stockAmount };
+    }
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${editProduct._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ inventory: editInventory, stock })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
-        setProducts(prev => prev.map(p => p._id === editProduct._id ? { ...p, inventory: editInventory, stock } : p));
+        setProducts(prev => prev.map(p => p._id === editProduct._id ? { ...p, ...payload } : p));
         closeEditModal();
       } else {
         alert(data.message);
@@ -422,30 +471,76 @@ export default function AdminStock() {
               <button onClick={closeEditModal} className="text-gray-400 hover:text-gray-600 text-2xl font-light leading-none">&times;</button>
             </div>
             
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
-                  <div key={size} className="flex flex-col">
-                    <label className="text-xs font-bold text-gray-500 mb-1">Size {size}</label>
-                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                      <button 
-                        onClick={() => handleInventoryChange(size, editInventory[size] - 1)}
-                        className="bg-gray-100 px-3 py-2 hover:bg-gray-200 text-gray-600 font-bold transition-colors"
-                      >−</button>
-                      <input 
-                        type="number" 
-                        className="w-full text-center py-2 focus:outline-none focus:bg-yellow-50 font-medium"
-                        value={editInventory[size]}
-                        onChange={(e) => handleInventoryChange(size, e.target.value)}
-                        min="0"
-                      />
-                      <button 
-                        onClick={() => handleInventoryChange(size, editInventory[size] + 1)}
-                        className="bg-gray-100 px-3 py-2 hover:bg-gray-200 text-gray-600 font-bold transition-colors"
-                      >+</button>
+            {editProduct.variants && editProduct.variants.length > 0 && (
+              <div className="px-6 pt-5">
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 block">Select Variant (Color)</label>
+                <select 
+                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2 bg-white focus:outline-none focus:border-[var(--accent)] font-medium text-gray-800"
+                  value={editVariantIndex}
+                  onChange={(e) => handleVariantChange(Number(e.target.value))}
+                >
+                  {editProduct.variants.map((v, i) => (
+                    <option key={i} value={i}>{v.colorName} (Total Stock: {v.stock || 0})</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
+            <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+              <div>
+                <h4 className="text-sm font-bold text-[var(--foreground)] mb-3 border-b border-[var(--border)] pb-1">Alphabetical Sizes</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
+                    <div key={size} className="flex flex-col">
+                      <label className="text-xs font-bold text-[var(--text-muted)] mb-1">Size {size}</label>
+                      <div className="flex items-center border border-[var(--border)] rounded-lg overflow-hidden bg-white">
+                        <button 
+                          onClick={() => handleInventoryChange(size, editInventory[size] - 1)}
+                          className="bg-[#FAF8F5] px-3 py-2 hover:bg-gray-200 text-[var(--foreground)] font-bold transition-colors"
+                        >−</button>
+                        <input 
+                          type="number" 
+                          className="w-full text-center py-2 focus:outline-none focus:bg-[#FAF8F5] font-medium"
+                          value={editInventory[size] || 0}
+                          onChange={(e) => handleInventoryChange(size, e.target.value)}
+                          min="0"
+                        />
+                        <button 
+                          onClick={() => handleInventoryChange(size, editInventory[size] + 1)}
+                          className="bg-[#FAF8F5] px-3 py-2 hover:bg-gray-200 text-[var(--foreground)] font-bold transition-colors"
+                        >+</button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-bold text-[var(--foreground)] mb-3 border-b border-[var(--border)] pb-1">Numerical Sizes</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => (
+                    <div key={size} className="flex flex-col">
+                      <label className="text-xs font-bold text-[var(--text-muted)] mb-1">Size {size}</label>
+                      <div className="flex items-center border border-[var(--border)] rounded-lg overflow-hidden bg-white">
+                        <button 
+                          onClick={() => handleInventoryChange(size, editInventory[size] - 1)}
+                          className="bg-[#FAF8F5] px-3 py-2 hover:bg-gray-200 text-[var(--foreground)] font-bold transition-colors"
+                        >−</button>
+                        <input 
+                          type="number" 
+                          className="w-full text-center py-2 focus:outline-none focus:bg-[#FAF8F5] font-medium"
+                          value={editInventory[size] || 0}
+                          onChange={(e) => handleInventoryChange(size, e.target.value)}
+                          min="0"
+                        />
+                        <button 
+                          onClick={() => handleInventoryChange(size, editInventory[size] + 1)}
+                          className="bg-[#FAF8F5] px-3 py-2 hover:bg-gray-200 text-[var(--foreground)] font-bold transition-colors"
+                        >+</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               
               <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center">

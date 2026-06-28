@@ -9,6 +9,7 @@ export function RealtimeStockProvider({ children }) {
   const [stocks, setStocks] = useState({});
   const [visibilities, setVisibilities] = useState({});
   const [variants, setVariants] = useState({});
+  const [inventories, setInventories] = useState({});
   const [deleted, setDeleted] = useState({});
   const [prices, setPrices] = useState({});
   const [salePrices, setSalePrices] = useState({});
@@ -29,6 +30,10 @@ export function RealtimeStockProvider({ children }) {
       // Update variant list
       if (data.variants !== undefined) {
         setVariants((prev) => ({ ...prev, [data.productId]: data.variants }));
+      }
+      // Update inventory (size-specific global stock)
+      if (data.inventory !== undefined) {
+        setInventories((prev) => ({ ...prev, [data.productId]: data.inventory }));
       }
       // Update price
       if (data.price !== undefined) {
@@ -53,7 +58,7 @@ export function RealtimeStockProvider({ children }) {
 
   return (
     <RealtimeStockContext.Provider
-      value={{ stocks, visibilities, variants, deleted, prices, salePrices }}
+      value={{ stocks, visibilities, variants, inventories, deleted, prices, salePrices }}
     >
       {children}
     </RealtimeStockContext.Provider>
@@ -99,4 +104,10 @@ export function useLiveSalePrice(productId, initialSalePrice) {
 export function useAllLiveStocks() {
   const ctx = useContext(RealtimeStockContext);
   return ctx ? ctx.stocks : {};
+}
+
+export function useLiveInventory(productId, initialInventory) {
+  const ctx = useContext(RealtimeStockContext);
+  const inv = ctx ? ctx.inventories : {};
+  return inv && inv[productId] !== undefined ? inv[productId] : initialInventory;
 }

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { generateWhatsAppMessage, trackWhatsAppClick } from "../../../utils/whatsapp";
 import styles from "./product.module.css";
 
-import { useLiveStock, useLiveVariants, useLiveVisibility } from "../../../context/RealtimeStockContext";
+import { useLiveStock, useLiveVariants, useLiveVisibility, useLiveInventory } from "../../../context/RealtimeStockContext";
 import ColorSelector from "./ColorSelector";
 
 export default function AddToCartSection({ product, selectedColor, setSelectedColor }) {
@@ -19,18 +19,19 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
   
   const firstAvailableSize = availableSizes.find(size => !(product.inventory && product.inventory[size] === 0)) || availableSizes[0];
   const [selectedSize, setSelectedSize] = useState(firstAvailableSize || "");
+  const liveInventory = useLiveInventory(product._id || product.id, product.inventory || {});
 
   useEffect(() => {
     if (availableSizes.length > 0 && !availableSizes.includes(selectedSize)) {
       const firstValid = availableSizes.find(size => {
         const isSizeOut = selectedColor && selectedVariantInfo && selectedVariantInfo.sizeInventory
           ? selectedVariantInfo.sizeInventory[size] === 0
-          : product.inventory && product.inventory[size] === 0;
+          : liveInventory && liveInventory[size] === 0;
         return !isSizeOut;
       }) || availableSizes[0];
       setSelectedSize(firstValid || "");
     }
-  }, [availableSizes, selectedSize, product.inventory, selectedColor, selectedVariantInfo]);
+  }, [availableSizes, selectedSize, liveInventory, selectedColor, selectedVariantInfo]);
   const variantColors = variants.map(v => v.colorName);
   const globalColors = product.colors || [];
   
@@ -55,6 +56,7 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
       setCurrentUrl(window.location.href);
     }
   }, []);
+
   let initialStock = 0;
   if (selectedColor && selectedVariantInfo) {
     if (selectedSize && selectedVariantInfo.sizeInventory && selectedVariantInfo.sizeInventory[selectedSize] !== undefined) {
@@ -63,17 +65,25 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
       initialStock = selectedVariantInfo.stock !== undefined ? selectedVariantInfo.stock : 0;
     }
   } else if (variants.length > 0) {
-    initialStock = variants.reduce((acc, curr) => acc + (curr.stock || 0), 0);
+    if (selectedSize) {
+      initialStock = variants.reduce((acc, curr) => acc + (curr.sizeInventory && curr.sizeInventory[selectedSize] !== undefined ? curr.sizeInventory[selectedSize] : 0), 0);
+    } else {
+      initialStock = variants.reduce((acc, curr) => acc + (curr.stock || 0), 0);
+    }
   } else {
-    initialStock = product.stock !== undefined ? product.stock : (product.totalStock || 0);
+    if (selectedSize && liveInventory && liveInventory[selectedSize] !== undefined) {
+      initialStock = liveInventory[selectedSize];
+    } else {
+      initialStock = product.stock !== undefined ? product.stock : (product.totalStock || 0);
+    }
   }
   
   const liveStock = useLiveStock(product._id || product.id, initialStock);
   const liveVisibility = useLiveVisibility(product._id || product.id, product.inStock !== undefined ? product.inStock : true);
 
-  // Use initialStock for variant-specific display because liveStock is the global product stock.
+  // Use initialStock for variant/size-specific display because liveStock is the global product stock.
   // Also treat liveVisibility === false (inStock: false) as 0 stock.
-  const effectiveStock = liveVisibility === false ? 0 : ((variants.length > 0 && selectedColor) ? initialStock : liveStock);
+  const effectiveStock = liveVisibility === false ? 0 : (selectedSize ? initialStock : liveStock);
 
   let stockStatus = { text: '', className: '' };
   if (effectiveStock === 0) {
@@ -109,7 +119,7 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
             {availableSizes.map((size) => {
               const isSizeOut = selectedColor && selectedVariantInfo && selectedVariantInfo.sizeInventory
                 ? selectedVariantInfo.sizeInventory[size] === 0
-                : product.inventory && product.inventory[size] === 0;
+                : liveInventory && liveInventory[size] === 0;
 
               return (
                 <button

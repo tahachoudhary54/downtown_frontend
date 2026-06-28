@@ -262,27 +262,53 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
           )}
         </div>
 
-        <div className="space-y-2 pt-2">
-          <label className="block text-sm font-medium text-[var(--text-muted)]">Available Sizes</label>
-          <div className="flex flex-wrap gap-4">
-            {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
-              <label key={size} className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={formData.sizes?.includes(size) || false}
-                  onChange={(e) => {
-                    const currentSizes = formData.sizes || [];
-                    if (e.target.checked) {
-                      setFormData({...formData, sizes: [...currentSizes, size]});
-                    } else {
-                      setFormData({...formData, sizes: currentSizes.filter(s => s !== size)});
-                    }
-                  }}
-                  className="w-4 h-4 accent-[var(--accent)]"
-                />
-                <span className="text-sm font-medium text-[var(--foreground)]">{size}</span>
-              </label>
-            ))}
+        <div className="space-y-4 pt-2">
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Alphabetical Sizes</label>
+            <div className="flex flex-wrap gap-4">
+              {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
+                <label key={size} className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={formData.sizes?.includes(size) || false}
+                    onChange={(e) => {
+                      const currentSizes = formData.sizes || [];
+                      if (e.target.checked) {
+                        setFormData({...formData, sizes: [...currentSizes, size]});
+                      } else {
+                        setFormData({...formData, sizes: currentSizes.filter(s => s !== size)});
+                      }
+                    }}
+                    className="w-4 h-4 accent-[var(--accent)]"
+                  />
+                  <span className="text-sm font-medium text-[var(--foreground)]">{size}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Numerical Sizes (Jeans/Pants)</label>
+            <div className="flex flex-wrap gap-4">
+              {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => (
+                <label key={size} className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={formData.sizes?.includes(size) || false}
+                    onChange={(e) => {
+                      const currentSizes = formData.sizes || [];
+                      if (e.target.checked) {
+                        setFormData({...formData, sizes: [...currentSizes, size]});
+                      } else {
+                        setFormData({...formData, sizes: currentSizes.filter(s => s !== size)});
+                      }
+                    }}
+                    className="w-4 h-4 accent-[var(--accent)]"
+                  />
+                  <span className="text-sm font-medium text-[var(--foreground)]">{size}</span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -364,57 +390,118 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Available Sizes & Stock for this Color</label>
-                <div className="flex flex-col gap-2">
-                  {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => {
-                    const isChecked = variant.sizes?.includes(size) || false;
-                    return (
-                      <div key={size} className="flex items-center gap-3">
-                        <label className="flex items-center gap-1.5 cursor-pointer w-16">
-                          <input 
-                            type="checkbox" 
-                            checked={isChecked}
-                            onChange={(e) => {
-                              const newVariants = [...formData.variants];
-                              const currentSizes = newVariants[index].sizes || [];
-                              if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
-                              
-                              if (e.target.checked) {
-                                newVariants[index].sizes = [...currentSizes, size];
-                                newVariants[index].sizeInventory[size] = 0;
-                              } else {
-                                newVariants[index].sizes = currentSizes.filter(s => s !== size);
-                                delete newVariants[index].sizeInventory[size];
-                              }
-                              
-                              // Auto sum total stock
-                              newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                              setFormData({...formData, variants: newVariants});
-                            }}
-                            className="w-3.5 h-3.5 accent-[var(--accent)]"
-                          />
-                          <span className="text-xs font-medium text-[var(--foreground)]">{size}</span>
-                        </label>
-                        {isChecked && (
-                          <input
-                            type="number"
-                            min="0"
-                            placeholder="Stock"
-                            value={variant.sizeInventory?.[size] || 0}
-                            onChange={(e) => {
-                               const newVariants = [...formData.variants];
-                               if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
-                               newVariants[index].sizeInventory[size] = parseInt(e.target.value) || 0;
-                               // Auto sum total stock
-                               newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                               setFormData({...formData, variants: newVariants});
-                            }}
-                            className="border border-[var(--border)] rounded px-2 py-1 text-xs w-20"
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
+                <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">Available Sizes & Stock for this Color</label>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Alphabetical Sizes</label>
+                    <div className="flex flex-col gap-2">
+                      {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => {
+                        const isChecked = variant.sizes?.includes(size) || false;
+                        return (
+                          <div key={size} className="flex items-center gap-3">
+                            <label className="flex items-center gap-1.5 cursor-pointer w-16">
+                              <input 
+                                type="checkbox" 
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const newVariants = [...formData.variants];
+                                  const currentSizes = newVariants[index].sizes || [];
+                                  if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
+                                  
+                                  if (e.target.checked) {
+                                    newVariants[index].sizes = [...currentSizes, size];
+                                    newVariants[index].sizeInventory[size] = 0;
+                                  } else {
+                                    newVariants[index].sizes = currentSizes.filter(s => s !== size);
+                                    delete newVariants[index].sizeInventory[size];
+                                  }
+                                  
+                                  // Auto sum total stock
+                                  newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                  setFormData({...formData, variants: newVariants});
+                                }}
+                                className="w-3.5 h-3.5 accent-[var(--accent)]"
+                              />
+                              <span className="text-xs font-medium text-[var(--foreground)]">{size}</span>
+                            </label>
+                            {isChecked && (
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="Stock"
+                                value={variant.sizeInventory?.[size] || 0}
+                                onChange={(e) => {
+                                   const newVariants = [...formData.variants];
+                                   if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
+                                   newVariants[index].sizeInventory[size] = parseInt(e.target.value) || 0;
+                                   // Auto sum total stock
+                                   newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                   setFormData({...formData, variants: newVariants});
+                                }}
+                                className="border border-[var(--border)] rounded px-2 py-1 text-xs w-20"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Numerical Sizes</label>
+                    <div className="flex flex-col gap-2">
+                      {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => {
+                        const isChecked = variant.sizes?.includes(size) || false;
+                        return (
+                          <div key={size} className="flex items-center gap-3">
+                            <label className="flex items-center gap-1.5 cursor-pointer w-16">
+                              <input 
+                                type="checkbox" 
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const newVariants = [...formData.variants];
+                                  const currentSizes = newVariants[index].sizes || [];
+                                  if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
+                                  
+                                  if (e.target.checked) {
+                                    newVariants[index].sizes = [...currentSizes, size];
+                                    newVariants[index].sizeInventory[size] = 0;
+                                  } else {
+                                    newVariants[index].sizes = currentSizes.filter(s => s !== size);
+                                    delete newVariants[index].sizeInventory[size];
+                                  }
+                                  
+                                  // Auto sum total stock
+                                  newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                  setFormData({...formData, variants: newVariants});
+                                }}
+                                className="w-3.5 h-3.5 accent-[var(--accent)]"
+                              />
+                              <span className="text-xs font-medium text-[var(--foreground)]">{size}</span>
+                            </label>
+                            {isChecked && (
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="Stock"
+                                value={variant.sizeInventory?.[size] || 0}
+                                onChange={(e) => {
+                                   const newVariants = [...formData.variants];
+                                   if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
+                                   newVariants[index].sizeInventory[size] = parseInt(e.target.value) || 0;
+                                   // Auto sum total stock
+                                   newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                   setFormData({...formData, variants: newVariants});
+                                }}
+                                className="border border-[var(--border)] rounded px-2 py-1 text-xs w-20"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
               
