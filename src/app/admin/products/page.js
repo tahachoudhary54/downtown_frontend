@@ -106,49 +106,64 @@ function AdminProductsContent() {
                 <th className="p-2 sm:p-4 font-semibold">Image</th>
                 <th className="p-2 sm:p-4 font-semibold">Product</th>
                 <th className="p-2 sm:p-4 font-semibold hidden sm:table-cell">Category</th>
+                <th className="p-2 sm:p-4 font-semibold hidden md:table-cell">Sub Category</th>
+                <th className="p-2 sm:p-4 font-semibold hidden lg:table-cell">Collection</th>
                 <th className="p-2 sm:p-4 font-semibold hidden sm:table-cell">Price</th>
-                <th className="p-2 sm:p-4 font-semibold hidden md:table-cell">Status</th>
+                <th className="p-2 sm:p-4 font-semibold hidden md:table-cell">Inventory Status</th>
+                <th className="p-2 sm:p-4 font-semibold hidden md:table-cell">Visibility</th>
                 <th className="p-2 sm:p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-gray-500 animate-pulse">Loading products...</td>
+                  <td colSpan="9" className="p-8 text-center text-gray-500 animate-pulse">Loading products...</td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-gray-500">No products found.</td>
+                  <td colSpan="9" className="p-8 text-center text-gray-500">No products found.</td>
                 </tr>
               ) : (
-                products.map((product) => (
+                products.map((product) => {
+                  const hasVariants = product.variants && product.variants.length > 0;
+                  const isLowStock = !hasVariants && product.stock > 0 && product.stock <= (product.lowStockThreshold || 5);
+                  
+                  return (
                   <tr key={product._id} className="border-b border-[var(--border)] hover:bg-[#FAF8F5] transition-colors">
                     <td className="p-2 sm:p-4">
                       <img src={product.img} alt={product.name} className="w-10 h-10 sm:w-12 sm:h-12 min-w-[40px] sm:min-w-[48px] object-cover rounded border border-[var(--border)]" />
                     </td>
                     <td className="p-2 sm:p-4">
                       <p className="font-medium text-[var(--foreground)] break-words line-clamp-2">{product.name}</p>
-                      {/* Show price and status on mobile only under the name */}
+                      <div className="mt-1 flex flex-wrap gap-1 text-xs">
+                        {product.isOnSale && <span className="bg-red-100 text-red-700 font-semibold px-1.5 py-0.5 rounded">Sale</span>}
+                        {!product.inStock && <span className="bg-gray-100 text-gray-700 font-semibold px-1.5 py-0.5 rounded">Out of Stock</span>}
+                        {isLowStock && <span className="bg-orange-100 text-orange-700 font-semibold px-1.5 py-0.5 rounded">Low Stock</span>}
+                        {product.essentialCollection && <span className="bg-purple-100 text-purple-700 font-semibold px-1.5 py-0.5 rounded">Collection</span>}
+                        {hasVariants && <span className="bg-blue-100 text-blue-700 font-semibold px-1.5 py-0.5 rounded">Variants</span>}
+                      </div>
                       <div className="sm:hidden mt-1 flex flex-col gap-1 text-xs">
                         <span className="text-[var(--foreground)] font-semibold">
                           {String(product.price).startsWith('₹') ? product.price : `₹${product.price}`}
                         </span>
-                        {product.isOnSale && <span className="bg-red-100 text-red-700 font-semibold px-1.5 py-0.5 rounded w-max">Sale</span>}
-                        {!product.inStock && <span className="bg-gray-100 text-gray-700 font-semibold px-1.5 py-0.5 rounded w-max">Out of Stock</span>}
                       </div>
                     </td>
                     <td className="p-2 sm:p-4 text-[var(--text-muted)] capitalize hidden sm:table-cell">{product.category}</td>
+                    <td className="p-2 sm:p-4 text-[var(--text-muted)] capitalize hidden md:table-cell">{product.subCategory || '-'}</td>
+                    <td className="p-2 sm:p-4 text-[var(--text-muted)] capitalize hidden lg:table-cell">{product.essentialCollection || '-'}</td>
                     <td className="p-2 sm:p-4 text-[var(--foreground)] font-medium hidden sm:table-cell">
                       {String(product.price).startsWith('₹') ? product.price : `₹${product.price}`}
                       {product.isOnSale && <span className="ml-2 text-xs text-red-500 line-through">{String(product.originalPrice).startsWith('₹') ? product.originalPrice : `₹${product.originalPrice}`}</span>}
                     </td>
                     <td className="p-2 sm:p-4 hidden md:table-cell">
-                      {product.isOnSale && (
-                        <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded">Sale</span>
-                      )}
-                      {!product.inStock && (
-                        <span className="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-1 rounded ml-2">Out of Stock</span>
-                      )}
+                      <span className={`text-xs font-semibold px-2 py-1 rounded whitespace-nowrap inline-block ${product.inStock ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                        {product.inStock ? (hasVariants ? 'Check Variants' : `${product.stock} in stock`) : 'Out of Stock'}
+                      </span>
+                    </td>
+                    <td className="p-2 sm:p-4 hidden md:table-cell">
+                      <span className={`text-xs font-semibold px-2 py-1 rounded ${product.inStock ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-gray-50 text-gray-500 border border-gray-200'}`}>
+                        {product.inStock ? 'Published' : 'Hidden'}
+                      </span>
                     </td>
                     <td className="p-2 sm:p-4 text-right">
                       <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
@@ -161,7 +176,8 @@ function AdminProductsContent() {
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>

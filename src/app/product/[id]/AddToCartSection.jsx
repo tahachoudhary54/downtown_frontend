@@ -7,9 +7,14 @@ import { generateWhatsAppMessage, trackWhatsAppClick } from "../../../utils/what
 import styles from "./product.module.css";
 
 import { useLiveStock, useLiveVariants, useLiveVisibility, useLiveInventory } from "../../../context/RealtimeStockContext";
+import { useAIStylist } from "../../../context/AIStylistContext";
+import { useWishlist } from "../../../context/WishlistContext";
 import ColorSelector from "./ColorSelector";
 
 export default function AddToCartSection({ product, selectedColor, setSelectedColor }) {
+  const { openStylist } = useAIStylist();
+  const { toggleWishlist, isWishlisted } = useWishlist();
+  const isWished = isWishlisted(product);
   const variants = useLiveVariants(product._id || product.id, product.variants || []);
   const selectedVariantInfo = variants.find(v => v.colorName === selectedColor);
   const globalSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["S", "M", "L", "XL"];
@@ -33,9 +38,9 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
     }
   }, [availableSizes, selectedSize, liveInventory, selectedColor, selectedVariantInfo]);
   const variantColors = variants.map(v => v.colorName);
-  const globalColors = product.colors || [];
   
-  let availableColors = Array.from(new Set([...globalColors, ...variantColors]));
+  // Only use variant colors, ignoring legacy product.colors
+  let availableColors = Array.from(new Set([...variantColors]));
   const hasVariants = availableColors.length > 0;
   
   // Check if any existing color falls back to the main product image.
@@ -153,6 +158,24 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
         {effectiveStock === 0 ? "OUT OF STOCK" : added ? "✓ ADDED TO CART" : "ADD TO CART"}
       </button>
 
+      <button
+        type="button"
+        className={`${styles.btnWishlist} ${isWished ? styles.btnWishlistAdded : ''}`}
+        onClick={() => {
+          const variantInfo = variants.find(v => v.colorName === selectedColor);
+          toggleWishlist({
+            ...product,
+            selectedVariant: variantInfo || (selectedColor ? { colorName: selectedColor } : null),
+            selectedSize: selectedSize || null
+          });
+        }}
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill={isWished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        {isWished ? 'SAVED TO WISHLIST' : 'ADD TO WISHLIST'}
+      </button>
+
       <a 
         href={generateWhatsAppMessage({
           productName: product.name,
@@ -181,6 +204,24 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
           VIEW CART →
         </Link>
       )}
+
+      <div className={styles.aiStylistContextCard}>
+        <div className={styles.aiStylistContextCardHeader}>
+          <span>✨ Downtown AI Stylist</span>
+        </div>
+        <p>Need help styling this product?</p>
+        <button 
+          className={styles.aiStylistContextCardBtn}
+          onClick={() => {
+            openStylist({
+              type: 'complete_outfit',
+              product: product
+            });
+          }}
+        >
+          [ Complete My Outfit ]
+        </button>
+      </div>
     </>
   );
 }

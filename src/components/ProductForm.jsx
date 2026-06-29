@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-// Dynamic categories loaded via API
+import SearchableDropdown from './SearchableDropdown';
 
 export default function ProductForm({ initialData = null, isEdit = false }) {
   const { token } = useAuth();
@@ -14,57 +14,113 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     price: '',
     description: '',
     category: '',
+    subCategory: '',
+    essentialCollection: '',
     img: '',
     isOnSale: false,
-    isEssential: false,
-    essentialCollection: '',
     originalPrice: '',
     inStock: true,
+    sku: '',
+    stock: 0,
+    lowStockThreshold: 5,
     sizes: [],
-    colors: [],
     variants: [],
+    fit: '',
+    fabric: '',
+    occasion: [],
+    gender: 'unisex',
+    season: [],
+    aiTags: [],
+    brand: '',
+    pattern: '',
+    material: '',
+    neck: '',
+    sleeve: '',
+    stretch: '',
+    weight: '',
+    colorFamily: '',
   });
   
   const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const [customColor, setCustomColor] = useState('');
-  const [currentVariantPage, setCurrentVariantPage] = useState(1);
-  const VARIANTS_PER_PAGE = 1;
+  const [toastMessage, setToastMessage] = useState('');
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  
+  // Section state
+  const [activeSection, setActiveSection] = useState('basic');
+  const [expandedSections, setExpandedSections] = useState({
+    basic: true,
+    organization: true,
+    inventory: true,
+    variants: true,
+    ai: false, // Collapsed by default
+    filters: false // Collapsed by default
+  });
+  
+  const [isDirty, setIsDirty] = useState(false);
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/categories?activeOnly=true`);
-        const data = await res.json();
-        if (data.success) {
-          setCategories(data.data);
-          // Auto-select first category if not set
-          if (!formData.category && data.data.length > 0) {
-            setFormData(prev => ({ ...prev, category: data.data[0].name }));
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch categories:', err);
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
       }
     };
-    fetchCategories();
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const [catRes, settingsRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/categories?activeOnly=true`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/settings`)
+        ]);
+        const catData = await catRes.json();
+        const settingsData = await settingsRes.json();
+        
+        if (catData.success) {
+          setCategories(catData.data);
+          if (!formData.category && catData.data.length > 0) {
+            setFormData(prev => ({ ...prev, category: catData.data[0].name }));
+          }
+        }
+        if (settingsData.success && settingsData.data?.categories) {
+          setCollections(settingsData.data.categories);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dropdown data:', err);
+      }
+    };
+    fetchDropdownData();
   }, []);
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData(prev => ({ ...prev, ...initialData }));
     }
   }, [initialData]);
 
   const handleChange = (e) => {
+    setIsDirty(true);
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: type === 'checkbox' ? checked : value
-    });
+    }));
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const handleImageUpload = async (e) => {
@@ -99,58 +155,45 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     }
   };
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      setError('');
-      setLoading(true);
-      try {
-        const rawPrice = String(formData.price);
-        if (rawPrice.includes('-')) {
-          setError("Price cannot be negative.");
-          setLoading(false);
-          return;
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitAttempted(true);
+    
+    const missing = requiredFields.filter(f => !formData[f.key] || String(formData[f.key]).trim() === '');
+    if (missing.length > 0) {
+      return; // Do not submit if required fields are missing
+    }
 
-        if (formData.isOnSale && String(formData.originalPrice).includes('-')) {
-          setError("Original price cannot be negative.");
-          setLoading(false);
-          return;
-        }
+    setError('');
+    setLoading(true);
+    try {
+      const rawPrice = String(formData.price);
+      const priceValue = parseFloat(rawPrice.replace(/[^0-9.]/g, ''));
+      
+      let mainStock = parseInt(formData.stock) || 0;
+      let variantStock = 0;
+      if (formData.variants && formData.variants.length > 0) {
+        variantStock = formData.variants.reduce((acc, v) => acc + (parseInt(v.stock) || 0), 0);
+      }
+      let finalStock = mainStock + variantStock;
 
-        // derive priceValue
-        const priceValue = parseFloat(rawPrice.replace(/[^0-9.]/g, ''));
-        
-        // Auto-flush any pending urlInputs into images
-        const finalVariants = (formData.variants || []).map(v => {
-          const newV = { ...v };
-          if (newV.urlInput && newV.urlInput.trim() !== '') {
-            newV.images = [...(newV.images || []), newV.urlInput.trim()];
-            newV.urlInput = '';
-          }
-          return newV;
-        });
+      let formattedPrice = rawPrice.trim();
+      if (formattedPrice && !formattedPrice.includes('₹') && !formattedPrice.includes('$')) {
+        formattedPrice = `₹${formattedPrice}`;
+      }
+      
+      const payload = { 
+        ...formData, 
+        price: formattedPrice, 
+        priceValue, 
+        stock: finalStock,
+        isEssential: !!formData.essentialCollection
+      };
 
-        let finalStock = parseInt(formData.stock) || 0;
-        if (finalVariants && finalVariants.length > 0) {
-          finalStock = finalVariants.reduce((acc, v) => acc + (parseInt(v.stock) || 0), 0);
-        }
+      const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${isEdit ? `/${initialData._id}` : ''}`;
+      const method = isEdit ? 'PUT' : 'POST';
 
-        let formattedPrice = rawPrice.trim();
-        if (formattedPrice && !formattedPrice.includes('₹') && !formattedPrice.includes('$')) {
-          formattedPrice = `₹${formattedPrice}`;
-        }
-
-        let formattedOriginalPrice = formData.originalPrice ? String(formData.originalPrice).trim() : '';
-        if (formattedOriginalPrice && !formattedOriginalPrice.includes('₹') && !formattedOriginalPrice.includes('$')) {
-          formattedOriginalPrice = `₹${formattedOriginalPrice}`;
-        }
-        
-        const payload = { ...formData, variants: finalVariants, price: formattedPrice, originalPrice: formattedOriginalPrice, priceValue, stock: finalStock };
-
-        const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products${isEdit ? `/${initialData._id}` : ''}`;
-        const method = isEdit ? 'PUT' : 'POST';
-
-        const res = await fetch(url, {
+      const res = await fetch(url, {
         method,
         headers: { 
           'Content-Type': 'application/json',
@@ -161,563 +204,524 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
 
       const data = await res.json();
       if (data.success) {
-        router.refresh(); // purge next.js cache
-        router.push('/admin/products');
+        setToastMessage(isEdit ? 'Product updated successfully.' : 'Product created successfully.');
+        setTimeout(() => {
+          router.push('/admin/products');
+          router.refresh();
+        }, 1500);
       } else {
         setError(data.message || 'Something went wrong');
       }
     } catch (err) {
       console.error(err);
+      setError('Failed to save product');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-[var(--border)] max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6">{isEdit ? 'Edit Product' : 'Add New Product'}</h2>
+  const handleCreateSubcategory = async (categoryName) => {
+    const subName = prompt('Enter new sub-category name:');
+    if (!subName) return;
+    const cat = categories.find(c => c.name === categoryName);
+    if (!cat) return;
+    
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/categories/${cat._id}/subcategories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: subName, slug: subName.toLowerCase().replace(/\s+/g, '-') })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCategories(categories.map(c => c._id === cat._id ? data.data : c));
+        setFormData(prev => ({ ...prev, subCategory: subName }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCreateCollection = () => {
+    alert('Please manage Essential Collections from the CMS Page to properly set up their homepage images.');
+    router.push('/admin/cms');
+  };
+
+  // ---------------------------------------------------------
+  // RENDER SECTIONS
+  // ---------------------------------------------------------
+  const renderBasicInfo = () => (
+    <div className="space-y-4 p-4 border border-[var(--border)] rounded-lg bg-white shadow-sm mb-4">
+      <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleSection('basic')}>
+        <h3 className="font-semibold text-lg text-[var(--foreground)]">Basic Information</h3>
+        <span>{expandedSections.basic ? '▲' : '▼'}</span>
+      </div>
       
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">
-          {error}
+      {expandedSections.basic && (
+        <div className="space-y-4 pt-4 border-t border-[var(--border)]">
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Product Name *</label>
+            <input type="text" name="name" value={formData.name} onChange={handleChange} required className={`w-full border ${(submitAttempted && !formData.name) ? 'border-red-300' : 'border-[var(--border)]'} rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]`} />
+            {(submitAttempted && !formData.name) && <p className="text-xs text-red-500 mt-1">Product name is required</p>}
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Description</label>
+            <textarea name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full border border-[var(--border)] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"></textarea>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Price *</label>
+              <input type="text" name="price" value={formData.price} onChange={handleChange} required className={`w-full border ${(submitAttempted && !formData.price) ? 'border-red-300' : 'border-[var(--border)]'} rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]`} />
+              {(submitAttempted && !formData.price) && <p className="text-xs text-red-500 mt-1">Price is required</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Original Price (If on sale)</label>
+              <input type="text" name="originalPrice" value={formData.originalPrice} onChange={handleChange} className="w-full border border-[var(--border)] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]" />
+            </div>
+
+            <div className="flex items-center gap-4 mt-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="isOnSale" checked={formData.isOnSale} onChange={handleChange} className="w-4 h-4 accent-[var(--accent)]" />
+                <span className="text-sm font-medium text-[var(--foreground)]">On Sale</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="inStock" checked={formData.inStock} onChange={handleChange} className="w-4 h-4 accent-[var(--accent)]" />
+                <span className="text-sm font-medium text-[var(--foreground)]">Visible (Published)</span>
+              </label>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Main Image URL *</label>
+            <div className="flex gap-2">
+              <input type="text" name="img" value={formData.img} onChange={handleChange} required className={`flex-1 border ${(submitAttempted && !formData.img) ? 'border-red-300' : 'border-[var(--border)]'} rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]`} />
+              <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+              <button type="button" onClick={() => fileInputRef.current.click()} disabled={uploading} className="bg-[#F1ECE5] px-4 py-2 rounded-md text-sm font-medium hover:bg-[#E5DED5]">
+                {uploading ? '...' : 'Upload'}
+              </button>
+            </div>
+            {(submitAttempted && !formData.img) && <p className="text-xs text-red-500 mt-1">Main image is required</p>}
+            {formData.img && <img src={formData.img} className="mt-2 h-24 object-contain border rounded-md" />}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderOrganization = () => {
+    const activeCategoryObj = categories.find(c => c.name === formData.category);
+    const subCategoryOptions = activeCategoryObj?.subCategories?.map(sub => ({ label: sub.name, value: sub.name })) || [];
+    
+    return (
+    <div className="space-y-4 p-4 border border-[var(--border)] rounded-lg bg-white shadow-sm mb-4">
+      <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleSection('organization')}>
+        <h3 className="font-semibold text-lg text-[var(--foreground)]">Organization</h3>
+        <span>{expandedSections.organization ? '▲' : '▼'}</span>
+      </div>
+      
+      {expandedSections.organization && (
+        <div className="space-y-6 pt-4 border-t border-[var(--border)] pb-2">
+          
+          <div className="border-b border-gray-100 pb-4">
+            <SearchableDropdown 
+              label="Essential Collection"
+              required={true}
+              placeholder="Search Collection ▼"
+              value={formData.essentialCollection}
+              options={collections.map(c => ({ label: c.name, value: c.name }))}
+              onChange={(val) => setFormData(prev => ({...prev, essentialCollection: val}))}
+              onCreate={handleCreateCollection}
+            />
+            {(submitAttempted && !formData.essentialCollection) && <p className="text-xs text-red-500 mt-1">Essential collection is required</p>}
+            <p className="text-xs text-gray-500 mt-1">This determines which collection the product appears under in the Shop page filter sidebar.</p>
+          </div>
+
+          <div className="border-b border-gray-100 pb-4">
+            <SearchableDropdown 
+              label="Main Category"
+              required={true}
+              placeholder="Search Category ▼"
+              value={formData.category}
+              options={categories.map(c => ({ label: c.name, value: c.name }))}
+              onChange={(val) => setFormData(prev => ({...prev, category: val, subCategory: ''}))}
+              onCreate={async () => {
+                const name = prompt('Enter new main category name:');
+                if (!name) return;
+                try {
+                  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/categories`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ name, slug: name.toLowerCase().replace(/\s+/g, '-') })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    setCategories([...categories, data.data]);
+                    setFormData(prev => ({...prev, category: name, subCategory: ''}));
+                  } else {
+                    alert(data.message || 'Error creating category');
+                  }
+                } catch(e) { console.error(e); }
+              }}
+            />
+            {(submitAttempted && !formData.category) && <p className="text-xs text-red-500 mt-1">Main category is required</p>}
+            <p className="text-xs text-gray-500 mt-1">Defines what type of product this is (e.g. Jeans, Shirt).</p>
+          </div>
+
+        </div>
+      )}
+    </div>
+    );
+  };
+
+
+
+  const renderMainSizes = () => (
+    <div className="space-y-4 p-4 border border-[var(--border)] rounded-lg bg-white shadow-sm mb-4">
+      <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleSection('inventory')}>
+        <h3 className="font-semibold text-lg text-[var(--foreground)]">Main Product Sizes & Stock</h3>
+        <span>{expandedSections.inventory ? '▲' : '▼'}</span>
+      </div>
+      
+      {expandedSections.inventory && (
+        <div className="pt-4 border-t border-[var(--border)]">
+          <p className="text-sm text-[var(--text-muted)] mb-4">Select the sizes and enter the stock available for the default/main product image.</p>
+          
+          <div className="flex flex-col gap-4 bg-white p-4 border border-[var(--border)] rounded-md">
+            {/* Alphabetical Sizes */}
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Top Sizes</h4>
+              <div className="flex flex-wrap gap-4">
+                {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => {
+                  const isChecked = formData.sizes?.includes(size);
+                  return (
+                    <div key={size} className="flex flex-col items-start gap-1 w-20">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" checked={isChecked || false} onChange={(e) => {
+                          const newSizes = e.target.checked 
+                            ? [...(formData.sizes || []), size]
+                            : (formData.sizes || []).filter(s => s !== size);
+                          
+                          const newInventory = { ...(formData.inventory || {}) };
+                          if (e.target.checked) newInventory[size] = 0;
+                          else delete newInventory[size];
+                          
+                          const newStock = Object.values(newInventory).reduce((a,b)=>a+b, 0);
+                          setFormData({...formData, sizes: newSizes, inventory: newInventory, stock: newStock});
+                        }} className="accent-[var(--accent)]" />
+                        <span className="text-xs font-medium">{size}</span>
+                      </label>
+                      {isChecked && (
+                        <input type="number" min="0" value={formData.inventory?.[size] || 0} onChange={(e) => {
+                          const newInventory = { ...(formData.inventory || {}) };
+                          newInventory[size] = parseInt(e.target.value) || 0;
+                          const newStock = Object.values(newInventory).reduce((a,b)=>a+b, 0);
+                          setFormData({...formData, inventory: newInventory, stock: newStock});
+                        }} className="w-full border border-[var(--border)] rounded px-2 py-1 text-xs" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="h-px bg-gray-100 w-full"></div>
+
+            {/* Numerical Sizes */}
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Bottom Sizes</h4>
+              <div className="flex flex-wrap gap-4">
+                {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => {
+                  const isChecked = formData.sizes?.includes(size);
+                  return (
+                    <div key={size} className="flex flex-col items-start gap-1 w-20">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" checked={isChecked || false} onChange={(e) => {
+                          const newSizes = e.target.checked 
+                            ? [...(formData.sizes || []), size]
+                            : (formData.sizes || []).filter(s => s !== size);
+                          
+                          const newInventory = { ...(formData.inventory || {}) };
+                          if (e.target.checked) newInventory[size] = 0;
+                          else delete newInventory[size];
+                          
+                          const newStock = Object.values(newInventory).reduce((a,b)=>a+b, 0);
+                          setFormData({...formData, sizes: newSizes, inventory: newInventory, stock: newStock});
+                        }} className="accent-[var(--accent)]" />
+                        <span className="text-xs font-medium">{size}</span>
+                      </label>
+                      {isChecked && (
+                        <input type="number" min="0" value={formData.inventory?.[size] || 0} onChange={(e) => {
+                          const newInventory = { ...(formData.inventory || {}) };
+                          newInventory[size] = parseInt(e.target.value) || 0;
+                          const newStock = Object.values(newInventory).reduce((a,b)=>a+b, 0);
+                          setFormData({...formData, inventory: newInventory, stock: newStock});
+                        }} className="w-full border border-[var(--border)] rounded px-2 py-1 text-xs" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+          
+        </div>
+      )}
+    </div>
+  );
+
+  const renderVariants = () => (
+    <div className="space-y-4 p-4 border border-[var(--border)] rounded-lg bg-white shadow-sm mb-4">
+      <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleSection('variants')}>
+        <h3 className="font-semibold text-lg text-[var(--foreground)]">Variants</h3>
+        <div className="flex items-center gap-4">
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFormData(prev => ({
+                ...prev,
+                variants: [...(prev.variants || []), { colorName: '', variantName: '', images: [], stock: 0, sizes: [], sizeInventory: {} }]
+              }));
+              if (!expandedSections.variants) toggleSection('variants');
+            }}
+            className="text-xs bg-[var(--foreground)] text-white px-3 py-1 rounded hover:bg-opacity-90"
+          >
+            + Add Variant
+          </button>
+          <span>{expandedSections.variants ? '▲' : '▼'}</span>
+        </div>
+      </div>
+      
+      {expandedSections.variants && (
+        <div className="space-y-4 pt-4 border-t border-[var(--border)]">
+          {(!formData.variants || formData.variants.length === 0) && (
+            <p className="text-sm text-[var(--text-muted)] italic">No variants added. Product will be treated as a single item.</p>
+          )}
+          
+          {(formData.variants || []).map((variant, index) => (
+            <div key={index} className="p-4 border border-[var(--border)] rounded-lg bg-[#fafafa] relative">
+              <button type="button" onClick={() => {
+                const newV = [...formData.variants];
+                newV.splice(index, 1);
+                setFormData({...formData, variants: newV});
+              }} className="absolute top-3 right-3 text-red-500 font-bold hover:text-red-700">✕</button>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Color / Variant Name *</label>
+                  <input type="text" required value={variant.colorName} onChange={(e) => {
+                    const newV = [...formData.variants];
+                    newV[index].colorName = e.target.value;
+                    newV[index].variantName = e.target.value;
+                    setFormData({...formData, variants: newV});
+                  }} className="w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm" placeholder="e.g. Black" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Total Variant Stock (Auto sum from sizes)</label>
+                  <input type="number" readOnly value={variant.stock || 0} className="w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm bg-gray-100 text-gray-500" />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Variant Image URL</label>
+                <div className="flex gap-2">
+                  <input type="text" value={variant.images?.[0] || ''} onChange={(e) => {
+                    const newV = [...formData.variants];
+                    if (!newV[index].images) newV[index].images = [];
+                    newV[index].images[0] = e.target.value;
+                    setFormData({...formData, variants: newV});
+                  }} className="flex-1 border border-[var(--border)] rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--accent)]" placeholder="Image URL..." />
+                  <input type="file" id={`variant-upload-${index}`} onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    const uploadData = new FormData();
+                    uploadData.append('image', file);
+                    try {
+                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+                        body: uploadData
+                      });
+                      const result = await res.json();
+                      if (result.success) {
+                        const newV = [...formData.variants];
+                        if (!newV[index].images) newV[index].images = [];
+                        newV[index].images[0] = result.imageUrl || result.url || '';
+                        setFormData({...formData, variants: newV});
+                      } else {
+                        alert(result.message || 'Image upload failed');
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      alert('Error uploading image');
+                    }
+                  }} accept="image/*" className="hidden" />
+                  <button type="button" onClick={() => document.getElementById(`variant-upload-${index}`).click()} className="bg-[#F1ECE5] px-4 py-1.5 rounded-md text-xs font-medium hover:bg-[#E5DED5]">
+                    Upload
+                  </button>
+                </div>
+                {variant.images?.[0] && <img src={variant.images[0]} className="mt-2 h-16 w-16 object-cover border rounded-md" alt="Variant preview" />}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">Sizes & Inventory for {variant.colorName || 'this variant'}</label>
+                <div className="flex flex-col gap-4 bg-white p-4 border border-[var(--border)] rounded-md">
+                  
+                  {/* Alphabetical Sizes */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Top Sizes</h4>
+                    <div className="flex flex-wrap gap-4">
+                      {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => {
+                        const isChecked = variant.sizes?.includes(size);
+                        return (
+                          <div key={size} className="flex flex-col items-start gap-1 w-20">
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                              <input type="checkbox" checked={isChecked || false} onChange={(e) => {
+                                const newV = [...formData.variants];
+                                if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
+                                if (e.target.checked) {
+                                  newV[index].sizes = [...(newV[index].sizes || []), size];
+                                  newV[index].sizeInventory[size] = 0;
+                                } else {
+                                  newV[index].sizes = newV[index].sizes.filter(s => s !== size);
+                                  delete newV[index].sizeInventory[size];
+                                }
+                                newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                setFormData({...formData, variants: newV});
+                              }} className="accent-[var(--accent)]" />
+                              <span className="text-xs font-medium">{size}</span>
+                            </label>
+                            {isChecked && (
+                              <input type="number" min="0" value={variant.sizeInventory?.[size] || 0} onChange={(e) => {
+                                const newV = [...formData.variants];
+                                if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
+                                newV[index].sizeInventory[size] = parseInt(e.target.value) || 0;
+                                newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                setFormData({...formData, variants: newV});
+                              }} className="w-full border border-[var(--border)] rounded px-2 py-1 text-xs" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-gray-100 w-full"></div>
+
+                  {/* Numerical Sizes */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Bottom Sizes</h4>
+                    <div className="flex flex-wrap gap-4">
+                      {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => {
+                        const isChecked = variant.sizes?.includes(size);
+                        return (
+                          <div key={size} className="flex flex-col items-start gap-1 w-20">
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                              <input type="checkbox" checked={isChecked || false} onChange={(e) => {
+                                const newV = [...formData.variants];
+                                if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
+                                if (e.target.checked) {
+                                  newV[index].sizes = [...(newV[index].sizes || []), size];
+                                  newV[index].sizeInventory[size] = 0;
+                                } else {
+                                  newV[index].sizes = newV[index].sizes.filter(s => s !== size);
+                                  delete newV[index].sizeInventory[size];
+                                }
+                                newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                setFormData({...formData, variants: newV});
+                              }} className="accent-[var(--accent)]" />
+                              <span className="text-xs font-medium">{size}</span>
+                            </label>
+                            {isChecked && (
+                              <input type="number" min="0" value={variant.sizeInventory?.[size] || 0} onChange={(e) => {
+                                const newV = [...formData.variants];
+                                if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
+                                newV[index].sizeInventory[size] = parseInt(e.target.value) || 0;
+                                newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                setFormData({...formData, variants: newV});
+                              }} className="w-full border border-[var(--border)] rounded px-2 py-1 text-xs" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const requiredFields = [
+    { key: 'name', label: 'Name' },
+    { key: 'price', label: 'Price' },
+    { key: 'img', label: 'Main Image' },
+    { key: 'essentialCollection', label: 'Essential Collection' },
+    { key: 'category', label: 'Main Category' }
+  ];
+
+  const missingFields = requiredFields.filter(f => !formData[f.key] || String(formData[f.key]).trim() === '');
+
+  return (
+    <div className="max-w-4xl mx-auto pb-24 relative">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-[var(--foreground)]">{isEdit ? 'Edit Product' : 'Add New Product'}</h2>
+        <button type="button" onClick={() => router.back()} className="text-sm font-medium text-[var(--text-muted)] hover:underline">← Back to Products</button>
+      </div>
+      
+      {error && <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">{error}</div>}
+      {toastMessage && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50 flex items-center gap-2 animate-bounce">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+          {toastMessage}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-[var(--text-muted)]">Product Name *</label>
-          <input 
-            type="text" required name="name" value={formData.name || ''} onChange={handleChange}
-            className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[var(--text-muted)]">Price (e.g. 59.99) *</label>
-            <input 
-              type="text" required name="price" value={formData.price || ''} onChange={handleChange}
-              className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-            />
-          </div>
-          
-          {formData.isOnSale && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-[var(--text-muted)]">Original Price</label>
-              <input 
-                type="text" name="originalPrice" value={formData.originalPrice || ''} onChange={handleChange}
-                className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-[var(--text-muted)]">Category *</label>
-          <select
-            name="category"
-            value={formData.category || ''}
-            onChange={handleChange}
-            required
-            className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
-          >
-            <option value="" disabled>Select a category</option>
-            {categories.map(cat => (
-              <option key={cat._id || cat.id} value={cat.name}>{cat.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-[var(--text-muted)]">Description</label>
-          <textarea 
-            name="description" value={formData.description || ''} onChange={handleChange} rows="4"
-            className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-          ></textarea>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-[var(--text-muted)]">Image URL *</label>
-          <div className="flex gap-2">
-            <input 
-              type="text" required name="img" value={formData.img || ''} onChange={handleChange} placeholder="https://..."
-              className="flex-1 border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
-            />
-            <input 
-              type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" 
-            />
-            <button 
-              type="button" 
-              onClick={() => fileInputRef.current.click()}
-              disabled={uploading}
-              className="bg-[#F1ECE5] text-[var(--foreground)] px-4 py-2 rounded-lg font-medium hover:bg-[#E5DED5] transition-colors whitespace-nowrap"
-            >
-              {uploading ? 'Uploading...' : 'Upload Image'}
-            </button>
-          </div>
-          {formData.img && (
-            <div className="mt-2">
-              <img src={formData.img} alt="Preview" className="h-32 object-contain border border-[var(--border)] rounded" />
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-4 pt-2">
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Alphabetical Sizes</label>
-            <div className="flex flex-wrap gap-4">
-              {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
-                <label key={size} className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={formData.sizes?.includes(size) || false}
-                    onChange={(e) => {
-                      const currentSizes = formData.sizes || [];
-                      if (e.target.checked) {
-                        setFormData({...formData, sizes: [...currentSizes, size]});
-                      } else {
-                        setFormData({...formData, sizes: currentSizes.filter(s => s !== size)});
-                      }
-                    }}
-                    className="w-4 h-4 accent-[var(--accent)]"
-                  />
-                  <span className="text-sm font-medium text-[var(--foreground)]">{size}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Numerical Sizes (Jeans/Pants)</label>
-            <div className="flex flex-wrap gap-4">
-              {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => (
-                <label key={size} className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={formData.sizes?.includes(size) || false}
-                    onChange={(e) => {
-                      const currentSizes = formData.sizes || [];
-                      if (e.target.checked) {
-                        setFormData({...formData, sizes: [...currentSizes, size]});
-                      } else {
-                        setFormData({...formData, sizes: currentSizes.filter(s => s !== size)});
-                      }
-                    }}
-                    className="w-4 h-4 accent-[var(--accent)]"
-                  />
-                  <span className="text-sm font-medium text-[var(--foreground)]">{size}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-
-
-        <div className="space-y-4 pt-4 border-t border-[var(--border)]">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium text-[var(--text-muted)]">Product Variants (Colors & Images)</label>
-            <button 
-              type="button" 
-              onClick={() => {
-                const currentVariants = formData.variants || [];
-                setFormData({...formData, variants: [...currentVariants, { colorName: '', variantName: '', images: [], stock: 0, sizes: [], sizeInventory: {} }]});
-                setCurrentVariantPage(currentVariants.length + 1);
-              }}
-              className="text-xs bg-[var(--accent)] text-white px-3 py-1 rounded hover:bg-opacity-90"
-            >
-              + Add Variant
-            </button>
-          </div>
-          
-          {(() => {
-            const totalVariantPages = Math.ceil((formData.variants || []).length / VARIANTS_PER_PAGE);
-            const startIndex = (currentVariantPage - 1) * VARIANTS_PER_PAGE;
-            const paginatedVariants = (formData.variants || []).slice(startIndex, startIndex + VARIANTS_PER_PAGE);
-            
-            return (
-              <>
-                {paginatedVariants.map((variant, localIndex) => {
-                  const index = startIndex + localIndex;
-                  return (
-                    <div key={index} className="p-4 border border-[var(--border)] rounded-lg bg-[#fafafa] space-y-4 relative">
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          const newVariants = [...formData.variants];
-                          newVariants.splice(index, 1);
-                          setFormData({...formData, variants: newVariants});
-                          if (paginatedVariants.length === 1 && currentVariantPage > 1) {
-                            setCurrentVariantPage(currentVariantPage - 1);
-                          }
-                        }}
-                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold"
-                      >
-                        ✕
-                      </button>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Variant Name</label>
-                  <input 
-                    type="text" 
-                    value={variant.variantName || ''}
-                    onChange={(e) => {
-                      const newVariants = [...formData.variants];
-                      newVariants[index].variantName = e.target.value;
-                      // Keep colorName in sync for backend schema requirements and color selection logic
-                      newVariants[index].colorName = e.target.value;
-                      setFormData({...formData, variants: newVariants});
-                    }}
-                    placeholder="e.g. Baggy Shirt - Black"
-                    className="w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Total Stock {variant.sizes?.length > 0 ? '(Auto)' : ''}</label>
-                  <input 
-                    type="number" 
-                    min="0"
-                    value={variant.stock}
-                    readOnly={variant.sizes?.length > 0}
-                    onChange={(e) => {
-                      if (variant.sizes?.length > 0) return;
-                      const newVariants = [...formData.variants];
-                      newVariants[index].stock = parseInt(e.target.value) || 0;
-                      setFormData({...formData, variants: newVariants});
-                    }}
-                    className={`w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm ${variant.sizes?.length > 0 ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">Available Sizes & Stock for this Color</label>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Alphabetical Sizes</label>
-                    <div className="flex flex-col gap-2">
-                      {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => {
-                        const isChecked = variant.sizes?.includes(size) || false;
-                        return (
-                          <div key={size} className="flex items-center gap-3">
-                            <label className="flex items-center gap-1.5 cursor-pointer w-16">
-                              <input 
-                                type="checkbox" 
-                                checked={isChecked}
-                                onChange={(e) => {
-                                  const newVariants = [...formData.variants];
-                                  const currentSizes = newVariants[index].sizes || [];
-                                  if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
-                                  
-                                  if (e.target.checked) {
-                                    newVariants[index].sizes = [...currentSizes, size];
-                                    newVariants[index].sizeInventory[size] = 0;
-                                  } else {
-                                    newVariants[index].sizes = currentSizes.filter(s => s !== size);
-                                    delete newVariants[index].sizeInventory[size];
-                                  }
-                                  
-                                  // Auto sum total stock
-                                  newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                                  setFormData({...formData, variants: newVariants});
-                                }}
-                                className="w-3.5 h-3.5 accent-[var(--accent)]"
-                              />
-                              <span className="text-xs font-medium text-[var(--foreground)]">{size}</span>
-                            </label>
-                            {isChecked && (
-                              <input
-                                type="number"
-                                min="0"
-                                placeholder="Stock"
-                                value={variant.sizeInventory?.[size] || 0}
-                                onChange={(e) => {
-                                   const newVariants = [...formData.variants];
-                                   if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
-                                   newVariants[index].sizeInventory[size] = parseInt(e.target.value) || 0;
-                                   // Auto sum total stock
-                                   newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                                   setFormData({...formData, variants: newVariants});
-                                }}
-                                className="border border-[var(--border)] rounded px-2 py-1 text-xs w-20"
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Numerical Sizes</label>
-                    <div className="flex flex-col gap-2">
-                      {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => {
-                        const isChecked = variant.sizes?.includes(size) || false;
-                        return (
-                          <div key={size} className="flex items-center gap-3">
-                            <label className="flex items-center gap-1.5 cursor-pointer w-16">
-                              <input 
-                                type="checkbox" 
-                                checked={isChecked}
-                                onChange={(e) => {
-                                  const newVariants = [...formData.variants];
-                                  const currentSizes = newVariants[index].sizes || [];
-                                  if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
-                                  
-                                  if (e.target.checked) {
-                                    newVariants[index].sizes = [...currentSizes, size];
-                                    newVariants[index].sizeInventory[size] = 0;
-                                  } else {
-                                    newVariants[index].sizes = currentSizes.filter(s => s !== size);
-                                    delete newVariants[index].sizeInventory[size];
-                                  }
-                                  
-                                  // Auto sum total stock
-                                  newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                                  setFormData({...formData, variants: newVariants});
-                                }}
-                                className="w-3.5 h-3.5 accent-[var(--accent)]"
-                              />
-                              <span className="text-xs font-medium text-[var(--foreground)]">{size}</span>
-                            </label>
-                            {isChecked && (
-                              <input
-                                type="number"
-                                min="0"
-                                placeholder="Stock"
-                                value={variant.sizeInventory?.[size] || 0}
-                                onChange={(e) => {
-                                   const newVariants = [...formData.variants];
-                                   if (!newVariants[index].sizeInventory) newVariants[index].sizeInventory = {};
-                                   newVariants[index].sizeInventory[size] = parseInt(e.target.value) || 0;
-                                   // Auto sum total stock
-                                   newVariants[index].stock = Object.values(newVariants[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                                   setFormData({...formData, variants: newVariants});
-                                }}
-                                className="border border-[var(--border)] rounded px-2 py-1 text-xs w-20"
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Variant Images</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {(variant.images || []).map((img, imgIndex) => (
-                    <div key={imgIndex} className="relative group">
-                      <img src={img} className="w-16 h-16 object-cover border border-[var(--border)] rounded" />
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          const newVariants = [...formData.variants];
-                          newVariants[index].images.splice(imgIndex, 1);
-                          setFormData({...formData, variants: newVariants});
-                        }}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={variant.urlInput || ''}
-                    onChange={(e) => {
-                      const newVariants = [...formData.variants];
-                      newVariants[index].urlInput = e.target.value;
-                      setFormData({...formData, variants: newVariants});
-                    }}
-                    placeholder="https://... (Add image URL)"
-                    className="flex-1 border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--accent)]"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const url = variant.urlInput?.trim();
-                        if (url) {
-                          const newVariants = [...formData.variants];
-                          newVariants[index].images = [...(newVariants[index].images || []), url];
-                          newVariants[index].urlInput = '';
-                          setFormData({...formData, variants: newVariants});
-                        }
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const url = variant.urlInput?.trim();
-                      if (url) {
-                        const newVariants = [...formData.variants];
-                        newVariants[index].images = [...(newVariants[index].images || []), url];
-                        newVariants[index].urlInput = '';
-                        setFormData({...formData, variants: newVariants});
-                      }
-                    }}
-                    className="bg-[#F1ECE5] text-[var(--foreground)] px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-[#E5DED5] transition-colors whitespace-nowrap"
-                  >
-                    Add URL
-                  </button>
-                </div>
-
-                {variant.urlInput && (
-                  <div className="mb-3">
-                    <p className="text-xs text-[var(--text-muted)] mb-1">Preview:</p>
-                    <img src={variant.urlInput} alt="Preview" className="h-32 object-contain border border-[var(--border)] rounded" />
-                  </div>
-                )}
-                
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-semibold">OR</span>
-                  <label className="bg-[#F1ECE5] text-[var(--foreground)] px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-[#E5DED5] transition-colors cursor-pointer inline-block">
-                    {uploading ? 'Uploading...' : 'Upload Image File'}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      multiple
-                      className="hidden"
-                      onChange={async (e) => {
-                        if (!e.target.files.length) return;
-                        setUploading(true);
-                        const newImages = [];
-                        for (let file of e.target.files) {
-                          const data = new FormData();
-                          data.append('image', file);
-                          try {
-                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
-                              method: 'POST',
-                              headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-                              body: data
-                            });
-                            const result = await res.json();
-                            if (result.success) {
-                              newImages.push(result.imageUrl || result.url);
-                            }
-                          } catch (err) {
-                            console.error('Upload error', err);
-                          }
-                        }
-                        const newVariants = [...formData.variants];
-                        newVariants[index].images = [...(newVariants[index].images || []), ...newImages];
-                        setFormData({...formData, variants: newVariants});
-                        setUploading(false);
-                        e.target.value = '';
-                      }}
-                      disabled={uploading}
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      <form onSubmit={handleSubmit}>
+        {renderBasicInfo()}
+        {renderOrganization()}
+        {renderMainSizes()}
+        {renderVariants()}
         
-        {totalVariantPages > 0 && (
-          <div className="flex items-center justify-between mt-4 p-4 border border-[var(--border)] rounded-lg bg-[#fafafa]">
-            <span className="text-sm text-[var(--text-muted)]">Showing page {currentVariantPage} of {totalVariantPages}</span>
-            <div className="flex gap-2">
-              <button 
-                type="button"
-                disabled={currentVariantPage === 1}
-                onClick={() => setCurrentVariantPage(prev => Math.max(1, prev - 1))}
-                className="px-4 py-1.5 border border-[var(--border)] rounded text-sm disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button 
-                type="button"
-                disabled={currentVariantPage === totalVariantPages}
-                onClick={() => setCurrentVariantPage(prev => Math.min(totalVariantPages, prev + 1))}
-                className="px-4 py-1.5 border border-[var(--border)] rounded text-sm disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  })()}
-</div>
-
-        <div className="flex flex-wrap gap-6 pt-4 border-t border-[var(--border)]">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="checkbox" name="isOnSale" checked={formData.isOnSale} onChange={handleChange}
-              className="w-4 h-4 accent-[var(--accent)]"
-            />
-            <span className="text-[var(--foreground)] font-medium">On Sale</span>
-          </label>
-          
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="checkbox" name="inStock" checked={formData.inStock} onChange={handleChange}
-              className="w-4 h-4 accent-[var(--accent)]"
-            />
-            <span className="text-[var(--foreground)] font-medium">In Stock</span>
-          </label>
-        </div>
-
-        {/* Essential Collection Selector */}
-        <div className="space-y-2 pt-2">
-          <label className="block text-sm font-medium text-[var(--text-muted)]">Essential Collection</label>
-          <p className="text-xs text-[var(--text-muted)] mb-1">Select which Essential Collection this product appears in on the homepage.</p>
-          <select
-            value={formData.essentialCollection || ''}
-            onChange={(e) => {
-              const val = e.target.value;
-              setFormData(prev => ({
-                ...prev,
-                essentialCollection: val,
-                isEssential: val !== ''
-              }));
-            }}
-            className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)] bg-white"
-          >
-            <option value="">— None (Not in Essential Collection) —</option>
-            <optgroup label="Shirts">
-              <option value="BAGGY SHIRT">Baggy Shirt</option>
-              <option value="REGULAR SHIRT">Regular Shirt</option>
-              <option value="LINEN SHIRT">Linen Shirt</option>
-              <option value="HALF SLEEVE SHIRT">Half Sleeve Shirt</option>
-            </optgroup>
-            <optgroup label="T-Shirts">
-              <option value="T-SHIRT">T-Shirt</option>
-              <option value="POLO T-SHIRT">Polo T-Shirt</option>
-              <option value="FULL SLEEVE T-SHIRT">Full Sleeve T-Shirt</option>
-            </optgroup>
-            <optgroup label="Bottoms">
-              <option value="BAGGY JEANS">Baggy Jeans</option>
-              <option value="BOOT CUT JEANS">Boot Cut Jeans</option>
-              <option value="REGULAR FIT JEANS">Regular Fit Jeans</option>
-              <option value="STRAIGHT FIT JEANS">Straight Fit Jeans</option>
-              <option value="TRACK PANT">Track Pant</option>
-            </optgroup>
-          </select>
-          {formData.isEssential && formData.essentialCollection && (
-            <p className="text-xs text-green-600 mt-1">✓ Product will appear in <strong>{formData.essentialCollection}</strong> collection.</p>
-          )}
-        </div>
-
-        <div className="pt-6 border-t border-[var(--border)] flex justify-end gap-4">
+        {/* Action Area */}
+        <div className="mt-12 pt-6 border-t border-[var(--border)] flex items-center justify-end gap-4">
           <button 
-            type="button" onClick={() => router.back()}
-            className="px-6 py-2 rounded-lg font-medium text-[var(--text-muted)] hover:bg-[#F9F7F4] transition-colors"
+            type="button" 
+            onClick={() => {
+              if (isDirty && !window.confirm("You have unsaved changes. Are you sure you want to discard them?")) return;
+              router.push('/admin/products');
+            }}
+            className="px-5 py-2 text-sm font-medium text-[var(--foreground)] bg-transparent hover:bg-gray-50 border border-[var(--border)] rounded-md transition-colors"
           >
             Cancel
           </button>
+          
           <button 
-            type="submit" disabled={loading}
-            className="bg-[var(--accent)] text-white px-8 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors disabled:opacity-50"
+            type="button" 
+            onClick={handleSubmit}
+            disabled={loading} 
+            className="flex items-center justify-center min-w-[140px] px-6 py-2 bg-[var(--foreground)] text-white text-sm font-medium rounded-md hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
-            {loading ? 'Saving...' : 'Save Product'}
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {isEdit ? 'Updating Product...' : 'Creating Product...'}
+              </div>
+            ) : (isEdit ? 'Update Product' : 'Save Product')}
           </button>
         </div>
       </form>

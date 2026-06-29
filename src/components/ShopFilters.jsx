@@ -6,24 +6,36 @@ import useSWR from 'swr';
 
 const fetcher = (url) => fetch(url).then(res => res.json());
 
-export default function ShopFilters({ categories = [], categoryCounts = {} }) {
+export default function ShopFilters({ initialCategories = [], initialCollections = [], categoryCounts = {} }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
   const [isOpen, setIsOpen] = useState(false);
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '10000');
+  
+  const activeCategory = searchParams.get('category') || '';
+  const activeCollection = searchParams.get('collection') || '';
+  const activeSubCategory = searchParams.get('subCategory') || '';
 
   const { data: categoriesData } = useSWR(
     `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/categories?activeOnly=true`, 
     fetcher, 
     { 
-      fallbackData: { success: true, data: categories.map(name => ({ name })) },
-      refreshInterval: 3000 // Poll every 3 seconds for true realtime feel
+      fallbackData: { success: true, data: initialCategories },
+      refreshInterval: 3000
     }
   );
 
-  // Construct URL for products SWR to get real-time category counts
+  const { data: collectionsData } = useSWR(
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/collections`, 
+    fetcher, 
+    { 
+      fallbackData: { success: true, data: initialCollections },
+      refreshInterval: 3000
+    }
+  );
+
   const queryParams = new URLSearchParams(searchParams);
   queryParams.set('limit', '50');
   if (!queryParams.has('page')) queryParams.set('page', '1');
@@ -40,12 +52,10 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
 
   const liveCategoryCounts = productsData?.categoryCounts || categoryCounts;
 
-  // Sync local state if URL changes externally
   useEffect(() => {
     setMaxPrice(searchParams.get('maxPrice') || '10000');
   }, [searchParams]);
 
-  // Disable body scroll when filter menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -62,11 +72,17 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
 
   const handleFilterChange = (key, value) => {
     const params = new URLSearchParams(searchParams);
+    
     if (value) {
       params.set(key, value);
     } else {
       params.delete(key);
     }
+
+    if (key === 'category') {
+      params.delete('subCategory'); // reset subcategory when category changes
+    }
+
     if (key === 'maxPrice' && value === '10000') {
       params.delete('maxPrice');
     }
@@ -74,21 +90,12 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const baseCategories = ['SHIRT', 'JEANS', 'T-SHIRT', 'PANT'];
-  const categoryOptions = ['', ...baseCategories];
+  const categories = categoriesData?.data || [];
+  const collections = collectionsData?.data || [];
 
-  const groupedCounts = { shirt: 0, jeans: 0, 't-shirt': 0, pant: 0 };
-  Object.keys(liveCategoryCounts).forEach(key => {
-    if (key.includes('t-shirt')) {
-      groupedCounts['t-shirt'] += liveCategoryCounts[key];
-    } else if (key.includes('shirt')) {
-      groupedCounts['shirt'] += liveCategoryCounts[key];
-    } else if (key.includes('jeans')) {
-      groupedCounts['jeans'] += liveCategoryCounts[key];
-    } else if (key.includes('pant')) {
-      groupedCounts['pant'] += liveCategoryCounts[key];
-    }
-  });
+  const activeCategoryObj = categories.find(c => c.name === activeCategory);
+  const subCategories = activeCategoryObj?.subCategories || [];
+
   return (
     <>
       <button 
@@ -99,7 +106,6 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
         Filter Products
       </button>
 
-      {/* Overlay */}
       {isOpen && (
         <div 
           onClick={() => setIsOpen(false)}
@@ -107,7 +113,6 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
         />
       )}
 
-      {/* Slide-out Panel */}
       <div style={{ 
         position: 'fixed', top: 0, left: 0, bottom: 0, width: '300px', background: 'var(--background)', zIndex: 1000,
         transform: isOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 0.3s ease-in-out',
@@ -123,28 +128,75 @@ export default function ShopFilters({ categories = [], categoryCounts = {} }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           
-          {/* Category Filter */}
+          {/* Collections Filter */}
+          {collections.length > 0 && (
+            <div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
+                Collections
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: !activeCollection ? 'var(--foreground)' : '#555', fontWeight: !activeCollection ? 600 : 400 }}>
+                  <input 
+                    type="radio" 
+                    name="collection" 
+                    checked={!activeCollection} 
+                    onChange={() => handleFilterChange('collection', '')} 
+                    style={{ accentColor: 'var(--foreground)' }}
+                  />
+                  All Collections
+                </label>
+                {collections.map((col) => {
+                  const isActive = activeCollection === col.name;
+                  return (
+                    <label key={col._id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: isActive ? 'var(--foreground)' : '#555', fontWeight: isActive ? 600 : 400 }}>
+                      <input 
+                        type="radio" 
+                        name="collection" 
+                        checked={isActive} 
+                        onChange={() => handleFilterChange('collection', col.name)} 
+                        style={{ accentColor: 'var(--foreground)' }}
+                      />
+                      {col.name}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Categories Filter */}
           <div>
             <h3 style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
               Categories
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {categoryOptions.map((cat) => {
-                const isActive = (searchParams.get('category') || '') === cat;
-                const count = cat === '' ? '' : (groupedCounts[cat.toLowerCase()] || 0);
-                const isDisabled = cat !== '' && count === 0;
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: !activeCategory ? 'var(--foreground)' : '#555', fontWeight: !activeCategory ? 600 : 400 }}>
+                <input 
+                  type="radio" 
+                  name="category" 
+                  checked={!activeCategory} 
+                  onChange={() => handleFilterChange('category', '')} 
+                  style={{ accentColor: 'var(--foreground)' }}
+                />
+                All Categories
+              </label>
+              {categories.map((cat) => {
+                const isActive = activeCategory === cat.name;
+                const count = liveCategoryCounts[cat.name.toLowerCase()] || 0;
+                // Don't disable dynamic categories if they are active (to allow unselecting/reselecting)
+                const isDisabled = count === 0 && !isActive;
 
                 return (
-                  <label key={cat} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: isDisabled ? 'not-allowed' : 'pointer', fontSize: '0.95rem', color: isActive ? 'var(--foreground)' : (isDisabled ? '#aaa' : '#555'), fontWeight: isActive ? 600 : 400, opacity: isDisabled ? 0.6 : 1 }}>
+                  <label key={cat._id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: isDisabled ? 'not-allowed' : 'pointer', fontSize: '0.95rem', color: isActive ? 'var(--foreground)' : (isDisabled ? '#aaa' : '#555'), fontWeight: isActive ? 600 : 400, opacity: isDisabled ? 0.6 : 1 }}>
                     <input 
                       type="radio" 
                       name="category" 
                       checked={isActive} 
                       disabled={isDisabled}
-                      onChange={() => !isDisabled && handleFilterChange('category', cat)} 
+                      onChange={() => !isDisabled && handleFilterChange('category', cat.name)} 
                       style={{ accentColor: 'var(--foreground)', cursor: isDisabled ? 'not-allowed' : 'pointer' }}
                     />
-                    {cat === '' ? 'All Categories' : cat}
+                    {cat.name}
                   </label>
                 );
               })}

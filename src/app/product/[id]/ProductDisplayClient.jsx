@@ -17,11 +17,9 @@ export default function ProductDisplayClient({ product }) {
   const variants = liveVariants;
   
   const variantColors = product.variants ? product.variants.map(v => v.colorName) : [];
-  const globalColors = product.colors || [];
   
-  // If there are variants, we should ensure the main product image is accessible.
-  // We'll add a 'Default' color if we have variants.
-  let availableColors = Array.from(new Set([...globalColors, ...variantColors]));
+  // Only use variant colors, ignoring legacy product.colors
+  let availableColors = Array.from(new Set([...variantColors]));
   const hasVariants = availableColors.length > 0;
   
   // Check if any existing color falls back to the main product image.

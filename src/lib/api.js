@@ -3,7 +3,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 export async function fetchProducts(params = {}, returnFullRes = false) {
   try {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_URL}/api/products${query ? `?${query}` : ""}`, {
+    let url = `${API_URL}/api/products${query ? `?${query}` : ""}`;
+    if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
+        url = `http://127.0.0.1:5000/api/products${query ? `?${query}` : ""}`;
+    }
+    const res = await fetch(url, {
       cache: "no-store",
     });
     if (res.ok) {
@@ -27,13 +31,19 @@ export async function fetchProducts(params = {}, returnFullRes = false) {
 
 export async function fetchProductById(id) {
   try {
-    const res = await fetch(`${API_URL}/api/products/${id}`, { cache: "no-store" });
+    let url = `${API_URL}/api/products/${id}`;
+    if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
+        url = `http://127.0.0.1:5000/api/products/${id}`; // Fix Node fetch IPv6 and .env issues
+    }
+    const res = await fetch(url, { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
       return data.data;
+    } else {
+      console.error("fetchProductById HTTP Error:", res.status, res.statusText);
     }
   } catch (e) {
-    // ignore fetch errors
+    console.error("fetchProductById error:", e.message, e.cause);
   }
   // Fallback to static product list
   try {

@@ -60,6 +60,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import WhatsAppButton from "../components/WhatsAppButton";
 import FaqButton from "../components/FaqButton";
+import { AIStylistProvider } from "../context/AIStylistContext";
 
 import { RealtimeSettingsProvider } from "../context/RealtimeSettingsContext";
 import { LoadingProvider } from "../context/LoadingContext";
@@ -90,15 +91,17 @@ export default function RootLayout({ children }) {
                   <RealtimeStockProvider>
                     <RealtimeSettingsProvider>
                       <CartProvider>
-                        <WishlistProvider>
-                          <LoadingProvider>
-                            <ClientLayoutWrapper>
-                              {children}
-                            </ClientLayoutWrapper>
-                            <FaqButton />
-                            <WhatsAppButton />
-                          </LoadingProvider>
-                        </WishlistProvider>
+                        <AIStylistProvider>
+                          <WishlistProvider>
+                            <LoadingProvider>
+                              <ClientLayoutWrapper>
+                                {children}
+                              </ClientLayoutWrapper>
+                              <FaqButton />
+                              <WhatsAppButton />
+                            </LoadingProvider>
+                          </WishlistProvider>
+                        </AIStylistProvider>
                       </CartProvider>
                     </RealtimeSettingsProvider>
                   </RealtimeStockProvider>

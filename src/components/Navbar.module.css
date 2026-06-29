@@ -98,6 +98,42 @@
   color: #fff;
 }
 
+.aiStylistLink {
+  position: relative;
+  background: transparent;
+  border: none;
+  color: #C8A96A;
+  text-decoration: none;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding-bottom: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-family: inherit;
+}
+.aiStylistLink::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1px;
+  background-color: #C8A96A;
+  transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.aiStylistLink:hover::after {
+  width: 100%;
+}
+.aiStylistLink:hover {
+  color: #d8ba7c;
+  text-shadow: 0 0 10px rgba(200, 169, 106, 0.4);
+}
+
 .userIcons {
   display: flex;
   gap: 1.8rem;

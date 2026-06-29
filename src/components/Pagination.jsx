@@ -1,7 +1,7 @@
 'use client';
 
 export default function Pagination({ pagination, onPageChange }) {
-  if (!pagination || pagination.totalPages <= 1) return null;
+  if (!pagination || pagination.totalProducts === 0) return null;
 
   const { currentPage, totalPages, totalProducts, limit } = pagination;
   

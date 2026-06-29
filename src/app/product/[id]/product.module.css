@@ -234,8 +234,50 @@
 }
 
 .btnAdded {
-  background-color: #2d6a4f !important;
-  color: #fff !important;
+  background-color: #2e7d32;
+  color: #fff;
+  border-color: #2e7d32;
+}
+
+.aiStylistContextCard {
+  margin-top: 1.5rem;
+  padding: 1.2rem;
+  background: rgba(200, 169, 106, 0.05);
+  border: 1px solid rgba(200, 169, 106, 0.2);
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.aiStylistContextCardHeader {
+  font-weight: 600;
+  color: #C8A96A;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}
+
+.aiStylistContextCard p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.aiStylistContextCardBtn {
+  background: transparent;
+  border: none;
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-family: inherit;
+}
+
+.aiStylistContextCardBtn:hover {
+  color: #C8A96A;
 }
 
 .btnViewCart {
@@ -398,4 +440,38 @@
 .btnWhatsAppProduct:hover {
   background-color: rgba(37, 211, 102, 0.1);
   box-shadow: 0 4px 12px rgba(37, 211, 102, 0.15);
+}
+
+.btnWishlist {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.2rem;
+  background-color: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--foreground);
+  font-family: var(--font-inter);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+  gap: 12px;
+}
+
+.btnWishlist:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.btnWishlistAdded {
+  color: #ef4444;
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.btnWishlistAdded:hover {
+  background-color: rgba(239, 68, 68, 0.1);
 }

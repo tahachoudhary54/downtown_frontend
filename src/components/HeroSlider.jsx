@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSettings } from "../hooks/useSettings";
+import { useAIStylist } from "../context/AIStylistContext";
 import styles from "./HeroSlider.module.css";
 
 // ─── Per-slide Focal Point Config ────────────────────────────────────────────
@@ -95,6 +96,7 @@ export default function HeroSlider({ initialSettings }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex,    setPrevIndex]    = useState(-1);
   const [imagesLoaded, setImagesLoaded]  = useState(false);
+  const { openStylist } = useAIStylist();
 
   // ── Preload images ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -179,6 +181,15 @@ export default function HeroSlider({ initialSettings }) {
           <Link href={heroSettings.buttonLink} className={styles.btnPrimary}>
             {heroSettings.buttonText}
           </Link>
+          <div className={styles.aiStylistCtaWrapper}>
+             <button 
+               className={styles.aiStylistCta}
+               onClick={() => openStylist()}
+             >
+               <span className={styles.aiStylistCtaText}>✨ Need help choosing the perfect outfit?</span>
+               <strong className={styles.aiStylistCtaAction}>Ask Downtown AI Stylist →</strong>
+             </button>
+          </div>
         </div>
       </div>
     </section>

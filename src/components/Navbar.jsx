@@ -13,6 +13,7 @@ import IconHeartFilled from "./IconHeartFilled";
 import styles from "./Navbar.module.css";
 import { motion } from "framer-motion";
 import { useLoading } from "../context/LoadingContext";
+import { useAIStylist } from "../context/AIStylistContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -39,9 +40,15 @@ export default function Navbar() {
   const [navOpen, setNavOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [mounted, setMounted] = useState(false);
   const searchRef = useRef(null);
   const userMenuRef = useRef(null);
   const notifRef = useRef(null);
+  const { openStylist, preloadStylist } = useAIStylist();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -142,6 +149,13 @@ export default function Navbar() {
             <Link href="/shop" className={pathname === '/shop' ? styles.active : ''} onClick={() => setNavOpen(false)}>Shop</Link>
             <Link href="/clothing" className={pathname.startsWith('/clothing') ? styles.active : ''} onClick={() => setNavOpen(false)}>Clothing</Link>
             <Link href="/sale" className={pathname === '/sale' ? styles.active : ''} onClick={() => setNavOpen(false)}>Sale</Link>
+            <button 
+              className={styles.aiStylistLink} 
+              onMouseEnter={() => preloadStylist?.()}
+              onClick={() => { setNavOpen(false); openStylist(); }}
+            >
+              ✨ AI Stylist
+            </button>
             <Link href="/wishlist" className={`${pathname === '/wishlist' ? styles.active : ''} ${styles.mobileOnlyLink}`} onClick={() => setNavOpen(false)}>Wishlist</Link>
           </nav>
           
@@ -304,7 +318,7 @@ export default function Navbar() {
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                   </svg>
-                  {unreadCount > 0 && (
+                  {(mounted && unreadCount > 0) && (
                     <span className={styles.cartBadge} style={{ top: '-6px', right: '-6px', position: 'absolute' }}>
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
@@ -380,14 +394,14 @@ export default function Navbar() {
               aria-label="Wishlist"
               style={{ position: 'relative' }}
             >
-              {wishlist.length > 0 ? <IconHeartFilled /> : <IconHeartOutline />}
-              {wishlist.length > 0 && (
+              {(mounted && wishlist.length > 0) ? <IconHeartFilled /> : <IconHeartOutline />}
+              {(mounted && wishlist.length > 0) && (
                 <span className={styles.cartBadge} style={{ top: '-6px', right: '-6px', position: 'absolute' }}>{wishlist.length}</span>
               )}
             </button>
             <Link href="/cart" aria-label="Cart" className={styles.cartIcon}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-              {totalItems > 0 && (
+              {(mounted && totalItems > 0) && (
                 <span className={styles.cartBadge}>{totalItems}</span>
               )}
             </Link>
