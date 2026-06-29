@@ -127,6 +127,12 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 800 * 1024) {
+      setError('Image must be under 800KB. Please compress your image.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     setUploading(true);
     const data = new FormData();
     data.append('image', file);
@@ -540,6 +546,12 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
                   <input type="file" id={`variant-upload-${index}`} onChange={async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
+                    
+                    if (file.size > 800 * 1024) {
+                      alert('Image must be under 800KB. Please compress your image.');
+                      e.target.value = '';
+                      return;
+                    }
                     
                     const uploadData = new FormData();
                     uploadData.append('image', file);
