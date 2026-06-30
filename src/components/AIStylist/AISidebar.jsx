@@ -30,19 +30,26 @@ export default function AISidebar() {
         return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
     };
 
+    const handleAction = (actionFn) => {
+        actionFn();
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            toggleSidebar();
+        }
+    };
+
     return (
         <motion.div
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="h-full bg-[#1A1A1A] border-r border-[#C8A96A]/20 flex flex-col flex-shrink-0 overflow-hidden"
+            className="h-full bg-[#1A1A1A] border-r border-[#C8A96A]/20 flex flex-col flex-shrink-0 overflow-hidden absolute lg:static z-20 w-full sm:w-[300px]"
             style={{ minWidth: 0 }}
         >
             {/* New Chat + Search */}
             <div className="p-4 flex flex-col gap-3">
                 <button
-                    onClick={createNewChat}
+                    onClick={() => handleAction(createNewChat)}
                     className="w-full flex items-center justify-center gap-2 bg-[#C8A96A] text-black font-semibold py-3 rounded-lg hover:bg-[#e5c98f] transition-colors text-sm"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +85,7 @@ export default function AISidebar() {
                                 key={conv._id}
                                 conv={conv}
                                 isActive={activeConversationId === conv._id}
-                                onClick={() => setActiveConversationId(conv._id)}
+                                onClick={() => handleAction(() => setActiveConversationId(conv._id))}
                                 onPin={() => pinConversation(conv._id, !conv.isPinned)}
                                 onDelete={() => {
                                     if (window.confirm('Delete this conversation?')) {
@@ -100,7 +107,7 @@ export default function AISidebar() {
                                 key={conv._id}
                                 conv={conv}
                                 isActive={activeConversationId === conv._id}
-                                onClick={() => setActiveConversationId(conv._id)}
+                                onClick={() => handleAction(() => setActiveConversationId(conv._id))}
                                 onPin={() => pinConversation(conv._id, !conv.isPinned)}
                                 onDelete={() => {
                                     if (window.confirm('Delete this conversation?')) {

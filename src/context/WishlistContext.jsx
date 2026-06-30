@@ -20,17 +20,7 @@ export const WishlistProvider = ({ children }) => {
   const [toast, setToast] = useState(null);
   const toastTimeoutRef = useRef(null);
 
-  const [wishlist, setWishlist] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('wishlist');
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (_) {}
-      }
-    }
-    return [];
-  });
+  const [wishlist, setWishlist] = useState([]);
 
   const triggerToast = (message, subtitle = '', type = 'add') => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -141,6 +131,9 @@ export const WishlistProvider = ({ children }) => {
         syncWishlist();
       }
     };
+
+    // Load initial state from localStorage after mount to avoid hydration mismatch
+    syncWishlist();
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('wishlist-updated', syncWishlist);

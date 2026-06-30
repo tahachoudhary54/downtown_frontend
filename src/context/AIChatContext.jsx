@@ -30,6 +30,12 @@ export function AIChatProvider({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            setIsSidebarOpen(false);
+        }
+    }, []);
+
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
     const createNewChat = () => setActiveConversationId(null);
 
