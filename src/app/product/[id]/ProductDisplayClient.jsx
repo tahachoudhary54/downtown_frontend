@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import AddToCartSection from "./AddToCartSection";
 import styles from "./product.module.css";
 import { getSalePricing } from "../../../utils/price";
@@ -41,7 +42,6 @@ export default function ProductDisplayClient({ product }) {
   const [mainImage, setMainImage] = useState(product.img);
   const [displayImages, setDisplayImages] = useState([product.img].filter(Boolean));
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
-  const [zoomScale, setZoomScale] = useState(1);
 
   // Sync main image when color changes
   useEffect(() => {
@@ -97,7 +97,7 @@ export default function ProductDisplayClient({ product }) {
           <div className={styles.imageCol}>
             <div 
               className={styles.imageWrapper}
-              onClick={() => { setIsZoomModalOpen(true); setZoomScale(1); }}
+              onClick={() => setIsZoomModalOpen(true)}
               style={{ cursor: 'zoom-in' }}
             >
               {mainImage && (
@@ -196,19 +196,11 @@ export default function ProductDisplayClient({ product }) {
               alignItems: 'center',
               justifyContent: 'center',
               overflow: 'hidden',
-              cursor: zoomScale > 1 ? 'zoom-out' : 'zoom-in'
             }}
-            onClick={() => {
-              if (zoomScale === 1) {
-                setZoomScale(2.5);
-              } else {
-                setZoomScale(1);
-                setIsZoomModalOpen(false);
-              }
-            }}
+            onClick={() => setIsZoomModalOpen(false)}
           >
             <button 
-              onClick={(e) => { e.stopPropagation(); setIsZoomModalOpen(false); setZoomScale(1); }}
+              onClick={(e) => { e.stopPropagation(); setIsZoomModalOpen(false); }}
               style={{
                 position: 'absolute',
                 top: '20px',
@@ -230,25 +222,28 @@ export default function ProductDisplayClient({ product }) {
             >
               ×
             </button>
-            <motion.img 
-              src={mainImage} 
-              alt="Zoomed product"
-              animate={{ scale: zoomScale }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              style={{
-                maxHeight: '90vh',
-                maxWidth: '95vw',
-                objectFit: 'contain'
-              }}
-              drag={zoomScale > 1}
-              dragConstraints={{ left: -400, right: 400, top: -400, bottom: 400 }}
-              onClick={(e) => e.stopPropagation()}
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                if (zoomScale === 1) setZoomScale(2.5);
-                else { setZoomScale(1); setIsZoomModalOpen(false); }
-              }}
-            />
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
+              <TransformWrapper
+                initialScale={1}
+                minScale={1}
+                maxScale={4}
+                centerOnInit={true}
+                wheel={{ step: 0.1 }}
+              >
+                <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }} contentStyle={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <img 
+                    src={mainImage} 
+                    alt="Zoomed product"
+                    style={{
+                      maxHeight: '90vh',
+                      maxWidth: '95vw',
+                      objectFit: 'contain'
+                    }}
+                    draggable={false}
+                  />
+                </TransformComponent>
+              </TransformWrapper>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
