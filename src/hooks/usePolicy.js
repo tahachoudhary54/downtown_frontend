@@ -18,8 +18,13 @@ export function usePolicy(policyKey, defaultData) {
         if (json.success && json.data && json.data[policyKey]) {
           try {
             // Admin text should be valid JSON
-            const parsed = JSON.parse(json.data[policyKey]);
-            setData(parsed);
+            const policyData = json.data[policyKey];
+            if (typeof policyData === 'object' && policyData !== null) {
+              setData(policyData);
+            } else {
+              const parsed = JSON.parse(policyData);
+              setData(parsed);
+            }
           } catch (e) {
             // If it's not valid JSON, check if we expected a string
             if (typeof defaultData === 'string') {
@@ -44,8 +49,13 @@ export function usePolicy(policyKey, defaultData) {
     socket.on('policies_updated', (updatedData) => {
       if (updatedData && updatedData[policyKey] !== undefined) {
         try {
-          const parsed = JSON.parse(updatedData[policyKey]);
-          setData(parsed);
+          const policyData = updatedData[policyKey];
+          if (typeof policyData === 'object' && policyData !== null) {
+            setData(policyData);
+          } else {
+            const parsed = JSON.parse(policyData);
+            setData(parsed);
+          }
         } catch (e) {
           if (typeof defaultData === 'string') {
             setData(updatedData[policyKey]);

@@ -15,6 +15,41 @@ const POLICY_FIELDS = [
   { key: 'faq', label: 'FAQ' }
 ];
 
+const DEFAULT_SIZE_GUIDE = {
+  heroTitle: "Find Your Perfect Fit",
+  heroSubtitle: "Detailed measurements and fit guidance to ensure your selections are perfectly tailored to you.",
+  tableHeaders: ["Size", "Chest (in)", "Waist (in)", "Sleeve (in)", "Neck (in)"],
+  tableRows: [
+    ["S", "38-40", "32-34", "33.5", "15-15.5"],
+    ["M", "42-44", "36-38", "34.5", "16-16.5"],
+    ["L", "46-48", "40-42", "35.5", "17-17.5"],
+    ["XL", "50-52", "44-46", "36.5", "18-18.5"],
+    ["XXL", "54-56", "48-50", "37.5", "19-19.5"]
+  ],
+  bottomsTableHeaders: ["Size", "Waist (in)", "Hip (in)", "Inseam (in)"],
+  bottomsTableRows: [
+    ["28", "29-30", "35-36", "32"],
+    ["30", "31-32", "37-38", "32"],
+    ["32", "33-34", "39-40", "32"],
+    ["34", "35-36", "41-42", "34"],
+    ["36", "37-38", "43-44", "34"],
+    ["38", "39-40", "45-46", "34"],
+    ["40", "41-42", "47-48", "34"],
+    ["42", "43-44", "49-50", "34"]
+  ],
+  fitCards: [
+    { title: "Slim Fit", desc: "Tailored close to the body for a sharp, modern silhouette. Ideal for a refined look." },
+    { title: "Regular Fit", desc: "A classic, comfortable cut with moderate room through the chest and waist." },
+    { title: "Relaxed Fit", desc: "Generously cut for ease of movement and a more casual, laid-back aesthetic." }
+  ],
+  measurementSteps: [
+    { title: "Chest", desc: "Measure under your arms, around the fullest part of your chest." },
+    { title: "Waist", desc: "Measure around your natural waistline, keeping the tape comfortably loose." },
+    { title: "Sleeve", desc: "Start at the center back of your neck, measure across the shoulder to your wrist." }
+  ],
+  expertTip: "If you are between sizes for a tailored garment, we recommend selecting the larger size and consulting a tailor for the perfect finish."
+};
+
 export default function AdminSettings() {
   const { token } = useAuth();
   const [policies, setPolicies] = useState({
@@ -125,17 +160,46 @@ export default function AdminSettings() {
             <h3 className="text-lg font-bold text-[var(--foreground)]">
               Editing: {POLICY_FIELDS.find(f => f.key === activeTab)?.label}
             </h3>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
-              Supports plain text and paragraphs. Line breaks will be preserved on the frontend.
-            </p>
+            {activeTab === 'sizeGuide' ? (
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                You can edit the JSON layout directly below to update the size chart.
+              </p>
+            ) : (
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                Supports plain text and paragraphs. Line breaks will be preserved on the frontend.
+              </p>
+            )}
           </div>
-          <textarea
-            value={policies[activeTab] || ''}
-            onChange={(e) => setPolicies({ ...policies, [activeTab]: e.target.value })}
-            className="flex-1 w-full p-4 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] resize-none"
-            placeholder={`Enter ${POLICY_FIELDS.find(f => f.key === activeTab)?.label} content here...`}
-            style={{ minHeight: '400px' }}
-          />
+          
+          {activeTab === 'sizeGuide' ? (
+            <textarea
+              value={
+                typeof policies[activeTab] === 'object' && policies[activeTab] !== null
+                  ? JSON.stringify(policies[activeTab], null, 2)
+                  : (policies[activeTab] ? policies[activeTab] : JSON.stringify(DEFAULT_SIZE_GUIDE, null, 2))
+              }
+              onChange={(e) => {
+                try {
+                  const parsed = JSON.parse(e.target.value);
+                  setPolicies({ ...policies, [activeTab]: parsed });
+                } catch (err) {
+                  // If it's invalid JSON while typing, store it as a string temporarily
+                  setPolicies({ ...policies, [activeTab]: e.target.value });
+                }
+              }}
+              className="flex-1 w-full p-4 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] resize-none font-mono text-sm bg-gray-50"
+              placeholder={`Enter JSON data for the Size Guide...`}
+              style={{ minHeight: '500px' }}
+            />
+          ) : (
+            <textarea
+              value={policies[activeTab] || ''}
+              onChange={(e) => setPolicies({ ...policies, [activeTab]: e.target.value })}
+              className="flex-1 w-full p-4 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] resize-none"
+              placeholder={`Enter ${POLICY_FIELDS.find(f => f.key === activeTab)?.label} content here...`}
+              style={{ minHeight: '400px' }}
+            />
+          )}
         </div>
       </div>
     </div>

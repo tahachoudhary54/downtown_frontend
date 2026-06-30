@@ -39,11 +39,19 @@ export default function LuxurySaleBanner({ initialSettings }) {
           ))}
         </h1>
         
-        <h2 className={styles.subheading}>TIMELESS STYLE. MODERN ESSENTIALS.</h2>
+        {seasonalSettings.subtitle && (
+          <h2 className={styles.subheading}>{seasonalSettings.subtitle}</h2>
+        )}
         
-        <p className={styles.description}>
-          Elevated wardrobe staples, crafted<br />for the modern gentleman.
-        </p>
+        {seasonalSettings.description && (
+          <p className={styles.description}>
+            {seasonalSettings.description.split('\n').map((line, i, arr) => (
+              <React.Fragment key={i}>
+                {line}{i < arr.length - 1 && <br />}
+              </React.Fragment>
+            ))}
+          </p>
+        )}
 
         <div className={styles.offerWrapper}>
           {offerLine.toUpperCase().split(/(\d+%?)/).map((part, i) => 

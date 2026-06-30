@@ -290,6 +290,22 @@ export default function AdminSettings() {
                 className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
               ></textarea>
             </div>
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-[var(--text-muted)]">Subtitle</label>
+              <input 
+                type="text" value={settings.seasonalBanner.subtitle || ''} onChange={(e) => handleSeasonalChange('subtitle', e.target.value)}
+                className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-[var(--text-muted)]">Description (Use \n for new line)</label>
+              <textarea 
+                value={settings.seasonalBanner.description || ''} onChange={(e) => handleSeasonalChange('description', e.target.value)} rows="3"
+                className="w-full border border-[var(--border)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent)]"
+              ></textarea>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">

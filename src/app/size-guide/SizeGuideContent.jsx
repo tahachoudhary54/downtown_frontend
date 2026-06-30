@@ -9,12 +9,22 @@ const defaultSizeData = {
   heroSubtitle: "Detailed measurements and fit guidance to ensure your selections are perfectly tailored to you.",
   tableHeaders: ["Size", "Chest (in)", "Waist (in)", "Sleeve (in)", "Neck (in)"],
   tableRows: [
-    ["XS", "34-36", "28-30", "32.5", "14-14.5"],
     ["S", "38-40", "32-34", "33.5", "15-15.5"],
     ["M", "42-44", "36-38", "34.5", "16-16.5"],
     ["L", "46-48", "40-42", "35.5", "17-17.5"],
     ["XL", "50-52", "44-46", "36.5", "18-18.5"],
     ["XXL", "54-56", "48-50", "37.5", "19-19.5"]
+  ],
+  bottomsTableHeaders: ["Size", "Waist (in)", "Hip (in)", "Inseam (in)"],
+  bottomsTableRows: [
+    ["28", "29-30", "35-36", "32"],
+    ["30", "31-32", "37-38", "32"],
+    ["32", "33-34", "39-40", "32"],
+    ["34", "35-36", "41-42", "34"],
+    ["36", "37-38", "43-44", "34"],
+    ["38", "39-40", "45-46", "34"],
+    ["40", "41-42", "47-48", "34"],
+    ["42", "43-44", "49-50", "34"]
   ],
   fitCards: [
     { title: "Slim Fit", desc: "Tailored close to the body for a sharp, modern silhouette. Ideal for a refined look." },
@@ -46,7 +56,7 @@ export default function SizeGuideContent() {
           <div className={styles.layout}>
             {/* Left Column: Sizing Table */}
             <div className={styles.leftCol}>
-              <h2 className={styles.sectionTitle}>Men's International Sizing</h2>
+              <h2 className={styles.sectionTitle}>Men's Tops Sizing</h2>
               <div className={styles.tableWrapper}>
                 <table className={styles.sizeTable}>
                   <thead>
@@ -56,6 +66,24 @@ export default function SizeGuideContent() {
                   </thead>
                   <tbody>
                     {sizeData.tableRows?.map((row, i) => (
+                      <tr key={i}>
+                        {row.map((cell, j) => <td key={j}>{cell}</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <h2 className={styles.sectionTitle} style={{marginTop: '2rem'}}>Men's Bottoms Sizing</h2>
+              <div className={styles.tableWrapper}>
+                <table className={styles.sizeTable}>
+                  <thead>
+                    <tr>
+                      {(sizeData.bottomsTableHeaders || defaultSizeData.bottomsTableHeaders)?.map((h, i) => <th key={i}>{h}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(sizeData.bottomsTableRows || defaultSizeData.bottomsTableRows)?.map((row, i) => (
                       <tr key={i}>
                         {row.map((cell, j) => <td key={j}>{cell}</td>)}
                       </tr>
