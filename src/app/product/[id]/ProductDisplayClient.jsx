@@ -97,9 +97,15 @@ export default function ProductDisplayClient({ product }) {
             <div className={styles.imageWrapper}>
               {mainImage && (
                 <Zoom>
-                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                    <Image src={mainImage} alt={product.name} fill className={styles.productImage} priority />
-                  </div>
+                  <Image 
+                    src={mainImage} 
+                    alt={product.name} 
+                    width={900} 
+                    height={1200} 
+                    style={{ width: '100%', height: 'auto', objectFit: 'cover', display: 'block' }}
+                    className={styles.productImage}
+                    priority 
+                  />
                 </Zoom>
               )}
             </div>
