@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 import AddToCartSection from "./AddToCartSection";
 import styles from "./product.module.css";
 import { getSalePricing } from "../../../utils/price";
@@ -93,7 +95,13 @@ export default function ProductDisplayClient({ product }) {
         <div className={styles.container}>
           <div className={styles.imageCol}>
             <div className={styles.imageWrapper}>
-              {mainImage && <Image src={mainImage} alt={product.name} fill className={styles.productImage} priority />}
+              {mainImage && (
+                <Zoom>
+                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <Image src={mainImage} alt={product.name} fill className={styles.productImage} priority />
+                  </div>
+                </Zoom>
+              )}
             </div>
             {displayImages.length > 1 && (
               <div className={styles.thumbnailGallery} style={{ display: 'flex', gap: '10px', marginTop: '15px', flexWrap: 'wrap' }}>
