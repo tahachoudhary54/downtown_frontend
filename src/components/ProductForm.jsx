@@ -60,6 +60,8 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     filters: false // Collapsed by default
   });
   
+  const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
+
   const [isDirty, setIsDirty] = useState(false);
 
   const fileInputRef = useRef(null);
@@ -167,6 +169,17 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
     
     const missing = requiredFields.filter(f => !formData[f.key] || String(formData[f.key]).trim() === '');
     if (missing.length > 0) {
+      const missingLabels = missing.map(f => f.label).join(', ');
+      setError(`Please fill all required fields: ${missingLabels}`);
+      setExpandedSections({
+        basic: true,
+        organization: true,
+        inventory: true,
+        variants: true,
+        ai: true,
+        filters: true
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return; // Do not submit if required fields are missing
     }
 
@@ -494,6 +507,7 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
                 ...prev,
                 variants: [...(prev.variants || []), { colorName: '', variantName: '', images: [], stock: 0, sizes: [], sizeInventory: {} }]
               }));
+              setCurrentVariantIndex((formData.variants || []).length);
               if (!expandedSections.variants) toggleSection('variants');
             }}
             className="text-xs bg-[var(--foreground)] text-white px-3 py-1 rounded hover:bg-opacity-90"
@@ -510,166 +524,207 @@ export default function ProductForm({ initialData = null, isEdit = false }) {
             <p className="text-sm text-[var(--text-muted)] italic">No variants added. Product will be treated as a single item.</p>
           )}
           
-          {(formData.variants || []).map((variant, index) => (
-            <div key={index} className="p-4 border border-[var(--border)] rounded-lg bg-[#fafafa] relative">
-              <button type="button" onClick={() => {
-                const newV = [...formData.variants];
-                newV.splice(index, 1);
-                setFormData({...formData, variants: newV});
-              }} className="absolute top-3 right-3 text-red-500 font-bold hover:text-red-700">✕</button>
-              
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Color / Variant Name *</label>
-                  <input type="text" required value={variant.colorName} onChange={(e) => {
-                    const newV = [...formData.variants];
-                    newV[index].colorName = e.target.value;
-                    newV[index].variantName = e.target.value;
-                    setFormData({...formData, variants: newV});
-                  }} className="w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm" placeholder="e.g. Black" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Total Variant Stock (Auto sum from sizes)</label>
-                  <input type="number" readOnly value={variant.stock || 0} className="w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm bg-gray-100 text-gray-500" />
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Variant Image URL</label>
-                <div className="flex gap-2">
-                  <input type="text" value={variant.images?.[0] || ''} onChange={(e) => {
-                    const newV = [...formData.variants];
-                    if (!newV[index].images) newV[index].images = [];
-                    newV[index].images[0] = e.target.value;
-                    setFormData({...formData, variants: newV});
-                  }} className="flex-1 border border-[var(--border)] rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--accent)]" placeholder="Image URL..." />
-                  <input type="file" id={`variant-upload-${index}`} onChange={async (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    
-                    if (file.size > 800 * 1024) {
-                      alert('Image must be under 800KB. Please compress your image.');
-                      e.target.value = '';
-                      return;
-                    }
-                    
-                    const uploadData = new FormData();
-                    uploadData.append('image', file);
-                    try {
-                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
-                        method: 'POST',
-                        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-                        body: uploadData
-                      });
-                      const result = await res.json();
-                      if (result.success) {
-                        const newV = [...formData.variants];
-                        if (!newV[index].images) newV[index].images = [];
-                        newV[index].images[0] = result.imageUrl || result.url || '';
-                        setFormData({...formData, variants: newV});
-                      } else {
-                        alert(result.message || 'Image upload failed');
-                      }
-                    } catch (err) {
-                      console.error(err);
-                      alert('Error uploading image');
-                    }
-                  }} accept="image/*" className="hidden" />
-                  <button type="button" onClick={() => document.getElementById(`variant-upload-${index}`).click()} className="bg-[#F1ECE5] px-4 py-1.5 rounded-md text-xs font-medium hover:bg-[#E5DED5]">
-                    Upload
+          {formData.variants && formData.variants.length > 0 && (
+            <>
+              {/* Pagination UI */}
+              <div className="flex items-center justify-between bg-[#F8F8F8] px-4 py-3 rounded-lg border border-[var(--border)] mb-4">
+                <span className="text-sm font-semibold text-[var(--foreground)]">
+                  Variant {currentVariantIndex + 1} of {formData.variants.length}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button 
+                    type="button" 
+                    onClick={(e) => { e.preventDefault(); setCurrentVariantIndex(Math.max(0, currentVariantIndex - 1)); }}
+                    disabled={currentVariantIndex === 0}
+                    className="px-4 py-1.5 text-sm font-medium bg-white border border-[var(--border)] rounded hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm"
+                  >
+                    Previous
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={(e) => { e.preventDefault(); setCurrentVariantIndex(Math.min(formData.variants.length - 1, currentVariantIndex + 1)); }}
+                    disabled={currentVariantIndex === formData.variants.length - 1}
+                    className="px-4 py-1.5 text-sm font-medium bg-white border border-[var(--border)] rounded hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm"
+                  >
+                    Next
                   </button>
                 </div>
-                {variant.images?.[0] && <img src={variant.images[0]} className="mt-2 h-16 w-16 object-cover border rounded-md" alt="Variant preview" />}
               </div>
-              
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">Sizes & Inventory for {variant.colorName || 'this variant'}</label>
-                <div className="flex flex-col gap-4 bg-white p-4 border border-[var(--border)] rounded-md">
-                  
-                  {/* Alphabetical Sizes */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Top Sizes</h4>
-                    <div className="flex flex-wrap gap-4">
-                      {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => {
-                        const isChecked = variant.sizes?.includes(size);
-                        return (
-                          <div key={size} className="flex flex-col items-start gap-1 w-20">
-                            <label className="flex items-center gap-1.5 cursor-pointer">
-                              <input type="checkbox" checked={isChecked || false} onChange={(e) => {
-                                const newV = [...formData.variants];
-                                if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
-                                if (e.target.checked) {
-                                  newV[index].sizes = [...(newV[index].sizes || []), size];
-                                  newV[index].sizeInventory[size] = 0;
-                                } else {
-                                  newV[index].sizes = newV[index].sizes.filter(s => s !== size);
-                                  delete newV[index].sizeInventory[size];
-                                }
-                                newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                                setFormData({...formData, variants: newV});
-                              }} className="accent-[var(--accent)]" />
-                              <span className="text-xs font-medium">{size}</span>
-                            </label>
-                            {isChecked && (
-                              <input type="number" min="0" value={variant.sizeInventory?.[size] || 0} onChange={(e) => {
-                                const newV = [...formData.variants];
-                                if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
-                                newV[index].sizeInventory[size] = parseInt(e.target.value) || 0;
-                                newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                                setFormData({...formData, variants: newV});
-                              }} className="w-full border border-[var(--border)] rounded px-2 py-1 text-xs" />
-                            )}
+
+              {(() => {
+                const index = currentVariantIndex;
+                const variant = formData.variants[index];
+                if (!variant) return null;
+                
+                return (
+                  <div key={index} className="p-4 border border-[var(--border)] rounded-lg bg-[#fafafa] relative">
+                    <button type="button" onClick={() => {
+                      if (!window.confirm('Delete this variant?')) return;
+                      const newV = [...formData.variants];
+                      newV.splice(index, 1);
+                      setFormData({...formData, variants: newV});
+                      if (currentVariantIndex >= newV.length && newV.length > 0) {
+                        setCurrentVariantIndex(newV.length - 1);
+                      } else if (newV.length === 0) {
+                        setCurrentVariantIndex(0);
+                      }
+                    }} className="absolute top-3 right-3 text-red-500 font-bold hover:text-red-700">✕</button>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Color / Variant Name *</label>
+                        <input type="text" required value={variant.colorName} onChange={(e) => {
+                          const newV = [...formData.variants];
+                          newV[index].colorName = e.target.value;
+                          newV[index].variantName = e.target.value;
+                          setFormData({...formData, variants: newV});
+                        }} className="w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm" placeholder="e.g. Black" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Total Variant Stock (Auto sum from sizes)</label>
+                        <input type="number" readOnly value={variant.stock || 0} className="w-full border border-[var(--border)] rounded px-3 py-1.5 text-sm bg-gray-100 text-gray-500" />
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Variant Image URL</label>
+                      <div className="flex gap-2">
+                        <input type="text" value={variant.images?.[0] || ''} onChange={(e) => {
+                          const newV = [...formData.variants];
+                          if (!newV[index].images) newV[index].images = [];
+                          newV[index].images[0] = e.target.value;
+                          setFormData({...formData, variants: newV});
+                        }} className="flex-1 border border-[var(--border)] rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--accent)]" placeholder="Image URL..." />
+                        <input type="file" id={`variant-upload-${index}`} onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          
+                          if (file.size > 800 * 1024) {
+                            alert('Image must be under 800KB. Please compress your image.');
+                            e.target.value = '';
+                            return;
+                          }
+                          
+                          const uploadData = new FormData();
+                          uploadData.append('image', file);
+                          try {
+                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
+                              method: 'POST',
+                              headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+                              body: uploadData
+                            });
+                            const result = await res.json();
+                            if (result.success) {
+                              const newV = [...formData.variants];
+                              if (!newV[index].images) newV[index].images = [];
+                              newV[index].images[0] = result.imageUrl || result.url || '';
+                              setFormData({...formData, variants: newV});
+                            } else {
+                              alert(result.message || 'Image upload failed');
+                            }
+                          } catch (err) {
+                            console.error(err);
+                            alert('Error uploading image');
+                          }
+                        }} accept="image/*" className="hidden" />
+                        <button type="button" onClick={() => document.getElementById(`variant-upload-${index}`).click()} className="bg-[#F1ECE5] px-4 py-1.5 rounded-md text-xs font-medium hover:bg-[#E5DED5]">
+                          Upload
+                        </button>
+                      </div>
+                      {variant.images?.[0] && <img src={variant.images[0]} className="mt-2 h-16 w-16 object-cover border rounded-md" alt="Variant preview" />}
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">Sizes & Inventory for {variant.colorName || 'this variant'}</label>
+                      <div className="flex flex-col gap-4 bg-white p-4 border border-[var(--border)] rounded-md">
+                        
+                        {/* Alphabetical Sizes */}
+                        <div>
+                          <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Top Sizes</h4>
+                          <div className="flex flex-wrap gap-4">
+                            {['S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => {
+                              const isChecked = variant.sizes?.includes(size);
+                              return (
+                                <div key={size} className="flex flex-col items-start gap-1 w-20">
+                                  <label className="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" checked={isChecked || false} onChange={(e) => {
+                                      const newV = [...formData.variants];
+                                      if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
+                                      if (e.target.checked) {
+                                        newV[index].sizes = [...(newV[index].sizes || []), size];
+                                        newV[index].sizeInventory[size] = 0;
+                                      } else {
+                                        newV[index].sizes = newV[index].sizes.filter(s => s !== size);
+                                        delete newV[index].sizeInventory[size];
+                                      }
+                                      newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                      setFormData({...formData, variants: newV});
+                                    }} className="accent-[var(--accent)]" />
+                                    <span className="text-xs font-medium">{size}</span>
+                                  </label>
+                                  {isChecked && (
+                                    <input type="number" min="0" value={variant.sizeInventory?.[size] || 0} onChange={(e) => {
+                                      const newV = [...formData.variants];
+                                      if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
+                                      newV[index].sizeInventory[size] = parseInt(e.target.value) || 0;
+                                      newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                      setFormData({...formData, variants: newV});
+                                    }} className="w-full border border-[var(--border)] rounded px-2 py-1 text-xs" />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
+                        </div>
+
+                        <div className="h-px bg-gray-100 w-full"></div>
+
+                        {/* Numerical Sizes */}
+                        <div>
+                          <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Bottom Sizes</h4>
+                          <div className="flex flex-wrap gap-4">
+                            {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => {
+                              const isChecked = variant.sizes?.includes(size);
+                              return (
+                                <div key={size} className="flex flex-col items-start gap-1 w-20">
+                                  <label className="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" checked={isChecked || false} onChange={(e) => {
+                                      const newV = [...formData.variants];
+                                      if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
+                                      if (e.target.checked) {
+                                        newV[index].sizes = [...(newV[index].sizes || []), size];
+                                        newV[index].sizeInventory[size] = 0;
+                                      } else {
+                                        newV[index].sizes = newV[index].sizes.filter(s => s !== size);
+                                        delete newV[index].sizeInventory[size];
+                                      }
+                                      newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                      setFormData({...formData, variants: newV});
+                                    }} className="accent-[var(--accent)]" />
+                                    <span className="text-xs font-medium">{size}</span>
+                                  </label>
+                                  {isChecked && (
+                                    <input type="number" min="0" value={variant.sizeInventory?.[size] || 0} onChange={(e) => {
+                                      const newV = [...formData.variants];
+                                      if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
+                                      newV[index].sizeInventory[size] = parseInt(e.target.value) || 0;
+                                      newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
+                                      setFormData({...formData, variants: newV});
+                                    }} className="w-full border border-[var(--border)] rounded px-2 py-1 text-xs" />
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                      </div>
                     </div>
                   </div>
-
-                  <div className="h-px bg-gray-100 w-full"></div>
-
-                  {/* Numerical Sizes */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Bottom Sizes</h4>
-                    <div className="flex flex-wrap gap-4">
-                      {['28', '30', '32', '34', '36', '38', '40', '42'].map(size => {
-                        const isChecked = variant.sizes?.includes(size);
-                        return (
-                          <div key={size} className="flex flex-col items-start gap-1 w-20">
-                            <label className="flex items-center gap-1.5 cursor-pointer">
-                              <input type="checkbox" checked={isChecked || false} onChange={(e) => {
-                                const newV = [...formData.variants];
-                                if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
-                                if (e.target.checked) {
-                                  newV[index].sizes = [...(newV[index].sizes || []), size];
-                                  newV[index].sizeInventory[size] = 0;
-                                } else {
-                                  newV[index].sizes = newV[index].sizes.filter(s => s !== size);
-                                  delete newV[index].sizeInventory[size];
-                                }
-                                newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                                setFormData({...formData, variants: newV});
-                              }} className="accent-[var(--accent)]" />
-                              <span className="text-xs font-medium">{size}</span>
-                            </label>
-                            {isChecked && (
-                              <input type="number" min="0" value={variant.sizeInventory?.[size] || 0} onChange={(e) => {
-                                const newV = [...formData.variants];
-                                if (!newV[index].sizeInventory) newV[index].sizeInventory = {};
-                                newV[index].sizeInventory[size] = parseInt(e.target.value) || 0;
-                                newV[index].stock = Object.values(newV[index].sizeInventory || {}).reduce((a,b)=>a+b, 0);
-                                setFormData({...formData, variants: newV});
-                              }} className="w-full border border-[var(--border)] rounded px-2 py-1 text-xs" />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          ))}
+                );
+              })()}
+            </>
+          )}
         </div>
       )}
     </div>

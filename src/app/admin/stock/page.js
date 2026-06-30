@@ -43,16 +43,43 @@ export default function AdminStock() {
   products.forEach(p => {
     const stock = p.stock || 0;
     const price = p.priceValue || 0;
+    const threshold = p.lowStockThreshold || 5;
     
     totalItemsInStock += stock;
     totalInventoryValue += (stock * price);
 
     const hasVariants = p.variants && p.variants.length > 0;
     
-    if (stock === 0) {
-      outOfStockProducts.push(p);
-    } else if (stock <= (p.lowStockThreshold || 5)) {
-      lowStockProducts.push(p);
+    if (hasVariants) {
+      if (stock === 0) {
+        outOfStockProducts.push({ ...p, displayName: p.name, displayStock: 0, _uniqueId: p._id });
+      } else {
+        // If not fully out of stock, check individual variants
+        p.variants.forEach(v => {
+          if (v.sizeInventory && Object.keys(v.sizeInventory).length > 0) {
+            Object.entries(v.sizeInventory).forEach(([sizeName, sizeStock]) => {
+              if (sizeStock === 0) {
+                outOfStockProducts.push({ ...p, displayName: `${p.name} - ${v.colorName} (Size ${sizeName})`, displayStock: 0, img: v.images?.[0] || p.img, _uniqueId: `${p._id}-${v.colorName}-${sizeName}` });
+              } else if (sizeStock <= threshold) {
+                lowStockProducts.push({ ...p, displayName: `${p.name} - ${v.colorName} (Size ${sizeName})`, displayStock: sizeStock, img: v.images?.[0] || p.img, _uniqueId: `${p._id}-${v.colorName}-${sizeName}` });
+              }
+            });
+          } else {
+            const vStock = v.stock || 0;
+            if (vStock === 0) {
+              outOfStockProducts.push({ ...p, displayName: `${p.name} - ${v.colorName}`, displayStock: 0, img: v.images?.[0] || p.img, _uniqueId: `${p._id}-${v.colorName}` });
+            } else if (vStock <= threshold) {
+              lowStockProducts.push({ ...p, displayName: `${p.name} - ${v.colorName}`, displayStock: vStock, img: v.images?.[0] || p.img, _uniqueId: `${p._id}-${v.colorName}` });
+            }
+          }
+        });
+      }
+    } else {
+      if (stock === 0) {
+        outOfStockProducts.push({ ...p, displayName: p.name, displayStock: 0, _uniqueId: p._id });
+      } else if (stock <= threshold) {
+        lowStockProducts.push({ ...p, displayName: p.name, displayStock: stock, _uniqueId: p._id });
+      }
     }
   });
 
@@ -106,11 +133,11 @@ export default function AdminStock() {
             {loading ? <p className="text-gray-500 text-sm">Loading...</p> : 
              outOfStockProducts.length === 0 ? <p className="text-gray-500 text-sm">All products are in stock.</p> :
              outOfStockProducts.map(p => (
-              <div key={p._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <div key={p._uniqueId || p._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
                 <div className="flex items-center gap-3">
-                  <img src={p.img} alt={p.name} className="w-10 h-10 rounded object-cover border" />
+                  <img src={p.img} alt={p.displayName || p.name} className="w-10 h-10 rounded object-cover border" />
                   <div>
-                    <p className="text-sm font-bold text-gray-900 line-clamp-1">{p.name}</p>
+                    <p className="text-sm font-bold text-gray-900 line-clamp-1">{p.displayName || p.name}</p>
                     <p className="text-xs text-gray-500">{p.sku || 'No SKU'}</p>
                   </div>
                 </div>
@@ -134,12 +161,12 @@ export default function AdminStock() {
             {loading ? <p className="text-gray-500 text-sm">Loading...</p> : 
              lowStockProducts.length === 0 ? <p className="text-gray-500 text-sm">No low stock products.</p> :
              lowStockProducts.map(p => (
-              <div key={p._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <div key={p._uniqueId || p._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
                 <div className="flex items-center gap-3">
-                  <img src={p.img} alt={p.name} className="w-10 h-10 rounded object-cover border" />
+                  <img src={p.img} alt={p.displayName || p.name} className="w-10 h-10 rounded object-cover border" />
                   <div>
-                    <p className="text-sm font-bold text-gray-900 line-clamp-1">{p.name}</p>
-                    <p className="text-xs font-semibold text-orange-600">{p.stock} left in stock</p>
+                    <p className="text-sm font-bold text-gray-900 line-clamp-1">{p.displayName || p.name}</p>
+                    <p className="text-xs font-semibold text-orange-600">{p.displayStock !== undefined ? p.displayStock : p.stock} left in stock</p>
                   </div>
                 </div>
                 <Link href={`/admin/products/edit/${p._id}`} className="text-xs font-semibold text-blue-600 hover:underline">
