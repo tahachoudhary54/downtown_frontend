@@ -7,6 +7,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
+export const metadata = {
+  title: 'Clothing Categories | Downtown Boutique',
+  description: 'Browse our collection of premium clothing.',
+};
+
 async function fetchCategories() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings?_t=${Date.now()}`, { cache: 'no-store' });

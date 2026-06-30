@@ -3,6 +3,10 @@ import { fetchProducts } from "../../lib/api";
 import styles from "../page.module.css";
 import { Suspense } from 'react';
 
+export const metadata = {
+  title: 'Sale | Downtown Boutique',
+  description: 'Shop our exclusive sale on premium menswear.',
+};
 export default async function SalePage() {
   const products = await fetchProducts({ sale: "true" });
 

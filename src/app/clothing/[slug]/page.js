@@ -7,6 +7,25 @@ import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 
+export async function generateMetadata({ params }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+  const settings = await getSettings();
+  const dynamicCategories = settings?.categories && Array.isArray(settings.categories) ? settings.categories : defaultCategories;
+  const category = dynamicCategories.find((c) => c.slug === slug) || defaultCategories.find((c) => c.slug === slug);
+  
+  if (!category) {
+    return {
+      title: 'Category Not Found | Downtown Boutique',
+      description: 'The requested category does not exist.',
+    };
+  }
+
+  return {
+    title: `${category.name} | Downtown Boutique`,
+    description: `Shop our premium collection of ${category.name}.`,
+  };
+}
 async function getSettings() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/settings`, { cache: 'no-store' });
