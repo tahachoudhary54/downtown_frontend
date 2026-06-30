@@ -224,6 +224,12 @@ export default function CheckoutPage() {
         }
       };
 
+      options.modal = {
+        ondismiss: function() {
+          setIsProcessing(false);
+        }
+      };
+
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function (response) {
         console.error("Payment failed:", response.error);
