@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Zoom from "react-medium-image-zoom";
-import "react-medium-image-zoom/dist/styles.css";
+import { AnimatePresence, motion } from "framer-motion";
 import AddToCartSection from "./AddToCartSection";
 import styles from "./product.module.css";
 import { getSalePricing } from "../../../utils/price";
@@ -41,6 +40,8 @@ export default function ProductDisplayClient({ product }) {
   
   const [mainImage, setMainImage] = useState(product.img);
   const [displayImages, setDisplayImages] = useState([product.img].filter(Boolean));
+  const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
 
   // Sync main image when color changes
   useEffect(() => {
@@ -94,9 +95,12 @@ export default function ProductDisplayClient({ product }) {
       <main className={styles.main}>
         <div className={styles.container}>
           <div className={styles.imageCol}>
-            <div className={styles.imageWrapper}>
+            <div 
+              className={styles.imageWrapper}
+              onClick={() => { setIsZoomModalOpen(true); setZoomScale(1); }}
+              style={{ cursor: 'zoom-in' }}
+            >
               {mainImage && (
-                <Zoom>
                   <Image 
                     src={mainImage} 
                     alt={product.name} 
@@ -106,7 +110,6 @@ export default function ProductDisplayClient({ product }) {
                     className={styles.productImage}
                     priority 
                   />
-                </Zoom>
               )}
             </div>
             {displayImages.length > 1 && (
@@ -174,6 +177,81 @@ export default function ProductDisplayClient({ product }) {
         <ReviewsSection product={product} />
 
       </main>
+
+      <AnimatePresence>
+        {isZoomModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'rgba(0,0,0,0.95)',
+              zIndex: 99999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              cursor: zoomScale > 1 ? 'zoom-out' : 'zoom-in'
+            }}
+            onClick={() => {
+              if (zoomScale === 1) {
+                setZoomScale(2.5);
+              } else {
+                setZoomScale(1);
+                setIsZoomModalOpen(false);
+              }
+            }}
+          >
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsZoomModalOpen(false); setZoomScale(1); }}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'white',
+                fontSize: '28px',
+                width: '45px',
+                height: '45px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                zIndex: 100000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                lineHeight: 1
+              }}
+            >
+              ×
+            </button>
+            <motion.img 
+              src={mainImage} 
+              alt="Zoomed product"
+              animate={{ scale: zoomScale }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              style={{
+                maxHeight: '90vh',
+                maxWidth: '95vw',
+                objectFit: 'contain'
+              }}
+              drag={zoomScale > 1}
+              dragConstraints={{ left: -400, right: 400, top: -400, bottom: 400 }}
+              onClick={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                if (zoomScale === 1) setZoomScale(2.5);
+                else { setZoomScale(1); setIsZoomModalOpen(false); }
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
