@@ -260,12 +260,49 @@ export default function ShopFilters({ initialCategories = [], initialCollections
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: '#555' }}>
               <input 
                 type="checkbox" 
+                checked={searchParams.get('inStock') === 'true'}
+                onChange={(e) => handleFilterChange('inStock', e.target.checked ? 'true' : '')}
+                style={{ width: '16px', height: '16px', accentColor: 'var(--foreground)', cursor: 'pointer' }}
+              />
+              In Stock Only
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: '#555', marginTop: '0.5rem' }}>
+              <input 
+                type="checkbox" 
                 checked={searchParams.get('sale') === 'true'}
                 onChange={(e) => handleFilterChange('sale', e.target.checked ? 'true' : '')}
                 style={{ width: '16px', height: '16px', accentColor: 'var(--foreground)', cursor: 'pointer' }}
               />
               Sale Items Only
             </label>
+          </div>
+
+          {/* Sort Filter */}
+          <div>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
+              Sort By
+            </h3>
+            <select
+              value={searchParams.get('sort') || 'newest'}
+              onChange={(e) => handleFilterChange('sort', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.8rem',
+                fontSize: '0.95rem',
+                border: '1px solid #e0e0e0',
+                borderRadius: '4px',
+                backgroundColor: '#fff',
+                color: 'var(--foreground)',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-inter)'
+              }}
+            >
+              <option value="newest">Newest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="best-selling">Best Selling</option>
+              <option value="most-popular">Most Popular</option>
+            </select>
           </div>
 
         </div>

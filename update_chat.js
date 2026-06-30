@@ -342,7 +342,7 @@ export default function AIChatInterface({ initialPrompt }) {
     </div>
   );
 }
-\`;
+`;
 
 fs.writeFileSync(filePath, replacement);
 console.log('Successfully updated AIChatInterface.jsx');

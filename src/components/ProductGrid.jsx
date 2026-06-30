@@ -9,7 +9,7 @@ import IconHeartFilled from './IconHeartFilled';
 import { useLiveStock, useLiveVisibility, useLiveDeleted, useLivePrice, useLiveSalePrice } from '../context/RealtimeStockContext';
 import { getSalePricing } from '../utils/price';
 import { useCart } from '../context/CartContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLoading } from '../context/LoadingContext';
 
 function ProductCard({ item, showStatusBadges = true, showQuantityBadge = false }) {
@@ -48,7 +48,7 @@ const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing({ ...item
   }
 
   return (
-    <Link href={`/product/${item._id || item.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }}>
+    <Link href={`/product/${item._id || item.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%', width: '100%' }}>
       <div className={styles.productCard} style={{ width: '100%', height: '100%', position: 'relative', overflow: 'visible' }}>
         
         {/* Quantity in Cart Badge - hidden on shop page as requested */}
@@ -131,12 +131,52 @@ const { isSaleValid, originalPriceStr, salePriceStr } = getSalePricing({ ...item
   );
 }
 
-export default function ProductGrid({ products }) {
+const SkeletonCard = () => (
+  <div style={{ 
+    width: '100%', 
+    height: '450px', 
+    backgroundColor: '#f5f5f5', 
+    borderRadius: '20px', 
+    animation: 'pulse 1.5s infinite ease-in-out',
+    opacity: 0.7
+  }} />
+);
+
+export default function ProductGrid({ products, isLoading }) {
+  if (isLoading && (!products || products.length === 0)) {
+    return (
+      <section className={styles.productGrid}>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <SkeletonCard key={`skel-${i}`} />
+        ))}
+      </section>
+    );
+  }
+
   return (
     <section className={styles.productGrid}>
-      {products.map((item) => (
-        <ProductCard key={item._id || item.id} item={item} />
-      ))}
+      <style>{`
+        @keyframes pulse {
+          0% { opacity: 0.6; }
+          50% { opacity: 0.3; }
+          100% { opacity: 0.6; }
+        }
+      `}</style>
+      <AnimatePresence>
+        {products.map((item, index) => (
+          <motion.div
+            key={item._id || item.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.4, delay: index < 10 ? index * 0.05 : 0 }}
+            whileHover={{ y: -8 }}
+            style={{ display: 'flex', height: '100%', width: '100%' }}
+          >
+            <ProductCard item={item} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </section>
   );
 }

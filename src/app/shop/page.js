@@ -57,8 +57,10 @@ export default async function ShopPage({ searchParams }) {
   const minPrice = resolvedSearchParams?.minPrice || "";
   const maxPrice = resolvedSearchParams?.maxPrice || "";
   const page = resolvedSearchParams?.page || "1";
+  const inStock = resolvedSearchParams?.inStock || "";
+  const sort = resolvedSearchParams?.sort || "";
 
-  const params = { limit: 50, page };
+  const params = { limit: 24, page };
   if (query) params.search = query;
   if (category) params.category = category;
   if (subCategory) params.subCategory = subCategory;
@@ -66,6 +68,8 @@ export default async function ShopPage({ searchParams }) {
   if (sale) params.sale = sale;
   if (minPrice) params.minPrice = minPrice;
   if (maxPrice) params.maxPrice = maxPrice;
+  if (inStock) params.inStock = inStock;
+  if (sort) params.sort = sort;
   
   const res = await fetchProducts(params, true); 
   const products = res.products || [];
