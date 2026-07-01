@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import Link from 'next/link';
 
 export default function AdminReviewsPage() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   
   // Analytics State
   const [analytics, setAnalytics] = useState(null);

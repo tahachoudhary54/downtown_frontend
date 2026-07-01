@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export default function AdminSettings() {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

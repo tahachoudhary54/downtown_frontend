@@ -74,22 +74,22 @@ export async function verifyOtp(data) {
   return res.json();
 }
 
-export async function login(credentials) {
+export async function login(credentials, type = 'user') {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(credentials),
+    body: JSON.stringify({ ...credentials, loginType: type }),
   });
   return res.json();
 }
 
-export async function loginWithGoogle(credential) {
+export async function loginWithGoogle(credential, type = 'user') {
   const res = await fetch(`${API_URL}/api/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ credential }),
+    body: JSON.stringify({ credential, loginType: type }),
   });
   return res.json();
 }
@@ -121,31 +121,31 @@ export async function resetPassword(data) {
   return res.json();
 }
 
-let refreshPromise = null;
+let refreshPromises = { user: null, admin: null };
 
-export async function refreshSession() {
-  if (refreshPromise) {
-    return refreshPromise;
+export async function refreshSession(type = 'user') {
+  if (refreshPromises[type]) {
+    return refreshPromises[type];
   }
   
-  refreshPromise = (async () => {
+  refreshPromises[type] = (async () => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/refresh`, {
+      const res = await fetch(`${API_URL}/api/auth/refresh?type=${type}`, {
         method: "GET",
         credentials: "include",
       });
       if (!res.ok) throw new Error("Session refresh failed");
       return await res.json();
     } finally {
-      refreshPromise = null;
+      refreshPromises[type] = null;
     }
   })();
   
-  return refreshPromise;
+  return refreshPromises[type];
 }
 
-export async function logout() {
-  const res = await fetch(`${API_URL}/api/auth/logout`, {
+export async function logout(type = 'user') {
+  const res = await fetch(`${API_URL}/api/auth/logout?type=${type}`, {
     method: "POST",
     credentials: "include",
   });
@@ -153,8 +153,17 @@ export async function logout() {
 }
 
 let isInterceptorSetup = false;
+const authHandlers = {
+  user: { setToken: null, logout: null },
+  admin: { setToken: null, logout: null }
+};
 
-export function setupFetchInterceptor(setToken, logoutFn) {
+export function registerAuthHandlers(type, setToken, logoutFn) {
+  authHandlers[type] = { setToken, logout: logoutFn };
+  setupFetchInterceptor();
+}
+
+function setupFetchInterceptor() {
   if (typeof window === "undefined" || isInterceptorSetup) return;
   isInterceptorSetup = true;
 
@@ -169,12 +178,16 @@ export function setupFetchInterceptor(setToken, logoutFn) {
         !resource.includes('/api/auth/refresh') && 
         !resource.includes('/api/auth/login') && 
         !resource.includes('/api/auth/logout')) {
+      
+      const type = resource.includes('/api/admin') ? 'admin' : 'user';
+      const handler = authHandlers[type];
+      
       try {
-        const refreshData = await refreshSession();
+        const refreshData = await refreshSession(type);
         
         if (refreshData && refreshData.success && refreshData.token) {
           const newToken = refreshData.token;
-          setToken(newToken);
+          if (handler && handler.setToken) handler.setToken(newToken);
           
           const newConfig = { ...config };
           newConfig.headers = {
@@ -187,8 +200,8 @@ export function setupFetchInterceptor(setToken, logoutFn) {
           throw new Error("Refresh failed");
         }
       } catch (err) {
-        console.error("Session expired, logging out.", err);
-        logoutFn();
+        console.error(`Session expired for ${type}, logging out.`, err);
+        if (handler && handler.logout) handler.logout();
         return response;
       }
     }

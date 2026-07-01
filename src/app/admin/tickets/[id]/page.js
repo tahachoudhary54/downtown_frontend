@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export default function AdminTicketDetailsPage({ params }) {
   const router = useRouter();
   const { id } = use(params);
-  const { token, user, loading } = useAuth();
+  const { token, user, loading } = useAdminAuth();
   
   const [replyText, setReplyText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,12 +85,22 @@ export default function AdminTicketDetailsPage({ params }) {
     }
   };
 
-  if (!ticket && !error) {
+  if (!data && !error) {
     return <div className="p-12 text-center text-[var(--text-muted)] animate-pulse">Loading ticket details...</div>;
   }
 
-  if (error || !ticket) {
-    return <div className="p-12 text-center text-red-500 font-semibold">Ticket not found.</div>;
+  if (error || !ticket || (data && !data.success)) {
+    return (
+      <div className="p-12 text-center text-red-500 font-semibold flex flex-col items-center">
+        <p>{data?.message || "Ticket not found or an error occurred."}</p>
+        <button 
+          onClick={() => router.push('/admin/tickets')} 
+          className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          Back to Tickets
+        </button>
+      </div>
+    );
   }
 
   const ticketIdDisplay = ticket._id.slice(-6).toUpperCase();

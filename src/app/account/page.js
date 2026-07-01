@@ -433,7 +433,7 @@ function AccountContent() {
                             <span>•</span>
                             <span>{singleTicketData.data.category}</span>
                             <span>•</span>
-                            <span className={`${styles.ticketStatus} ${styles[singleTicketData.data.status.toLowerCase()] || ''}`} style={{ padding: '4px 10px', fontSize: '0.75rem', borderRadius: '12px' }}>{singleTicketData.data.status}</span>
+                            <span className={`${styles.ticketStatus} ${styles[singleTicketData.data.status.toLowerCase().replace(' ', '-')] || ''}`} style={{ padding: '4px 10px', fontSize: '0.75rem', borderRadius: '12px' }}>{singleTicketData.data.status}</span>
                           </div>
                         </div>
 
@@ -485,7 +485,7 @@ function AccountContent() {
                                 #{ticket._id.slice(-6).toUpperCase()} • {ticket.category} • Updated {new Date(ticket.updatedAt).toLocaleDateString()}
                               </span>
                             </div>
-                            <span className={`${styles.ticketStatus} ${styles[ticket.status.toLowerCase()] || ''}`}>
+                            <span className={`${styles.ticketStatus} ${styles[ticket.status.toLowerCase().replace(' ', '-')] || ''}`}>
                               {ticket.status}
                             </span>
                           </div>

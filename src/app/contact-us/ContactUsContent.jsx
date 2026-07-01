@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { usePolicy } from '@/hooks/usePolicy';
 import styles from './contact.module.css';
 
-const defaultContactData = {
+export const defaultContactData = {
   heroTitle: "Contact Us",
   heroSubtitle: "We're here to assist you with any inquiries regarding our collections, your orders, or styling advice.",
   clientServicesTitle: "Client Services",

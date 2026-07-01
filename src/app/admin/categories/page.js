@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import { useNotifications } from '@/context/NotificationsContext';
 import Image from 'next/image';
 
 import { useRouter } from 'next/navigation';
 
 export default function AdminCategories() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);

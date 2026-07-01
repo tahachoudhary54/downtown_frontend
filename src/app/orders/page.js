@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import useSWR from 'swr';
 import styles from './orders.module.css';
 
@@ -34,9 +35,19 @@ export default function MyOrders() {
     fetcher
   );
 
+  const { data: returnsData } = useSWR(
+    token ? `${apiBase}/api/returns/myreturns` : null,
+    fetcher
+  );
+
   if (!mounted || loading || !user) return null;
 
   const orders = data?.data || [];
+  const returnRequests = returnsData?.data || [];
+
+  const getActiveReturnRequest = (orderId) => {
+    return returnRequests.find(req => req.orderId === orderId && ['Pending', 'Under Review', 'Approved'].includes(req.status));
+  };
 
   const handleAction = async (orderId, action) => {
     setProcessingId(orderId);
@@ -100,6 +111,26 @@ export default function MyOrders() {
                 <div>
                   <div className={styles.orderId}>Order #{order._id.slice(-6).toUpperCase()}</div>
                   <div className={styles.orderDate}>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                  {order.orderStatus === 'Delivered' && (
+                    <div style={{ marginTop: '12px' }}>
+                      {(() => {
+                        const activeRequest = getActiveReturnRequest(order._id);
+                        if (activeRequest) {
+                          return (
+                            <div style={{ fontSize: '0.85rem', color: '#b45309', backgroundColor: '#fef3c7', padding: '6px 10px', borderRadius: '6px', border: '1px solid #fde68a', display: 'inline-block' }}>
+                              Return/Exchange in progress
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <Link href={`/return-exchange-request?orderId=${order._id}`} className={styles.btnReturn}>
+                              Request Return/Exchange
+                            </Link>
+                          );
+                        }
+                      })()}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div className={styles.orderStatusBadge} style={{

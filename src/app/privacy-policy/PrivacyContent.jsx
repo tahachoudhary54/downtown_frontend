@@ -5,44 +5,155 @@ import StickySidebarNav from '@/components/StickySidebarNav';
 import { usePolicy } from '@/hooks/usePolicy';
 import styles from '../terms-and-conditions/policy.module.css';
 
-const defaultPrivacyData = {
-  lastUpdated: "October 15, 2023",
+export const defaultPrivacyData = {
+  lastUpdated: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
   sections: [
     {
-      id: "data-collection",
-      title: "1. Data Collection",
-      paragraphs: ["We collect information that you provide directly to us when you create an account, make a purchase, or communicate with us. This may include your name, email address, shipping address, billing address, and payment information."]
-    },
-    {
-      id: "use-of-data",
-      title: "2. Use of Your Data",
-      paragraphs: ["We use the information we collect to provide, maintain, and improve our services. Specifically, we use your data to:"],
+      id: "information-we-collect",
+      title: "1. Information We Collect",
+      paragraphs: [
+        "We may collect the following information when you create an account, place an order, or submit a return/exchange request:"
+      ],
       listItems: [
-        "Process your transactions and send you related information, including order confirmations and receipts.",
-        "Send you technical notices, updates, security alerts, and support messages.",
-        "Respond to your comments, questions, and customer service requests.",
-        "Communicate with you about products, services, offers, and events offered by Downtown Boutique."
+        "Full Name",
+        "Email Address",
+        "Mobile Number",
+        "Shipping Address",
+        "Billing Address (if applicable)",
+        "Order Details",
+        "Payment Status",
+        "Return & Exchange Requests",
+        "Account Information"
       ]
     },
     {
-      id: "data-sharing",
-      title: "3. Data Sharing",
-      paragraphs: ["We do not share your personal information with third parties except as described in this privacy policy. We may share your information with vendors, consultants, and other service providers who need access to such information to carry out work on our behalf."]
+      id: "information-we-collect-payment",
+      title: "",
+      paragraphs: [
+        "Please note that payment information is securely processed by Razorpay and we do not store customers' banking credentials on our servers."
+      ]
     },
     {
-      id: "cookies",
+      id: "how-we-use-your-information",
+      title: "2. How We Use Your Information",
+      paragraphs: ["We use the information we collect to:"],
+      listItems: [
+        "Order processing",
+        "WhatsApp communication",
+        "Phone calls",
+        "Delivery coordination",
+        "Customer support",
+        "Payment confirmation",
+        "Return & exchange processing",
+        "Account creation and management",
+        "Website and service improvement",
+        "Fraud and misuse prevention"
+      ]
+    },
+    {
+      id: "information-sharing",
+      title: "3. Information Sharing",
+      paragraphs: [
+        "We do not sell or rent customer personal information.",
+        "Customer information may only be shared with trusted service providers when necessary to provide our services, including:"
+      ],
+      listItems: [
+        "Razorpay (Payment Processing)",
+        "Porter (Order Delivery)",
+        "Email Service Provider (for account verification, password reset, and notifications)"
+      ]
+    },
+    {
+      id: "information-sharing-legal",
+      title: "",
+      paragraphs: [
+        "Information may also be shared when required by applicable law."
+      ]
+    },
+    {
+      id: "cookies-tracking",
       title: "4. Cookies & Tracking",
-      paragraphs: ["We use cookies and similar tracking technologies to track the activity on our Service and hold certain information. Cookies are files with small amount of data which may include an anonymous unique identifier. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent."]
+      paragraphs: [
+        "We use cookies and similar tracking technologies to:"
+      ],
+      listItems: [
+        "Keep users logged in.",
+        "Remember preferences.",
+        "Improve website performance.",
+        "Analyze website usage.",
+        "Enhance user experience."
+      ]
     },
     {
-      id: "security",
-      title: "5. Security",
-      paragraphs: ["The security of your data is important to us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Data, we cannot guarantee its absolute security."]
+      id: "cookies-tracking-disable",
+      title: "",
+      paragraphs: [
+        "Users may disable cookies in their browser, although some features may not work correctly."
+      ]
+    },
+    {
+      id: "data-security",
+      title: "5. Data Security",
+      paragraphs: [
+        "We take the security of your data seriously:"
+      ],
+      listItems: [
+        "We use secure authentication.",
+        "Passwords are securely encrypted.",
+        "Sensitive information is protected.",
+        "Payments are processed securely through Razorpay."
+      ]
+    },
+    {
+      id: "data-security-disclaimer",
+      title: "",
+      paragraphs: [
+        "While we implement industry-standard security measures, no online system or method of electronic storage can guarantee absolute security."
+      ]
     },
     {
       id: "your-rights",
       title: "6. Your Rights",
-      paragraphs: ["You have the right to access, update, or delete the information we have on you. Whenever made possible, you can access, update, or request deletion of your Personal Data directly within your account settings section. If you are unable to perform these actions yourself, please contact us to assist you."]
+      paragraphs: ["As a customer, you have the right to:"],
+      listItems: [
+        "View your account information.",
+        "Update your profile information.",
+        "Change your password.",
+        "Request account deletion (subject to legal or operational requirements).",
+        "Contact us regarding privacy-related concerns."
+      ]
+    },
+    {
+      id: "data-retention",
+      title: "7. Data Retention",
+      paragraphs: ["We retain customer information only as long as necessary for:"],
+      listItems: [
+        "Order history",
+        "Customer support",
+        "Legal obligations",
+        "Business operations"
+      ]
+    },
+    {
+      id: "third-party-services",
+      title: "8. Third-Party Services",
+      paragraphs: [
+        "Our website uses trusted third-party services to ensure a seamless experience. These include Razorpay, Porter, and our Email Service Provider.",
+        "Please note that each third-party service has its own privacy policy governing how they handle data."
+      ]
+    },
+    {
+      id: "changes-to-policy",
+      title: "9. Changes to this Privacy Policy",
+      paragraphs: [
+        "We may update this Privacy Policy from time to time.",
+        "Changes become effective immediately after being published on the website."
+      ]
+    },
+    {
+      id: "contact-us",
+      title: "10. Contact Us",
+      paragraphs: ["If you have any questions regarding this Privacy Policy, please reach out to us through the Contact Us page or via WhatsApp support."]
     }
   ]
 };

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import Link from 'next/link';
 import useSWR from 'swr';
 
 export default function AdminDashboard() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [stats, setStats] = useState({ products: 0, users: 0 });
   const [loading, setLoading] = useState(true);
 

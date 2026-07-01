@@ -4,53 +4,58 @@ import PageHero from '@/components/PageHero';
 import { usePolicy } from '@/hooks/usePolicy';
 import styles from './shipping.module.css';
 
-const defaultShippingData = {
+export const defaultShippingData = {
   heroTitle: "Shipping & Returns",
-  heroSubtitle: "Enjoy a seamless luxury shopping experience from checkout to delivery.",
+  heroSubtitle: "Everything you need to know about our delivery process and return policy.",
   timeline: [
-    { title: "Order Placed", desc: "You'll receive a confirmation email instantly.", iconPath: "M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" },
-    { title: "Packed", desc: "Carefully hand-packed within 24 hours.", iconPath: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" },
-    { title: "Shipped", desc: "Dispatched with our premium logistics partners.", iconPath: "M1 3h15v13H1z M16 8h4l3 3v5h-7V8z M5.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z M18.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" },
-    { title: "Delivered", desc: "Arrives safely at your doorstep.", iconPath: "M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" }
+    { title: "Order Processed", desc: "Orders are processed after successful payment confirmation.", iconPath: "M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" },
+    { title: "Delivery Confirmation", desc: "Admin contacts you to confirm availability and delivery charge before dispatch.", iconPath: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" },
+    { title: "Shipped via Porter", desc: "Porter is booked only after your approval of the delivery charge.", iconPath: "M1 3h15v13H1z M16 8h4l3 3v5h-7V8z M5.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z M18.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" },
+    { title: "Delivered", desc: "Delivery time depends on confirmation, timing, and location.", iconPath: "M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" }
   ],
   cards: [
     {
-      title: "Shipping Information",
+      title: "Shipping Policy",
       items: [
-        "**Standard Delivery:** 3-5 business days. Complimentary on all orders over $200.",
-        "**Express Delivery:** 1-2 business days. Available for a flat rate of $25.",
-        "**International Delivery:** 5-10 business days depending on location. Duties may apply."
-      ],
-      note: "Please note that orders placed after 2 PM EST will be processed the following business day."
+        "**Delivery Area:** We currently deliver exclusively within India.",
+        "**Order Processing:** Orders are processed only after payment confirmation.",
+        "**Delivery Confirmation:** Before dispatch, our admin will contact you to communicate the Porter delivery charge.",
+        "**Approval Required:** You must approve the delivery charge. Porter is booked only after your approval.",
+        "**Delivery Charges:** Porter delivery charges are not included in product prices. Customers pay the delivery charge directly to the Porter delivery partner at the time of delivery.",
+        "**Cancellations:** If you reject the delivery charge before dispatch, your order is cancelled, and the product payment is refunded within approximately 7 business days.",
+        "**Delivery Time:** Delivery timing depends on your confirmation, order timing, and location."
+      ]
     },
     {
-      title: "Returns Policy",
+      title: "Returns & Exchanges",
       items: [
-        "Items must be returned within 30 days of delivery.",
-        "All garments must remain unworn, unwashed, and with all original Downtown Boutique tags attached.",
-        "Footwear must be returned in its original, undamaged shoebox.",
-        "Customized, tailored, or final sale items cannot be returned."
-      ],
-      note: "A prepaid return shipping label is included with all domestic orders."
+        "**Returns:** Accepted only for damaged, defective, or incorrectly delivered products. Requests must be submitted within 48 hours of delivery.",
+        "**Exchanges:** Requests must be submitted within 48 hours of delivery. Products must be unused and in original condition.",
+        "**Condition:** Product must be unused, unworn, unwashed, and have all original tags attached.",
+        "**Charges:** Customers are always responsible for paying return shipping charges.",
+        "**Inspection:** Returned products are inspected before refunds or exchanges are approved."
+      ]
     },
     {
-      title: "Refund Process",
+      title: "Refund Policy",
       paragraphs: [
-        "Once your return is received and inspected at our facility, we will send you an email to notify you of the approval or rejection of your refund.",
-        "Approved refunds will be processed immediately, and a credit will automatically be applied to your original method of payment within 5-7 business days, depending on your financial institution."
+        "If a customer rejects the Porter delivery charge before dispatch, the order is cancelled and the product payment is refunded.",
+        "For returns, approved refunds are processed within approximately 7 business days after inspection.",
+        "Refunds are credited to the original payment method used during checkout."
       ]
     }
   ]
 };
 
-// Helper to render bold text
+// Helper to render bold text and HTML
 const renderText = (text) => {
-  const parts = text.split(/\*\*(.*?)\*\*/g);
-  return parts.map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part));
+  const htmlText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  return <span dangerouslySetInnerHTML={{ __html: htmlText }} />;
 };
 
 export default function ShippingContent() {
-  const { data: shippingData, loading } = usePolicy('shippingAndReturns', defaultShippingData);
+  const shippingData = defaultShippingData;
+  const loading = false;
 
   return (
     <div className={styles.page}>

@@ -4,7 +4,7 @@ import PageHero from '@/components/PageHero';
 import { usePolicy } from '@/hooks/usePolicy';
 import styles from './about.module.css';
 
-const defaultAboutData = {
+export const defaultAboutData = {
   heroTitle: "Our Story",
   heroSubtitle: "Redefining modern menswear with timeless elegance and uncompromising quality.",
   sections: [

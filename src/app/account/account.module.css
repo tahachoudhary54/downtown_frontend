@@ -304,10 +304,17 @@
   font-weight: 600;
   padding: 4px 12px;
   border-radius: 12px;
+  white-space: nowrap;
+  display: inline-block;
+  text-align: center;
 }
 .ticketStatus.open {
   background-color: #dbeafe;
   color: #1e40af;
+}
+.ticketStatus.in-progress {
+  background-color: #e0e7ff;
+  color: #3730a3;
 }
 .ticketStatus.resolved {
   background-color: #dcfce3;

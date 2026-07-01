@@ -7,33 +7,34 @@ import { usePolicy } from '@/hooks/usePolicy';
 import styles from './faq.module.css';
 
 // Default data is used if DB fetch fails or is empty
-const defaultFaqData = [
+export const defaultFaqData = [
   {
     category: "Orders",
     items: [
-      { question: "How can I track my order?", answer: "Once your order has shipped, you will receive an email with your tracking number. You can also view your order status by logging into your account." },
-      { question: "Can I modify or cancel my order?", answer: "We process orders quickly, but if you contact us within 1 hour of placing your order, we may be able to modify or cancel it. Please reach out to our support team immediately." }
+      { question: "How can I track my order?", answer: "Customers can track order status from their account in the \"My Orders\" section. Status updates are provided after admin confirmation." },
+      { question: "Can I modify or cancel my order?", answer: "Orders may be cancelled before accepting the delivery charge. Once the delivery charge is accepted, cancellation may not be possible." }
     ]
   },
   {
     category: "Shipping",
     items: [
-      { question: "What are your shipping rates?", answer: "We offer complimentary standard shipping on all orders over $200. For orders under $200, a flat rate of $15 applies. Express shipping is available for $25." },
-      { question: "Do you ship internationally?", answer: "Yes, we ship to select international destinations. International shipping rates and delivery times vary by location and will be calculated at checkout." }
+      { question: "How does delivery work?", answer: "After you place an order, our admin contacts you to share the delivery charge. Once you approve the delivery charge, Porter is booked for your order. You pay the Porter delivery charge directly to the delivery partner during delivery." },
+      { question: "What are your shipping charges?", answer: "Delivery charges are calculated individually through Porter after order confirmation. They depend on your location and are communicated to you by our admin before dispatch." },
+      { question: "Do you ship internationally?", answer: "No. Currently we deliver only within India." }
     ]
   },
   {
-    category: "Returns",
+    category: "Returns & Exchanges",
     items: [
-      { question: "What is your return policy?", answer: "We accept returns on unworn, unwashed items with tags attached within 30 days of delivery. Custom or personalized items are final sale." },
-      { question: "How do I process a return?", answer: "To initiate a return, log into your account and navigate to 'My Orders', or contact our support team. A return shipping label will be provided." }
+      { question: "How do returns work?", answer: "Customers can submit return requests from their account within 48 hours of delivery for damaged, defective, or incorrect products. The customer pays the return shipping charges. Once the returned product is received and inspected, the refund is processed." },
+      { question: "How long does it take to receive a refund?", answer: "Once the returned product has been received and approved after inspection, refunds are processed to the original payment method within approximately 7 business days. If you reject the delivery charge before dispatch, your order is cancelled and the product payment is refunded within approximately 7 business days." }
     ]
   },
   {
     category: "Payments",
     items: [
-      { question: "What payment methods do you accept?", answer: "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and Apple Pay." },
-      { question: "Is my payment information secure?", answer: "Yes, we use industry-standard encryption protocols to ensure your payment information is kept secure and confidential." }
+      { question: "What payment methods do you accept?", answer: "We accept secure online payments through Razorpay using UPI and Net Banking." },
+      { question: "Is my payment information secure?", answer: "Yes. All online payments are securely processed through Razorpay using industry-standard encryption to ensure your payment information remains safe and confidential." }
     ]
   }
 ];
@@ -69,7 +70,7 @@ export default function FAQContent() {
 
         <section className={styles.supportCta}>
           <h2 className={styles.supportTitle}>Still Need Help?</h2>
-          <p className={styles.supportText}>Our client advisors are available to assist you with any inquiries.</p>
+          <p className={styles.supportText}>Our support team is available to assist you with any questions regarding your orders, payments, returns, and exchanges.</p>
           <div className={styles.actionButtons}>
             <Link href="/contact-us" className={styles.contactBtn}>Contact Us</Link>
             <a href="https://wa.me/919867211505" target="_blank" rel="noopener noreferrer" className={styles.whatsappBtn}>

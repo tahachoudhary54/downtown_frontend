@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export default function AdminTicketsPage() {
   const router = useRouter();
-  const { token, user, loading } = useAuth();
+  const { token, user, loading } = useAdminAuth();
   const [filter, setFilter] = useState('All');
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -123,7 +123,7 @@ export default function AdminTicketsPage() {
                       </td>
                       <td className="flex md:table-cell px-4 py-1.5 md:p-4 items-center">
                         <span className="md:hidden font-semibold text-xs text-gray-500 mr-2">Status:</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap inline-block ${
                           ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'bg-green-100 text-green-800' :
                           ticket.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
                           'bg-red-100 text-red-800'

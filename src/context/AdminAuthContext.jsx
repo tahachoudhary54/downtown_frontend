@@ -3,16 +3,16 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { refreshSession, logout as apiLogout, registerAuthHandlers } from "../lib/api";
 
-const AuthContext = createContext(null);
+const AdminAuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
+export function AdminAuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const logout = async () => {
     try {
-      await apiLogout("user");
+      await apiLogout("admin");
     } catch (err) {
       console.error("Logout error", err);
     }
@@ -22,11 +22,11 @@ export function AuthProvider({ children }) {
 
   // Attempt to refresh session on mount and initialize interceptor
   useEffect(() => {
-    registerAuthHandlers("user", setToken, logout);
+    registerAuthHandlers("admin", setToken, logout);
 
     const initAuth = async () => {
       try {
-        const res = await refreshSession("user");
+        const res = await refreshSession("admin");
         if (res && res.success && res.token && res.user) {
           const parsedUser = res.user;
           if (!parsedUser.phone) parsedUser.phone = "";
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
 
     const doRefresh = async () => {
       try {
-        const res = await refreshSession("user");
+        const res = await refreshSession("admin");
         if (res && res.success && res.token) {
           setToken(res.token);
         }
@@ -87,15 +87,14 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, loginState, logout, updateProfile }}>
+    <AdminAuthContext.Provider value={{ user, token, loading, loginState, logout, updateProfile }}>
       {children}
-    </AuthContext.Provider>
+    </AdminAuthContext.Provider>
   );
 }
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+export const useAdminAuth = () => {
+  const ctx = useContext(AdminAuthContext);
+  if (!ctx) throw new Error("useAdminAuth must be used within AdminAuthProvider");
   return ctx;
 };
-

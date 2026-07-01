@@ -3,19 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../context/AuthContext";
-import { login, loginWithGoogle } from "../../lib/api";
-import { GoogleLogin } from "@react-oauth/google";
-import styles from "../auth.module.css";
+import { useAdminAuth } from "../../../context/AdminAuthContext";
+import { login } from "../../../lib/api";
+import styles from "../../auth.module.css";
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { loginState } = useAuth();
+  const { loginState } = useAdminAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,15 +22,15 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      const res = await login({ email, password });
+      const res = await login({ email, password }, "admin");
       if (res.success) {
         loginState(res.token, res.user);
-        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+        const redirectUrl = sessionStorage.getItem('redirectAfterAdminAuth');
         if (redirectUrl) {
-          sessionStorage.removeItem('redirectAfterAuth');
+          sessionStorage.removeItem('redirectAfterAdminAuth');
           router.push(redirectUrl);
         } else {
-          router.push("/");
+          router.push("/admin");
         }
       } else {
         setError(res.message || "Invalid credentials");
@@ -43,56 +42,13 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setError("");
-    setLoading(true);
-    try {
-      const res = await loginWithGoogle(credentialResponse.credential);
-      if (res.success) {
-        loginState(res.token, res.user);
-        const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
-        if (redirectUrl) {
-          sessionStorage.removeItem('redirectAfterAuth');
-          router.push(redirectUrl);
-        } else {
-          router.push("/");
-        }
-      } else {
-        setError(res.message || "Google login failed");
-      }
-    } catch (err) {
-      setError("An unexpected error occurred during Google login.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className={styles.page}>
       <div className={styles.authContainer}>
-        <h1 className={styles.title}>Welcome Back</h1>
-        <p className={styles.subtitle}>Sign in to access your account</p>
+        <h1 className={styles.title}>Admin Login</h1>
+        <p className={styles.subtitle}>Sign in to access the control panel</p>
 
         {error && <div style={{ color: '#c0392b', marginBottom: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>{error}</div>}
-
-        <div className={styles.googleBtnWrapper} style={{ marginBottom: '1.5rem' }}>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => {
-              setError("Google login failed");
-            }}
-            shape="rectangular"
-            theme="outline"
-            text="continue_with"
-            size="large"
-          />
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }}></div>
-          <span style={{ padding: '0 1rem', color: '#64748b', fontSize: '0.9rem' }}>OR</span>
-          <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }}></div>
-        </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
@@ -101,7 +57,7 @@ export default function LoginPage() {
               type="email"
               id="email"
               className={styles.input}
-              placeholder="Enter your email"
+              placeholder="Enter admin email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -115,7 +71,7 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 id="password"
                 className={styles.input}
-                placeholder="Enter your password"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -133,25 +89,19 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-              <Link href="/forgot-password" className={styles.link} style={{ fontSize: '0.8rem', marginLeft: 0 }}>
-                Forgot Password?
-              </Link>
-            </div>
           </div>
 
-          <button type="submit" className={styles.btnSubmit}>LOGIN</button>
+          <button type="submit" className={styles.btnSubmit} disabled={loading}>
+            {loading ? "AUTHENTICATING..." : "LOGIN AS ADMIN"}
+          </button>
         </form>
 
-        <div className={styles.footer}>
-          Don't have an account? 
-          <Link href="/signup" className={styles.link}>
-            Sign up
+        <div className={styles.footer} style={{ marginTop: '1rem' }}>
+          <Link href="/login" className={styles.link}>
+            Back to Customer Login
           </Link>
         </div>
       </div>
     </div>
   );
 }
-
-// Triggering Fast Refresh

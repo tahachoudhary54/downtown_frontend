@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { defaultAboutData } from '../../about-us/AboutUsContent';
+import { defaultContactData } from '../../contact-us/ContactUsContent';
+import { defaultFaqData } from '../../faq/FAQContent';
+import { defaultPrivacyData } from '../../privacy-policy/PrivacyContent';
+import { defaultShippingData } from '../../shipping-and-returns/ShippingContent';
+import { defaultTermsData } from '../../terms-and-conditions/TermsContent';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -50,8 +56,107 @@ const DEFAULT_SIZE_GUIDE = {
   expertTip: "If you are between sizes for a tailored garment, we recommend selecting the larger size and consulting a tailor for the perfect finish."
 };
 
+const DEFAULT_POLICIES = {
+  aboutUs: defaultAboutData,
+  contactUs: defaultContactData,
+  termsAndConditions: defaultTermsData,
+  privacyPolicy: defaultPrivacyData,
+  shippingAndReturns: defaultShippingData,
+  faq: defaultFaqData,
+  sizeGuide: DEFAULT_SIZE_GUIDE
+};
+
+const DynamicEditor = ({ data, onChange, label = '' }) => {
+  if (Array.isArray(data)) {
+    if (data.length === 0 || typeof data[0] === 'string') {
+      return (
+        <div className="mb-4">
+          {label && <label className="block text-sm font-bold text-gray-700 mb-1 capitalize">{label.replace(/([A-Z])/g, ' $1').trim()} (One item per line)</label>}
+          <textarea 
+            value={data.join('\n')}
+            onChange={(e) => onChange(e.target.value.split('\n').filter(line => line.trim() !== ''))}
+            className="w-full p-3 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+            rows={5}
+          />
+        </div>
+      );
+    }
+    return (
+      <div className="mb-6">
+        {label && <h4 className="font-bold text-gray-800 mb-2 pb-2 border-b uppercase tracking-wider text-sm">{label.replace(/([A-Z])/g, ' $1').trim()}</h4>}
+        <div className="space-y-4 border-l-2 border-[var(--accent)] pl-4 ml-2">
+          {data.map((item, index) => (
+            <div key={index} className="bg-gray-50 p-4 rounded-lg relative border border-gray-100 shadow-sm">
+              <div className="absolute top-2 right-2 flex gap-2">
+                <button type="button" onClick={() => { const newData = [...data]; if (index > 0) { const temp = newData[index]; newData[index] = newData[index-1]; newData[index-1] = temp; onChange(newData); } }} className="text-gray-500 hover:text-[var(--accent)] text-lg">↑</button>
+                <button type="button" onClick={() => { const newData = [...data]; if (index < data.length - 1) { const temp = newData[index]; newData[index] = newData[index+1]; newData[index+1] = temp; onChange(newData); } }} className="text-gray-500 hover:text-[var(--accent)] text-lg">↓</button>
+                <button type="button" onClick={() => { const newData = [...data]; newData.splice(index, 1); onChange(newData); }} className="text-red-500 hover:text-red-700 ml-2 font-bold">✕</button>
+              </div>
+              <p className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">Item {index + 1}</p>
+              <DynamicEditor data={item} onChange={(newVal) => { const newData = [...data]; newData[index] = newVal; onChange(newData); }} />
+            </div>
+          ))}
+          <button 
+            type="button"
+            onClick={() => { const newData = [...data]; newData.push(data.length > 0 ? JSON.parse(JSON.stringify(data[0])) : {}); onChange(newData); }}
+            className="text-sm font-bold text-[var(--accent)] hover:underline flex items-center gap-1"
+          >
+            + Add New {label.replace(/s$/, '')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  if (typeof data === 'object' && data !== null) {
+    return (
+      <div className="space-y-4">
+        {Object.entries(data).map(([key, val]) => (
+          <DynamicEditor key={key} label={key} data={val} onChange={(newVal) => onChange({...data, [key]: newVal})} />
+        ))}
+      </div>
+    );
+  }
+  
+  if (typeof data === 'string') {
+    const isLong = data.length > 50 || label.toLowerCase().includes('desc') || label.toLowerCase().includes('paragraph') || label.toLowerCase().includes('answer');
+    return (
+      <div className="mb-4">
+        {label && <label className="block text-sm font-bold text-gray-700 mb-1 capitalize">{label.replace(/([A-Z])/g, ' $1').trim()}</label>}
+        {isLong ? (
+          <textarea 
+            value={data}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full p-3 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+            rows={3}
+          />
+        ) : (
+          <input 
+            type="text"
+            value={data}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full p-2 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+          />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4">
+      {label && <label className="block text-sm font-bold text-gray-700 mb-1 capitalize">{label.replace(/([A-Z])/g, ' $1').trim()}</label>}
+      <input 
+        type="text"
+        value={String(data)}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full p-2 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)]"
+      />
+    </div>
+  );
+};
+
 export default function AdminSettings() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [policies, setPolicies] = useState({
     aboutUs: '',
     contactUs: '',
@@ -155,51 +260,52 @@ export default function AdminSettings() {
         </div>
         
         {/* Editor Area */}
-        <div className="flex-1 p-6 flex flex-col">
-          <div className="mb-4">
+        <div className="flex-1 p-6 flex flex-col max-h-[800px]">
+          <div className="mb-4 shrink-0">
             <h3 className="text-lg font-bold text-[var(--foreground)]">
               Editing: {POLICY_FIELDS.find(f => f.key === activeTab)?.label}
             </h3>
-            {activeTab === 'sizeGuide' ? (
-              <p className="text-xs text-[var(--text-muted)] mt-1">
-                You can edit the JSON layout directly below to update the size chart.
-              </p>
-            ) : (
-              <p className="text-xs text-[var(--text-muted)] mt-1">
-                Supports plain text and paragraphs. Line breaks will be preserved on the frontend.
-              </p>
-            )}
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              Use the dynamic form below to easily update the content.
+            </p>
           </div>
           
-          {activeTab === 'sizeGuide' ? (
-            <textarea
-              value={
-                typeof policies[activeTab] === 'object' && policies[activeTab] !== null
-                  ? JSON.stringify(policies[activeTab], null, 2)
-                  : (policies[activeTab] ? policies[activeTab] : JSON.stringify(DEFAULT_SIZE_GUIDE, null, 2))
-              }
-              onChange={(e) => {
+          <div className="flex-1 overflow-y-auto pr-2">
+            {(() => {
+              // Parse the data or use defaults
+              let parsedData = policies[activeTab];
+              if (!parsedData || parsedData === '') {
+                parsedData = DEFAULT_POLICIES[activeTab] || '';
+              } else if (typeof parsedData === 'string') {
                 try {
-                  const parsed = JSON.parse(e.target.value);
-                  setPolicies({ ...policies, [activeTab]: parsed });
-                } catch (err) {
-                  // If it's invalid JSON while typing, store it as a string temporarily
-                  setPolicies({ ...policies, [activeTab]: e.target.value });
+                  parsedData = JSON.parse(parsedData);
+                } catch (e) {
+                  // Keep as string if it's not valid JSON
                 }
-              }}
-              className="flex-1 w-full p-4 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] resize-none font-mono text-sm bg-gray-50"
-              placeholder={`Enter JSON data for the Size Guide...`}
-              style={{ minHeight: '500px' }}
-            />
-          ) : (
-            <textarea
-              value={policies[activeTab] || ''}
-              onChange={(e) => setPolicies({ ...policies, [activeTab]: e.target.value })}
-              className="flex-1 w-full p-4 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] resize-none"
-              placeholder={`Enter ${POLICY_FIELDS.find(f => f.key === activeTab)?.label} content here...`}
-              style={{ minHeight: '400px' }}
-            />
-          )}
+              }
+
+              const isJsonStructure = typeof parsedData === 'object' && parsedData !== null;
+
+              if (isJsonStructure) {
+                return (
+                  <DynamicEditor 
+                    data={parsedData} 
+                    onChange={(newVal) => setPolicies({ ...policies, [activeTab]: JSON.stringify(newVal) })}
+                  />
+                );
+              }
+
+              return (
+                <textarea
+                  value={parsedData}
+                  onChange={(e) => setPolicies({ ...policies, [activeTab]: e.target.value })}
+                  className="w-full p-4 border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--accent)] resize-none"
+                  placeholder={`Enter ${POLICY_FIELDS.find(f => f.key === activeTab)?.label} content here...`}
+                  style={{ minHeight: '400px' }}
+                />
+              );
+            })()}
+          </div>
         </div>
       </div>
     </div>

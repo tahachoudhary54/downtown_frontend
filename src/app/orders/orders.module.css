@@ -120,3 +120,21 @@
   font-size: 0.9rem;
   color: var(--text-muted);
 }
+
+.btnReturn {
+  background: white;
+  color: black;
+  border: 1px solid black;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btnReturn:hover {
+  background: black;
+  color: white;
+}

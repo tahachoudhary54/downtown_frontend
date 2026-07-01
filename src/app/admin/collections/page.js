@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export default function AdminCollections() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);

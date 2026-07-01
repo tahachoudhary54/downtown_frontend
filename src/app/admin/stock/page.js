@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import Link from 'next/link';
 
 export default function AdminStock() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

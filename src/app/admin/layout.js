@@ -3,11 +3,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import { NotificationsProvider, useNotifications } from '@/context/NotificationsContext';
 
 function AdminLayoutContent({ children }) {
-  const { user, loading, logout, token } = useAuth();
+  const { user, loading, logout, token } = useAdminAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
@@ -82,12 +82,16 @@ function AdminLayoutContent({ children }) {
   }, [notifications]);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && pathname !== '/admin/login') {
       if (!user || user.role !== 'admin') {
-        router.replace('/login');
+        router.replace('/admin/login');
       }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, pathname]);
+
+  if (pathname === '/admin/login') {
+    return children;
+  }
 
   if (loading || !user || user.role !== 'admin') {
     return (
@@ -103,6 +107,7 @@ function AdminLayoutContent({ children }) {
     { href: '/admin/categories', label: 'Categories' },
     { href: '/admin/stock', label: 'Stock Management' },
     { href: '/admin/orders', label: 'Orders' },
+    { href: '/admin/returns', label: 'Return Requests' },
     { href: '/admin/users', label: 'Users' },
     { href: '/admin/tickets', label: 'Support Tickets' },
     { href: '/admin/reviews', label: 'Reviews' },

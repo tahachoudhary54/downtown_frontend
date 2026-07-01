@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import useSWR from 'swr';
 
 const STATUS_COLORS = {
@@ -15,7 +15,7 @@ const STATUS_COLORS = {
 };
 
 export default function AdminOrders() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [updatingId, setUpdatingId] = useState(null);

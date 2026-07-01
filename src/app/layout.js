@@ -52,6 +52,7 @@ export const viewport = {
 import ClientLayoutWrapper from "../components/ClientLayoutWrapper";
 import { CartProvider } from "../context/CartContext";
 import { AuthProvider } from "../context/AuthContext";
+import { AdminAuthProvider } from "../context/AdminAuthContext";
 import { WishlistProvider } from "../context/WishlistContext";
 import { NotificationsProvider } from "../context/NotificationsContext";
 import { CustomerNotificationsProvider } from "../context/CustomerNotificationsContext";
@@ -85,29 +86,31 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col" style={{ backgroundColor: '#0B0B0B', margin: 0 }}>
         <div style={{ overflowX: 'hidden', width: '100%', position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "placeholder_id"}>
-            <AuthProvider>
-              <CustomerNotificationsProvider>
-                <NotificationsProvider>
-                  <RealtimeStockProvider>
-                    <RealtimeSettingsProvider>
-                      <CartProvider>
-                        <AIStylistProvider>
-                          <WishlistProvider>
-                            <LoadingProvider>
-                              <ClientLayoutWrapper>
-                                {children}
-                              </ClientLayoutWrapper>
-                              <FaqButton />
-                              <WhatsAppButton />
-                            </LoadingProvider>
-                          </WishlistProvider>
-                        </AIStylistProvider>
-                      </CartProvider>
-                    </RealtimeSettingsProvider>
-                  </RealtimeStockProvider>
-                </NotificationsProvider>
-              </CustomerNotificationsProvider>
-            </AuthProvider>
+            <AdminAuthProvider>
+              <AuthProvider>
+                <CustomerNotificationsProvider>
+                  <NotificationsProvider>
+                    <RealtimeStockProvider>
+                      <RealtimeSettingsProvider>
+                        <CartProvider>
+                          <AIStylistProvider>
+                            <WishlistProvider>
+                              <LoadingProvider>
+                                <ClientLayoutWrapper>
+                                  {children}
+                                </ClientLayoutWrapper>
+                                <FaqButton />
+                                <WhatsAppButton />
+                              </LoadingProvider>
+                            </WishlistProvider>
+                          </AIStylistProvider>
+                        </CartProvider>
+                      </RealtimeSettingsProvider>
+                    </RealtimeStockProvider>
+                  </NotificationsProvider>
+                </CustomerNotificationsProvider>
+              </AuthProvider>
+            </AdminAuthProvider>
           </GoogleOAuthProvider>
         </div>
       </body>
