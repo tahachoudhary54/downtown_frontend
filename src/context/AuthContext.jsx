@@ -78,16 +78,6 @@ export function AuthProvider({ children }) {
     setUser(userData);
   };
 
-  const logout = async () => {
-    try {
-      await apiLogout();
-    } catch (err) {
-      console.error("Logout error", err);
-    }
-    setToken(null);
-    setUser(null);
-  };
-
   // Update user profile (e.g., name, phone)
   const updateProfile = (updates) => {
     setUser((prev) => {

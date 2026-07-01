@@ -166,7 +166,7 @@ export default function ProductDisplayClient({ product }) {
             />
             
             <div className={styles.features}>
-              <p>✓ Free Standard Shipping on orders above ₹999</p>
+              <p>✓ Premium Quality Materials</p>
               <p>✓ 30-Day Easy Returns</p>
               <p>✓ 100% Secure Checkout</p>
             </div>
