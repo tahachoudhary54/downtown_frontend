@@ -5,7 +5,7 @@ export async function fetchProducts(params = {}, returnFullRes = false) {
     const query = new URLSearchParams(params).toString();
     let url = `${API_URL}/api/products${query ? `?${query}` : ""}`;
     if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
-        url = `http://127.0.0.1:5000/api/products${query ? `?${query}` : ""}`;
+        url = `http://127.0.0.1:5024/api/products${query ? `?${query}` : ""}`;
     }
     const res = await fetch(url, {
       cache: "no-store",
@@ -33,7 +33,7 @@ export async function fetchProductById(id) {
   try {
     let url = `${API_URL}/api/products/${id}`;
     if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
-        url = `http://127.0.0.1:5000/api/products/${id}`; // Fix Node fetch IPv6 and .env issues
+        url = `http://127.0.0.1:5024/api/products/${id}`; // Fix Node fetch IPv6 and .env issues
     }
     const res = await fetch(url, { cache: "no-store" });
     if (res.ok) {
