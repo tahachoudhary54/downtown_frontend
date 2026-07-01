@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
-import { signup, verifyOtp, loginWithGoogle } from "../../lib/api";
+import { signup, verifyOtp, loginWithGoogle, resendOtp } from "../../lib/api";
 import { GoogleLogin } from "@react-oauth/google";
 import styles from "../auth.module.css";
 
@@ -18,8 +18,35 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const router = useRouter();
   const { loginState } = useAuth();
+
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    setError("");
+    try {
+      const res = await resendOtp(email);
+      if (res.success) {
+        setSuccessMsg("A new verification code has been sent to your email.");
+        setResendCooldown(30);
+      } else {
+        setError(res.message || "Failed to resend code.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred.");
+    }
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -110,6 +137,25 @@ export default function SignupPage() {
               {loading ? "VERIFYING..." : "VERIFY & CREATE ACCOUNT"}
             </button>
           </form>
+
+          <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
+            <button
+              onClick={handleResendOtp}
+              disabled={resendCooldown > 0}
+              style={{
+                background: "none",
+                border: "none",
+                color: resendCooldown > 0 ? "#888" : "#C8A96A",
+                fontWeight: 600,
+                cursor: resendCooldown > 0 ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+                fontSize: "0.9rem",
+                textDecoration: "underline"
+              }}
+            >
+              {resendCooldown > 0 ? `Resend Code in ${resendCooldown}s` : "Resend Verification Code"}
+            </button>
+          </div>
 
           <div className={styles.footer}>
             Wrong email?{" "}
