@@ -58,6 +58,7 @@ export async function signup(userData) {
   const res = await fetch(`${API_URL}/api/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(userData),
   });
   return res.json();
@@ -67,6 +68,7 @@ export async function verifyOtp(data) {
   const res = await fetch(`${API_URL}/api/auth/verify-otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(data),
   });
   return res.json();
@@ -76,6 +78,7 @@ export async function login(credentials) {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(credentials),
   });
   return res.json();
@@ -85,6 +88,7 @@ export async function loginWithGoogle(credential) {
   const res = await fetch(`${API_URL}/api/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ credential }),
   });
   return res.json();
@@ -115,4 +119,80 @@ export async function resetPassword(data) {
     body: JSON.stringify(data),
   });
   return res.json();
+}
+
+let refreshPromise = null;
+
+export async function refreshSession() {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+  
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/refresh`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Session refresh failed");
+      return await res.json();
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+  
+  return refreshPromise;
+}
+
+export async function logout() {
+  const res = await fetch(`${API_URL}/api/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return res.json();
+}
+
+let isInterceptorSetup = false;
+
+export function setupFetchInterceptor(setToken, logoutFn) {
+  if (typeof window === "undefined" || isInterceptorSetup) return;
+  isInterceptorSetup = true;
+
+  const originalFetch = window.fetch;
+
+  window.fetch = async (...args) => {
+    let [resource, config] = args;
+    
+    let response = await originalFetch(resource, config);
+    
+    if (response.status === 401 && typeof resource === 'string' && 
+        !resource.includes('/api/auth/refresh') && 
+        !resource.includes('/api/auth/login') && 
+        !resource.includes('/api/auth/logout')) {
+      try {
+        const refreshData = await refreshSession();
+        
+        if (refreshData && refreshData.success && refreshData.token) {
+          const newToken = refreshData.token;
+          setToken(newToken);
+          
+          const newConfig = { ...config };
+          newConfig.headers = {
+            ...newConfig.headers,
+            'Authorization': `Bearer ${newToken}`
+          };
+          
+          return await originalFetch(resource, newConfig);
+        } else {
+          throw new Error("Refresh failed");
+        }
+      } catch (err) {
+        console.error("Session expired, logging out.", err);
+        logoutFn();
+        return response;
+      }
+    }
+    
+    return response;
+  };
 }
