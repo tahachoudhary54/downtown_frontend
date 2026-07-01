@@ -106,7 +106,7 @@ export default function ProductDisplayClient({ product }) {
                     alt={product.name} 
                     width={900} 
                     height={1200} 
-                    style={{ width: '100%', height: 'auto', objectFit: 'cover', display: 'block' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     className={styles.productImage}
                     priority 
                   />
