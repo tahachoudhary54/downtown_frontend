@@ -230,6 +230,14 @@ export default function CheckoutPage() {
         }
       };
 
+      console.log("=== RAZORPAY DEBUG LOGS ===");
+      console.log("options.key:", options.key);
+      console.log("options.order_id:", options.order_id);
+      console.log("options.amount:", options.amount);
+      console.log("options.currency:", options.currency);
+      console.log("complete options object:", options);
+      console.log("===========================");
+
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function (response) {
         console.error("Payment failed:", response.error);
