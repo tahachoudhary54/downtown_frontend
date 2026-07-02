@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
 
     const initAuth = async () => {
       try {
-        const res = await refreshSession("user");
+        const res = await refreshSession("user", true);
         if (res && res.success && res.token && res.user) {
           const parsedUser = res.user;
           if (!parsedUser.phone) parsedUser.phone = "";

@@ -123,18 +123,32 @@ export async function resetPassword(data) {
 
 let refreshPromises = { user: null, admin: null };
 
-export async function refreshSession(type = 'user') {
+export async function refreshSession(type = 'user', force = false) {
   if (refreshPromises[type]) {
     return refreshPromises[type];
   }
   
+  // Cross-tab throttle: if another tab refreshed within the last 15 seconds, skip and return success implicitly.
+  // This prevents strict token rotation anomaly (replay attack) from falsely logging out users who switch tabs quickly.
+  if (!force && typeof window !== 'undefined') {
+    const lastRefresh = localStorage.getItem(`lastRefresh_${type}`);
+    if (lastRefresh && Date.now() - parseInt(lastRefresh, 10) < 15000) {
+      return { success: true, message: "Throttled cross-tab refresh" };
+    }
+  }
+
   refreshPromises[type] = (async () => {
     try {
       const res = await fetch(`${API_URL}/api/auth/refresh?type=${type}`, {
         method: "GET",
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Session refresh failed");
+      if (!res.ok) {
+        return { success: false, message: "Session refresh failed" };
+      }
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`lastRefresh_${type}`, Date.now().toString());
+      }
       return await res.json();
     } finally {
       refreshPromises[type] = null;

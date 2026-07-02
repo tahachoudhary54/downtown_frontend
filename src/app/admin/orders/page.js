@@ -160,8 +160,8 @@ export default function AdminOrders() {
           </div>
         ) : (
           <div>
-            <table className="w-full text-sm block md:table">
-              <thead className="hidden md:table-header-group bg-[var(--bg)] border-b border-[var(--border)]">
+            <table className="w-full text-sm block xl:table">
+              <thead className="hidden xl:table-header-group bg-[var(--bg)] border-b border-[var(--border)]">
                 <tr>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Order ID</th>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Customer</th>
@@ -172,27 +172,27 @@ export default function AdminOrders() {
                   <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="block md:table-row-group divide-y-0 md:divide-y md:divide-[var(--border)]">
+              <tbody className="block xl:table-row-group divide-y-0 xl:divide-y xl:divide-[var(--border)]">
                 {filtered.map((order) => (
-                  <tr key={order._id} className="border border-[var(--border)] m-4 md:m-0 rounded-xl md:rounded-none md:border-0 hover:bg-[var(--bg)] transition-colors block md:table-row bg-white overflow-hidden shadow-sm md:shadow-none">
-                    <td className="block md:table-cell px-6 py-3 md:py-4 font-mono text-xs text-[var(--text-muted)] border-b border-gray-100 md:border-b-0">
-                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Order ID</span>
+                  <tr key={order._id} className="border border-[var(--border)] m-4 xl:m-0 rounded-xl xl:rounded-none xl:border-0 hover:bg-[var(--bg)] transition-colors block xl:table-row bg-white overflow-hidden shadow-sm xl:shadow-none">
+                    <td className="block xl:table-cell px-6 py-3 xl:py-4 font-mono text-xs text-[var(--text-muted)] border-b border-gray-100 xl:border-b-0">
+                      <span className="xl:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Order ID</span>
                       #{order._id.slice(-6).toUpperCase()}
                     </td>
-                    <td className="block md:table-cell px-6 py-3 md:py-4 border-b border-gray-100 md:border-b-0">
-                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Customer</span>
-                      <p className="font-medium text-[var(--foreground)] inline-block md:block">{order.customer?.firstName} {order.customer?.lastName}</p>
-                      <p className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0">{order.customer?.email}</p>
-                      <p className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0">{order.customer?.phone}</p>
+                    <td className="block xl:table-cell px-6 py-3 xl:py-4 border-b border-gray-100 xl:border-b-0">
+                      <span className="xl:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Customer</span>
+                      <p className="font-medium text-[var(--foreground)] inline-block xl:block">{order.customer?.firstName} {order.customer?.lastName}</p>
+                      <p className="text-xs text-[var(--text-muted)] inline-block xl:block ml-2 xl:ml-0">{order.customer?.email}</p>
+                      <p className="text-xs text-[var(--text-muted)] inline-block xl:block ml-2 xl:ml-0">{order.customer?.phone}</p>
                       {order.shippingAddress && (
-                        <p className="text-xs text-[var(--text-muted)] inline-block md:block ml-2 md:ml-0 mt-1">
+                        <p className="text-xs text-[var(--text-muted)] inline-block xl:block ml-2 xl:ml-0 mt-1">
                           {order.shippingAddress.address}, {order.shippingAddress.city} - {order.shippingAddress.pinCode}
                         </p>
                       )}
                     </td>
-                    <td className="block md:table-cell px-6 py-3 md:py-4 border-b border-gray-100 md:border-b-0">
-                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Items</span>
-                      <div className="space-y-1 inline-block md:block">
+                    <td className="block xl:table-cell px-6 py-3 xl:py-4 border-b border-gray-100 xl:border-b-0">
+                      <span className="xl:hidden font-semibold text-xs text-gray-500 mr-2 uppercase block mb-1">Items</span>
+                      <div className="space-y-1 inline-block xl:block">
                         {order.items?.map((item, i) => (
                           <p key={i} className="text-xs text-[var(--text-muted)]">
                             {item.name} × {item.quantity} <span className="opacity-60">(Size: {item.size})</span>
@@ -200,24 +200,24 @@ export default function AdminOrders() {
                         ))}
                       </div>
                     </td>
-                    <td className="block md:table-cell px-6 py-3 md:py-4 font-semibold text-[var(--foreground)] border-b border-gray-100 md:border-b-0">
-                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Total:</span>
+                    <td className="block xl:table-cell px-6 py-3 xl:py-4 font-semibold text-[var(--foreground)] border-b border-gray-100 xl:border-b-0">
+                      <span className="xl:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Total:</span>
                       ₹{order.financials?.total?.toLocaleString('en-IN')}
                     </td>
-                    <td className="block md:table-cell px-6 py-3 md:py-4 border-b border-gray-100 md:border-b-0">
-                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Payment:</span>
-                      <span className="text-xs font-medium uppercase bg-[var(--bg)] px-2 py-1 rounded inline-block md:block w-fit">
+                    <td className="block xl:table-cell px-6 py-3 xl:py-4 border-b border-gray-100 xl:border-b-0">
+                      <span className="xl:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Payment:</span>
+                      <span className="text-xs font-medium uppercase bg-[var(--bg)] px-2 py-1 rounded inline-block xl:block w-fit">
                         {order.paymentMethod}
                       </span>
                     </td>
-                    <td className="block md:table-cell px-6 py-3 md:py-4 text-xs text-[var(--text-muted)] border-b border-gray-100 md:border-b-0">
-                      <span className="md:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Date:</span>
+                    <td className="block xl:table-cell px-6 py-3 xl:py-4 text-xs text-[var(--text-muted)] border-b border-gray-100 xl:border-b-0">
+                      <span className="xl:hidden font-semibold text-xs text-gray-500 mr-2 uppercase">Date:</span>
                       {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
-                    <td className="flex md:table-cell px-6 py-4 md:py-4 justify-between md:justify-start items-center bg-gray-50 md:bg-transparent">
-                      <div className="flex items-center gap-3 w-full justify-between md:justify-start">
+                    <td className="flex xl:table-cell px-6 py-4 xl:py-4 justify-between xl:justify-start items-center bg-gray-50 xl:bg-transparent">
+                      <div className="flex items-center gap-3 w-full justify-between xl:justify-start flex-wrap">
                         <div className="flex items-center gap-2">
-                          <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Status:</span>
+                          <span className="xl:hidden font-semibold text-xs text-gray-500 uppercase">Status:</span>
                           <div className="flex flex-col gap-2">
                             <select
                               value={order.orderStatus}
@@ -264,15 +264,16 @@ export default function AdminOrders() {
                         <button
                           onClick={() => handleDeleteOrder(order._id)}
                           disabled={updatingId === order._id}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                          className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-medium text-xs rounded-md transition-colors disabled:opacity-50 flex items-center gap-1.5 border border-red-200 shrink-0"
                           title="Delete Order"
                         >
-                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                             <line x1="10" y1="11" x2="10" y2="17"></line>
                             <line x1="14" y1="11" x2="14" y2="17"></line>
                           </svg>
+                          Delete
                         </button>
                       </div>
                     </td>

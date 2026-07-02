@@ -26,7 +26,7 @@ export function AdminAuthProvider({ children }) {
 
     const initAuth = async () => {
       try {
-        const res = await refreshSession("admin");
+        const res = await refreshSession("admin", true);
         if (res && res.success && res.token && res.user) {
           const parsedUser = res.user;
           if (!parsedUser.phone) parsedUser.phone = "";

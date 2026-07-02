@@ -79,9 +79,9 @@ export default function AdminReturns() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-[#FAF8F5] text-[var(--text-muted)] uppercase tracking-wider text-xs border-b border-[var(--border)]">
+        <div className="overflow-hidden">
+          <table className="w-full text-left text-sm block md:table">
+            <thead className="hidden md:table-header-group bg-[#FAF8F5] text-[var(--text-muted)] uppercase tracking-wider text-xs border-b border-[var(--border)]">
               <tr>
                 <th className="px-6 py-4 font-semibold">Order ID</th>
                 <th className="px-6 py-4 font-semibold">Customer</th>
@@ -92,25 +92,42 @@ export default function AdminReturns() {
                 <th className="px-6 py-4 font-semibold">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)]">
+            <tbody className="block md:table-row-group divide-y-0 md:divide-y md:divide-[var(--border)]">
               {requests.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-[var(--text-muted)]">No requests found.</td>
+                  <td colSpan="7" className="px-6 py-8 text-center text-[var(--text-muted)] block">No requests found.</td>
                 </tr>
               ) : (
                 requests.map(req => (
-                  <tr key={req._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium">{req.orderId}</td>
-                    <td className="px-6 py-4">{req.name}</td>
-                    <td className="px-6 py-4 font-semibold">{req.requestType}</td>
-                    <td className="px-6 py-4">{req.reason}</td>
-                    <td className="px-6 py-4">
+                  <tr key={req._id} className="block md:table-row hover:bg-gray-50 transition-colors border-b border-[var(--border)] md:border-b-0 p-4 md:p-0">
+                    <td className="block md:table-cell px-2 md:px-6 py-2 md:py-4 font-medium flex justify-between md:table-cell">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Order ID</span>
+                      <span>{req.orderId}</span>
+                    </td>
+                    <td className="block md:table-cell px-2 md:px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Customer</span>
+                      <span>{req.name}</span>
+                    </td>
+                    <td className="block md:table-cell px-2 md:px-6 py-2 md:py-4 font-semibold flex justify-between md:table-cell">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Type</span>
+                      <span>{req.requestType}</span>
+                    </td>
+                    <td className="block md:table-cell px-2 md:px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Reason</span>
+                      <span>{req.reason}</span>
+                    </td>
+                    <td className="block md:table-cell px-2 md:px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Status</span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(req.status)}`}>
                         {req.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">{new Date(req.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4">
+                    <td className="block md:table-cell px-2 md:px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Date</span>
+                      <span>{new Date(req.createdAt).toLocaleDateString()}</span>
+                    </td>
+                    <td className="block md:table-cell px-2 md:px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                      <span className="md:hidden font-semibold text-xs text-gray-500 uppercase">Action</span>
                       <button 
                         onClick={() => {
                           setSelectedRequest(req);
