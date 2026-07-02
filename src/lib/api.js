@@ -193,7 +193,13 @@ function setupFetchInterceptor() {
         !resource.includes('/api/auth/login') && 
         !resource.includes('/api/auth/logout')) {
       
-      const type = resource.includes('/api/admin') ? 'admin' : 'user';
+      let type = 'user';
+      if (resource.includes('/api/admin')) {
+        type = 'admin';
+      } else if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+        type = 'admin';
+      }
+      
       const handler = authHandlers[type];
       
       try {
