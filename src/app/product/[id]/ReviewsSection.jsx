@@ -26,7 +26,7 @@ export default function ReviewsSection({ product }) {
 
   useEffect(() => {
     fetchReviews();
-  }, [product._id, pagination.page, sort, ratingFilter, verifiedOnly, hasImages]);
+  }, [product._id, pagination.page, sort, ratingFilter, verifiedOnly, hasImages, product.reviewCount, product.averageRating]);
 
   const fetchReviews = async () => {
     setLoading(true);
