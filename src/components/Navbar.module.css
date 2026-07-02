@@ -100,8 +100,8 @@
 
 .aiStylistLink {
   position: relative;
-  background: transparent;
-  border: none;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(200, 169, 106, 0.4);
   color: #C8A96A;
   text-decoration: none;
   font-size: 0.85rem;
@@ -109,27 +109,21 @@
   letter-spacing: 0.12em;
   font-weight: 500;
   transition: all 0.3s ease;
-  padding-bottom: 6px;
+  padding: 4px 9px;
+  margin-left: -0.2rem;
+  border-radius: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
   font-family: inherit;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
 }
 .aiStylistLink::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 1px;
-  background-color: #C8A96A;
-  transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-.aiStylistLink:hover::after {
-  width: 100%;
+  display: none;
 }
 .aiStylistLink:hover {
+  background: rgba(0, 0, 0, 0.6);
   color: #d8ba7c;
   text-shadow: 0 0 10px rgba(200, 169, 106, 0.4);
 }
@@ -613,26 +607,31 @@
     to { opacity: 1; transform: translateX(0); }
   }
 
-  .nav a {
+  .nav a, .nav .aiStylistLink {
     font-size: 1.5rem;
     opacity: 0;
     transition: color 0.3s ease, letter-spacing 0.3s ease, text-shadow 0.3s ease;
   }
   
-  .nav a:hover, .nav a:active {
+  .nav a:hover, .nav a:active, .nav .aiStylistLink:hover, .nav .aiStylistLink:active {
     color: #C9A86A;
     letter-spacing: 0.18em;
     text-shadow: 0 0 15px rgba(201, 168, 106, 0.4);
   }
   
-  .nav.navOpen a {
+  .nav .aiStylistLink {
+    margin-left: 0;
+  }
+  
+  .nav.navOpen a, .nav.navOpen .aiStylistLink {
     animation: slideInLeftLink 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
   }
   .nav.navOpen a:nth-child(1) { animation-delay: 0.15s; }
   .nav.navOpen a:nth-child(2) { animation-delay: 0.25s; }
   .nav.navOpen a:nth-child(3) { animation-delay: 0.35s; }
   .nav.navOpen a:nth-child(4) { animation-delay: 0.45s; }
-  .nav.navOpen a:nth-child(5) { animation-delay: 0.55s; }
+  .nav.navOpen .aiStylistLink:nth-child(5) { animation-delay: 0.55s; }
+  .nav.navOpen a:nth-child(6) { animation-delay: 0.65s; }
   .searchInput {
     width: 150px;
     right: 0;
