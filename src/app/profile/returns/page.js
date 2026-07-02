@@ -56,7 +56,7 @@ export default function MyReturns() {
             <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
             <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">No Requests Found</h3>
             <p className="text-[var(--text-muted)] mb-6">You haven't made any return or exchange requests yet.</p>
-            <Link href="/orders" className="inline-block bg-[var(--foreground)] text-white font-bold tracking-wider uppercase px-8 py-3 rounded-xl hover:bg-[var(--accent)] transition-colors">
+            <Link href="/orders" className="inline-block bg-[var(--foreground)] font-bold tracking-wider uppercase px-8 py-3 rounded-xl hover:bg-[var(--accent)] transition-colors" style={{ color: '#ffffff' }}>
               View My Orders
             </Link>
           </div>
