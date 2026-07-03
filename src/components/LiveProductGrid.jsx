@@ -61,8 +61,11 @@ export default function LiveProductGrid({ initialProducts, queryParams, emptyMes
       setMobileProducts(prev => {
         const newArr = [...prev];
         data.products.forEach(p => {
-          if (!newArr.some(existing => (existing._id || existing.id) === (p._id || p.id))) {
+          const existingIndex = newArr.findIndex(existing => (existing._id || existing.id) === (p._id || p.id));
+          if (existingIndex === -1) {
             newArr.push(p);
+          } else {
+            newArr[existingIndex] = p;
           }
         });
         return newArr;

@@ -37,6 +37,37 @@ export const RealtimeSettingsProvider = ({ children }) => {
 
     socket.on('data_updated', (info) => {
       console.log("Data updated globally, triggering refresh...", info);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      
+      if (info && info.type) {
+        let endpointPrefix = "";
+        switch (info.type) {
+          case "product":
+            endpointPrefix = `${apiUrl}/api/products`;
+            break;
+          case "category":
+            endpointPrefix = `${apiUrl}/api/categories`;
+            break;
+          case "collection":
+            endpointPrefix = `${apiUrl}/api/collections`;
+            break;
+          case "settings":
+            endpointPrefix = `${apiUrl}/api/settings`;
+            break;
+          case "review":
+            endpointPrefix = `${apiUrl}/api/reviews`;
+            break;
+        }
+
+        if (endpointPrefix) {
+          mutate(
+            (key) => typeof key === 'string' && key.startsWith(endpointPrefix),
+            undefined,
+            { revalidate: true }
+          );
+        }
+      }
+
       startTransition(() => {
         router.refresh();
       });
