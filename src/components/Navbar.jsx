@@ -368,7 +368,7 @@ export default function Navbar() {
                               if (notif.orderId || notif.type?.startsWith('order_')) {
                                 router.push('/orders');
                               } else if (notif.type === 'support_ticket_reply') {
-                                router.push('/account?tab=support');
+                                router.push(`/account?tab=support&ticketId=${notif.ticketId || ''}`);
                               }
                             }}
                           >

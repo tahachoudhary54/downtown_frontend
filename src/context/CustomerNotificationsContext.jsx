@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import useSWR from 'swr';
+import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
 const CustomerNotificationsContext = createContext();
@@ -15,7 +16,6 @@ export function CustomerNotificationsProvider({ children }) {
     headers: { Authorization: `Bearer ${token}` }
   }).then(r => r.json());
 
-  // Poll for notifications every 5 seconds if logged in
   const { data: notificationsData, mutate } = useSWR(
     user && token ? `${apiBase}/api/notifications` : null,
     fetcher,
@@ -27,6 +27,27 @@ export function CustomerNotificationsProvider({ children }) {
     fetcher,
     { refreshInterval: 5000 }
   );
+
+  // Socket listener for real-time notifications
+  useEffect(() => {
+    if (!user || !user._id) return;
+    
+    const socket = io(apiBase);
+    
+    socket.on('connect', () => {
+      console.log('Customer socket connected');
+    });
+
+    socket.on(`user_notification_${user._id}`, (data) => {
+      // Optimistically update notifications by triggering SWR refetch
+      mutate();
+      mutateCount();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user, apiBase, mutate, mutateCount]);
 
   const notifications = notificationsData?.data || [];
   const unreadCount = countData?.count || 0;

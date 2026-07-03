@@ -11,7 +11,7 @@ import { Suspense } from 'react';
 
 function AccountContent() {
   const { token, user: authUser, loading, checkUser } = useAuth();
-  const { notifications, deleteNotification } = useCustomerNotifications();
+  const { notifications, deleteNotification, markAsRead } = useCustomerNotifications();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
@@ -25,8 +25,22 @@ function AccountContent() {
       if (tab) {
         setActiveTab(tab);
       }
+      const ticketId = searchParams.get('ticketId');
+      if (ticketId) {
+        setSelectedTicketId(ticketId);
+      }
     }
   }, [searchParams, mounted]);
+
+  // Mark notification as read when ticket is opened
+  useEffect(() => {
+    if (selectedTicketId && notifications.length > 0) {
+      const unreadForTicket = notifications.filter(n => !n.isRead && n.ticketId === selectedTicketId);
+      unreadForTicket.forEach(n => {
+        markAsRead(n._id);
+      });
+    }
+  }, [selectedTicketId, notifications, markAsRead]);
 
   // Profile State
   const [name, setName] = useState('');
