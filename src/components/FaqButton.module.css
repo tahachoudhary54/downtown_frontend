@@ -1,26 +1,71 @@
-.faqFloat {
+.wrapper {
   position: fixed;
-  bottom: 90px;
-  right: 30px;
-  background-color: var(--accent, #3b82f6);
-  color: #fff;
+  bottom: 90px; /* 60px (WhatsApp height) + 20px margin + 10px spacing */
+  right: 30px; /* centers 40px FAQ over 60px WhatsApp */
+  z-index: 10000;
   width: 40px;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+.faqFloat {
+  background-color: var(--accent, #3b82f6);
+  color: #fff;
+  width: 100%;
+  height: 100%;
   border-radius: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
   box-shadow: 2px 2px 10px rgba(0,0,0,0.15);
-  z-index: 9999;
   transition: transform 0.3s ease;
 }
 .faqFloat:hover {
   transform: scale(1.1);
 }
 
+/* Tooltip for FAQ */
+.tooltip {
+  position: absolute;
+  right: 100%;
+  margin-right: 12px;
+  background-color: var(--foreground);
+  color: var(--background);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent var(--foreground);
+}
+
+.wrapper:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
 @media (max-width: 600px) {
   .faqFloat {
-    bottom: calc(85px + env(safe-area-inset-bottom));
-    right: 22.5px;
+    top: calc(85px + env(safe-area-inset-bottom));
+    left: 22.5px;
   }
 }

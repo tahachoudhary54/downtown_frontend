@@ -55,7 +55,7 @@
 .imagePlaceholder {
   width: 100%;
   aspect-ratio: 4/5;
-  background-color: var(--secondary, #fcfaf8);
+  background-color: var(--bg-secondary);
   border-radius: 8px;
   position: relative;
   overflow: hidden;
@@ -70,7 +70,7 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  color: rgba(46,42,39,0.4);
+  color: rgba(46,42,39,0.8);
   font-family: var(--font-inter);
   font-weight: 500;
   font-size: 1.25rem;
