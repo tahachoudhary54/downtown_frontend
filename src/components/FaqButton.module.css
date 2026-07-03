@@ -1,7 +1,7 @@
 .wrapper {
   position: fixed;
   bottom: 90px; /* 60px (WhatsApp height) + 20px margin + 10px spacing */
-  right: 30px; /* centers 40px FAQ over 60px WhatsApp */
+  right: 16px; /* centers 40px FAQ over 60px WhatsApp */
   z-index: 10000;
   width: 40px;
   height: 40px;
