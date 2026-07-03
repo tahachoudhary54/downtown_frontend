@@ -91,7 +91,10 @@ function WishlistItem({ item, toggleWishlist }) {
             {isOutOfStock ? (
               <span className="text-[11px] text-red-600 font-semibold">Out of stock</span>
             ) : liveStock <= 20 ? (
-              <span className="text-[11px] text-amber-600 font-medium">⚡ {liveStock} left</span>
+              <span className="text-[11px] text-amber-600 font-medium flex items-center gap-1">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                {liveStock} left
+              </span>
             ) : (
               <span className="text-[11px] text-emerald-600 font-medium">In Stock</span>
             )}
@@ -124,13 +127,14 @@ function WishlistItem({ item, toggleWishlist }) {
               {isOutOfStock ? 'Sold Out' : 'Add to Cart'}
             </button>
           </div>
-          <button 
-            type="button"
-            onClick={() => toggleWishlist(item)}
-            className="w-full py-2 rounded text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5 border border-red-200"
-          >
-            ✕ Remove from Wishlist
-          </button>
+            <button 
+              type="button"
+              onClick={() => toggleWishlist(item)}
+              className="w-full py-2 rounded text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5 border border-red-200"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Remove from Wishlist
+            </button>
         </div>
       </div>
     </div>
@@ -150,8 +154,8 @@ export default function WishlistPage() {
 
         {wishlist.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500 text-2xl">
-              ♡
+            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </div>
             <p style={{ fontSize: '1.1rem', color: '#444', fontWeight: 500 }}>Your wishlist is currently empty.</p>
             <p style={{ fontSize: '0.9rem', color: '#777', marginTop: '0.25rem' }}>Explore our collection or ask AI Stylist for recommendations!</p>

@@ -13,12 +13,12 @@ const SUGGESTION_CHIPS = [
 ];
 
 const WELCOME_ACTIONS = [
-  { icon: "👔", label: "Complete My Outfit" },
-  { icon: "📷", label: "Find Similar Style" },
-  { icon: "💰", label: "Shop by Budget" },
-  { icon: "🎉", label: "Shop by Occasion" },
-  { icon: "🎨", label: "Shop by Colour" },
-  { icon: "🔥", label: "Trending Collection" }
+  { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>, label: "Complete My Outfit" },
+  { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>, label: "Find Similar Style" },
+  { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>, label: "Shop by Budget" },
+  { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, label: "Shop by Occasion" },
+  { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, label: "Shop by Colour" },
+  { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, label: "Trending Collection" }
 ];
 
 export default function AIChatInterface({ initialPrompt }) {
@@ -189,13 +189,13 @@ export default function AIChatInterface({ initialPrompt }) {
         const availableItems = itemsToSave.filter(p => p && p.stock !== 0 && p.totalStock !== 0);
         const unavailableCount = itemsToSave.length - availableItems.length;
 
-        let aiReply = "✅ Done! I've added all recommended products to your Wishlist.";
+        let aiReply = "Done! I've added all recommended products to your Wishlist.";
         if (itemsToSave.length === 0) {
           aiReply = "I couldn't find any recently recommended products in our chat to save. Ask me for an outfit recommendation first!";
         } else if (availableItems.length === 0) {
           aiReply = "Sorry, the recommended items are currently out of stock and couldn't be saved.";
         } else if (unavailableCount > 0) {
-          aiReply = `✅ Done! Saved ${availableItems.length} available products to your Wishlist. (${unavailableCount} item(s) were out of stock).`;
+          aiReply = `Done! Saved ${availableItems.length} available products to your Wishlist. (${unavailableCount} item(s) were out of stock).`;
         } else {
           addToWishlist(availableItems, "All recommended products saved");
         }
@@ -276,7 +276,7 @@ export default function AIChatInterface({ initialPrompt }) {
         {messages.length === 0 ? (
             <div className="min-h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-8 animate-fade-in py-8">
                 <div className="w-20 h-20 bg-[rgba(200,169,106,0.1)] rounded-full flex items-center justify-center mb-4 border border-[#C8A96A]/20">
-                    <span className="text-4xl">✨</span>
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C8A96A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 4l5 5L8 21l-5-1 1-5z"/><path d="M15 4l5 5"/></svg>
                 </div>
                 <h1 className="text-3xl font-medium text-white tracking-wide">Welcome to Downtown AI Stylist</h1>
                 <p className="text-[#888888] text-lg max-w-md">Your personal fashion concierge. How can I help you elevate your style today?</p>
@@ -292,7 +292,7 @@ export default function AIChatInterface({ initialPrompt }) {
                             }}
                             className="bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(200,169,106,0.1)] border border-[rgba(255,255,255,0.05)] hover:border-[#C8A96A]/30 p-4 rounded-xl transition-all flex flex-col items-center justify-center gap-2 group"
                         >
-                            <span className="text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
+                        <span className="text-2xl group-hover:scale-110 transition-transform flex items-center justify-center" style={{color:'#C8A96A'}}>{action.icon}</span>
                             <span className="text-sm text-gray-300 group-hover:text-white font-medium">{action.label}</span>
                         </button>
                     ))}

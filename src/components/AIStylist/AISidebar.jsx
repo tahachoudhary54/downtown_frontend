@@ -121,7 +121,7 @@ export default function AISidebar() {
 
                 {conversations.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                        <span className="text-3xl mb-3">💬</span>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         <p className="text-gray-500 text-sm">No conversations yet.</p>
                         <p className="text-gray-600 text-xs mt-1">Start chatting to see your history here.</p>
                     </div>
@@ -153,16 +153,19 @@ function ConversationItem({ conv, isActive, onClick, onPin, onDelete }) {
         ? conv.messages[conv.messages.length - 1]
         : null;
 
-    let previewText = 'No messages yet';
+    let preview = { text: 'No messages yet', icon: null };
     if (lastMsg) {
         if (lastMsg.type === 'text' && lastMsg.content) {
-            previewText = lastMsg.content;
+            preview.text = lastMsg.content;
         } else if (lastMsg.type === 'image') {
-            previewText = '📷 Image';
+            preview.text = 'Image';
+            preview.icon = <svg className="w-3 h-3 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>;
         } else if (lastMsg.type === 'products') {
-            previewText = '🛍 Products';
+            preview.text = 'Products';
+            preview.icon = <svg className="w-3 h-3 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>;
         } else if (lastMsg.type === 'outfits') {
-            previewText = '👔 Outfit';
+            preview.text = 'Outfit';
+            preview.icon = <svg className="w-3 h-3 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>;
         }
     }
 
@@ -179,7 +182,7 @@ function ConversationItem({ conv, isActive, onClick, onPin, onDelete }) {
                     {conv.title || 'New Chat'}
                 </h4>
             </div>
-            <p className="text-xs text-gray-500 truncate pr-14">{previewText}</p>
+            <p className="text-xs text-gray-500 truncate pr-14 flex items-center">{preview.icon}{preview.text}</p>
 
             <div className={'absolute right-1.5 top-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ' + (isActive ? 'opacity-100' : '')}>
                 <button

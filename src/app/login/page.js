@@ -70,6 +70,10 @@ export default function LoginPage() {
   return (
     <div className={styles.page}>
       <div className={styles.authContainer}>
+        <div className={styles.topTabs}>
+          <Link href="/login" className={`${styles.tabBtn} ${styles.activeTab}`}>LOGIN</Link>
+          <Link href="/signup" className={styles.tabBtn}>SIGN UP</Link>
+        </div>
         <h1 className={styles.title}>Welcome Back</h1>
         <p className={styles.subtitle}>Sign in to access your account</p>
 
@@ -142,16 +146,7 @@ export default function LoginPage() {
 
           <button type="submit" className={styles.btnSubmit}>LOGIN</button>
         </form>
-
-        <div className={styles.footer}>
-          Don't have an account? 
-          <Link href="/signup" className={styles.link}>
-            Sign up
-          </Link>
-        </div>
       </div>
     </div>
   );
 }
-
-// Triggering Fast Refresh

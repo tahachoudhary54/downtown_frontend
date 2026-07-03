@@ -126,7 +126,7 @@ export default function SizeGuideContent() {
               </div>
 
               <div className={styles.expertTip}>
-                <span className={styles.tipIcon}>✨</span>
+                <span className={styles.tipIcon}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 4l5 5L8 21l-5-1 1-5z"/><path d="M15 4l5 5"/></svg></span>
                 <div>
                   <strong>Stylist's Tip:</strong>
                   <p>{sizeData.expertTip}</p>

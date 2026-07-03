@@ -186,7 +186,7 @@ export default function HeroSlider({ initialSettings }) {
                className={styles.aiStylistCta}
                onClick={() => openStylist()}
              >
-               <span className={styles.aiStylistCtaText}>✨ Need help choosing the perfect outfit?</span>
+               <span className={styles.aiStylistCtaText}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:'5px',verticalAlign:'middle'}}><path d="M15 4l5 5L8 21l-5-1 1-5z"/><path d="M15 4l5 5"/></svg>Need help choosing the perfect outfit?</span>
                <strong className={styles.aiStylistCtaAction}>Ask Downtown AI Stylist →</strong>
              </button>
           </div>

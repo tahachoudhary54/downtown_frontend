@@ -54,6 +54,7 @@ export async function fetchProductById(id) {
   }
 }
 
+
 export async function signup(userData) {
   const res = await fetch(`${API_URL}/api/auth/signup`, {
     method: "POST",

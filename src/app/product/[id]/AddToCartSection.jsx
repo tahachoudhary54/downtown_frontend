@@ -155,7 +155,7 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
         onClick={handleAddToCart}
         disabled={effectiveStock === 0}
       >
-        {effectiveStock === 0 ? "OUT OF STOCK" : added ? "✓ ADDED TO CART" : "ADD TO CART"}
+        {effectiveStock === 0 ? "OUT OF STOCK" : added ? <span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'6px'}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>ADDED TO CART</span> : "ADD TO CART"}
       </button>
 
       <button
@@ -207,7 +207,7 @@ export default function AddToCartSection({ product, selectedColor, setSelectedCo
 
       <div className={styles.aiStylistContextCard}>
         <div className={styles.aiStylistContextCardHeader}>
-          <span>✨ Downtown AI Stylist</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:'5px',verticalAlign:'middle'}}><path d="M15 4l5 5L8 21l-5-1 1-5z"/><path d="M15 4l5 5"/></svg>Downtown AI Stylist</span>
         </div>
         <p>Need help styling this product?</p>
         <button 

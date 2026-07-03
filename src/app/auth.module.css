@@ -93,6 +93,63 @@
   transform: translateY(0);
 }
 
+.btnOutline {
+  background: transparent;
+  color: var(--foreground);
+  padding: 1rem;
+  border: 1px solid var(--foreground);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  display: block;
+  text-decoration: none;
+}
+
+.btnOutline:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.topTabs {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 2rem;
+}
+
+.tabBtn {
+  flex: 1;
+  text-align: center;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.tabBtn:hover {
+  color: var(--foreground);
+}
+
+.activeTab {
+  background: #fff;
+  color: var(--foreground);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
 .footer {
   margin-top: 2rem;
   text-align: center;

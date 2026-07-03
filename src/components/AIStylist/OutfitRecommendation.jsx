@@ -61,9 +61,15 @@ function OutfitRecommendation({ product, compact = false }) {
           <div className="flex flex-wrap items-center justify-between gap-2 mt-1.5">
             <p className="text-[#C8A96A] text-xs tracking-wide font-bold">{product.price}</p>
             {isOutOfStock ? (
-              <span className="text-[11px] text-red-400 font-medium flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">❌ Out of stock</span>
+              <span className="text-[11px] text-red-400 font-medium flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Out of stock
+              </span>
             ) : liveStock <= 20 ? (
-              <span className="text-[11px] text-amber-400 font-medium flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">⚡ Only {liveStock} left</span>
+              <span className="text-[11px] text-amber-400 font-medium flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Only {liveStock} left
+              </span>
             ) : null}
           </div>
         </div>

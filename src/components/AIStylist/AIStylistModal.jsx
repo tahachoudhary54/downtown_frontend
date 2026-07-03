@@ -58,7 +58,7 @@ export default function AIStylistModal({ onClose, initialPrompt }) {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h7" /></svg>
             </button>
             <div className="min-w-0">
-              <h2 className="text-[#C8A96A] font-semibold text-[15px] sm:text-xl tracking-wide uppercase truncate">✨ Downtown AI Stylist</h2>
+              <h2 className="text-[#C8A96A] font-semibold text-[15px] sm:text-xl tracking-wide uppercase truncate flex items-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8A96A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 4l5 5L8 21l-5-1 1-5z"/><path d="M15 4l5 5"/></svg>Downtown AI Stylist</h2>
               <p className="text-[#888888] text-[9px] sm:text-sm mt-0.5 tracking-wider uppercase truncate">
                 Your Personal Fashion Concierge
               </p>
