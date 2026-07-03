@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import { useRouter } from 'next/navigation';
 import SearchableDropdown from './SearchableDropdown';
 
 export default function ProductForm({ initialData = null, isEdit = false }) {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const router = useRouter();
   
   const [formData, setFormData] = useState({
