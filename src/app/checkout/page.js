@@ -108,19 +108,47 @@ export default function CheckoutPage() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
     try {
-      // 1. Create Razorpay Order
-      const orderRes = await fetch(`${apiUrl}/api/payment/create-order`, {
+      // 1. Create Pending Order and Razorpay Order
+      const orderPayload = {
+        ...(user?.id && { user: user.id }),
+        customer: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+        },
+        shippingAddress: {
+          address: formData.address,
+          city: formData.city,
+          pinCode: formData.pinCode,
+        },
+        items: cart.map(item => ({
+          product: item.product._id || item.product.id,
+          name: item.product.name,
+          size: item.size,
+          quantity: item.quantity,
+          price: parseFloat((item.product.price || "0").toString().replace(/[^0-9.]/g, "")) || 0,
+        })),
+        financials: {
+          subtotal: totalPrice,
+          shippingCost: shippingCost,
+          total: finalTotal,
+        },
+        paymentMethod: 'razorpay'
+      };
+
+      const orderRes = await fetch(`${apiUrl}/api/orders`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ amount: finalTotal * 100, currency: 'INR' })
+        body: JSON.stringify(orderPayload)
       });
       const orderData = await orderRes.json();
 
       if (!orderData.success) {
-        alert("Failed to initialize payment: " + orderData.message);
+        alert("Failed to initialize order: " + orderData.message);
         setIsProcessing(false);
         return;
       }
@@ -128,11 +156,11 @@ export default function CheckoutPage() {
       // 2. Open Razorpay Checkout Modal
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderData.order.amount,
-        currency: orderData.order.currency,
+        amount: Math.round(finalTotal * 100),
+        currency: "INR",
         name: "Downtown Boutique",
         description: "Order Payment",
-        order_id: orderData.order.id,
+        order_id: orderData.razorpayOrderId,
         prefill: {
           name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
@@ -159,59 +187,15 @@ export default function CheckoutPage() {
             const verifyData = await verifyRes.json();
 
             if (verifyData.success) {
-              // 4. Save Order to Database
-              const orderPayload = {
-                ...(user?.id && { user: user.id }),
-                customer: {
-                  firstName: formData.firstName,
-                  lastName: formData.lastName,
-                  email: formData.email,
-                  phone: formData.phone,
-                },
-                shippingAddress: {
-                  address: formData.address,
-                  city: formData.city,
-                  pinCode: formData.pinCode,
-                },
-                items: cart.map(item => ({
-                  product: item.product._id || item.product.id,
-                  name: item.product.name,
-                  size: item.size,
-                  quantity: item.quantity,
-                  price: parseFloat((item.product.price || "0").toString().replace(/[^0-9.]/g, "")) || 0,
-                })),
-                financials: {
-                  subtotal: totalPrice,
-                  shippingCost: shippingCost,
-                  total: finalTotal,
-                },
-                paymentMethod: 'razorpay',
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id
-              };
-
-              const saveRes = await fetch(`${apiUrl}/api/orders`, {
-                method: 'POST',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(orderPayload)
+              // 4. Order successfully verified and updated on backend
+              const orderId = verifyData.data?._id?.slice(-6).toUpperCase() || '------';
+              addNotification({
+                title: 'New Order Received',
+                desc: `Order #${orderId} placed by ${formData.firstName} ${formData.lastName} for ₹${finalTotal.toLocaleString('en-IN')}. Please review and prepare for shipping.`,
+                type: 'order',
               });
-              const saveData = await saveRes.json();
-              
-              if (saveData.success) {
-                const orderId = saveData.data?._id?.slice(-6).toUpperCase() || '------';
-                addNotification({
-                  title: 'New Order Received',
-                  desc: `Order #${orderId} placed by ${formData.firstName} ${formData.lastName} for ₹${finalTotal.toLocaleString('en-IN')}. Please review and prepare for shipping.`,
-                  type: 'order',
-                });
-                setIsSuccess(true);
-                clearCart();
-              } else {
-                alert("Failed to place order: " + saveData.message);
-              }
+              setIsSuccess(true);
+              clearCart();
             } else {
               alert("Payment verification failed. Please contact support.");
             }

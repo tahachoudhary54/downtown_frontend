@@ -115,6 +115,29 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Prevent background scroll when notifications or mobile nav are open
+  useEffect(() => {
+    if (notifOpen || navOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      // Store the scroll position on the body for retrieval
+      document.body.setAttribute('data-scroll-y', scrollY.toString());
+    } else {
+      const scrollY = document.body.getAttribute('data-scroll-y');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0'));
+        document.body.removeAttribute('data-scroll-y');
+      }
+    }
+  }, [notifOpen, navOpen]);
+
   const { isAppReady, isFirstVisit } = useLoading() || { isAppReady: true, isFirstVisit: false };
 
   let headerClass;
